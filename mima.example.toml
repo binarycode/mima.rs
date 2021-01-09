@@ -1,0 +1,34 @@
+[networks]
+    pub.bridge_name = 'mima-pub'
+    mgt.bridge_name = 'mima-mgt'
+    san.bridge_name = 'mima-san'
+[guests.beta]
+    description = 'Dev VM'
+    memory = 4096
+    cores = 4
+    spice_port = 5900
+    monitor_socket_path = '/tmp/beta.socket'
+    pidfile_path = '/tmp/beta.pid'
+    network_interfaces = [
+        { network = 'pub', mac_address = '52:54:00:00:00:08', tap_name = 'mima-pub-beta' },
+    ]
+    disks = [
+        { label = 'sda', path = '/tmp/beta.sda.qcow2', size = 20 },
+    ]
+[guests.zero]
+    description = 'Test VM'
+    memory = 8192
+    cores = 4
+    spice_port = 5901
+    monitor_socket_path = '/tmp/zero.monitor.socket'
+    pidfile_path = '/tmp/zero.pid'
+    network_interfaces = [
+        { network = 'pub', mac_address = '52:54:00:00:00:10', tap_name = 'mima-pub-zero' },
+        { network = 'mgt', mac_address = '52:54:00:00:09:10', tap_name = 'mima-mgt-zero' },
+        { network = 'san', mac_address = '52:54:00:00:0A:10', tap_name = 'mima-san0-zero', model = 'e1000e' },
+        { network = 'san', mac_address = '52:54:00:01:0A:10', tap_name = 'mima-san1-zero', model = 'e1000e' },
+    ]
+    disks = [
+        { label = 'sda', path = '/tmp/zero.sda.qcow2', size = 20 },
+        { label = 'sdb', path = '/tmp/zero.sdb.qcow2', size = 100 },
+    ]
