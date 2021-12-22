@@ -26,9 +26,11 @@ fn simple_happy_path_with_aliases() {
     .stderr("")
     .stdout("");
 
-    env.assert_history(indoc::indoc! {"
+    let expected_history = indoc::indoc! {"
         qemu-system-x86_64 -name zero -machine q35,accel=kvm -cpu host -m 8192M -smp 4 -no-user-config -nodefaults -daemonize -runas nobody -monitor unix:/tmp/zero.socket,server,nowait -pidfile /tmp/zero.pid -vga std -spice port=5901,disable-ticketing=on -object iothread,id=iothread1 -device virtio-scsi-pci-non-transitional,iothread=iothread1
-    "});
+    "};
+
+    env.assert_history(expected_history);
 
     command_macros::command!(
         {env.bin()} -c (env.config_path()) start zero
@@ -38,9 +40,7 @@ fn simple_happy_path_with_aliases() {
     .stderr("")
     .stdout("");
 
-    env.assert_history(indoc::indoc! {"
-        qemu-system-x86_64 -name zero -machine q35,accel=kvm -cpu host -m 8192M -smp 4 -no-user-config -nodefaults -daemonize -runas nobody -monitor unix:/tmp/zero.socket,server,nowait -pidfile /tmp/zero.pid -vga std -spice port=5901,disable-ticketing=on -object iothread,id=iothread1 -device virtio-scsi-pci-non-transitional,iothread=iothread1
-    "});
+    env.assert_history(expected_history);
 }
 
 #[test]

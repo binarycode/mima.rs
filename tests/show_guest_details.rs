@@ -63,12 +63,14 @@ fn happy_path_with_aliases() {
                             mgt      e1000e                           52:54:00:00:09:10  mima-mgt-zero
     "});
 
-    env.assert_history(indoc::formatdoc! {
+    let expected_history = indoc::formatdoc! {
         "
             pgrep --full --pidfile {} qemu
         ",
         pidfile_path,
-    });
+    };
+
+    env.assert_history(&expected_history);
 
     command_macros::command!(
         {env.bin()} -c (env.config_path()) show zero
@@ -89,12 +91,7 @@ fn happy_path_with_aliases() {
                             mgt      e1000e                           52:54:00:00:09:10  mima-mgt-zero
     "});
 
-    env.assert_history(indoc::formatdoc! {
-        "
-            pgrep --full --pidfile {} qemu
-        ",
-        pidfile_path,
-    });
+    env.assert_history(&expected_history);
 
     command_macros::command!(
         {env.bin()} -c (env.config_path()) guest zero
@@ -115,12 +112,7 @@ fn happy_path_with_aliases() {
                             mgt      e1000e                           52:54:00:00:09:10  mima-mgt-zero
     "});
 
-    env.assert_history(indoc::formatdoc! {
-        "
-            pgrep --full --pidfile {} qemu
-        ",
-        pidfile_path,
-    });
+    env.assert_history(&expected_history);
 }
 
 #[test]

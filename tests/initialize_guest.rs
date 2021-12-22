@@ -35,13 +35,15 @@ fn happy_path_with_aliases() {
     .stdout("")
     .stderr("");
 
-    env.assert_history(indoc::formatdoc! {
+    let expected_history = indoc::formatdoc! {
         "
             qemu-img create -q -fqcow2 -olazy_refcounts=on -opreallocation=metadata {0} 20G
             qemu-img snapshot -croot {0}
         ",
         sda_path,
-    });
+    };
+
+    env.assert_history(&expected_history);
 
     command_macros::command!(
         {env.bin()} -c (env.config_path()) init zero
@@ -51,13 +53,7 @@ fn happy_path_with_aliases() {
     .stdout("")
     .stderr("");
 
-    env.assert_history(indoc::formatdoc! {
-        "
-            qemu-img create -q -fqcow2 -olazy_refcounts=on -opreallocation=metadata {0} 20G
-            qemu-img snapshot -croot {0}
-        ",
-        sda_path,
-    });
+    env.assert_history(&expected_history);
 
     command_macros::command!(
         {env.bin()} -c (env.config_path()) init-guest zero
@@ -67,13 +63,7 @@ fn happy_path_with_aliases() {
     .stdout("")
     .stderr("");
 
-    env.assert_history(indoc::formatdoc! {
-        "
-            qemu-img create -q -fqcow2 -olazy_refcounts=on -opreallocation=metadata {0} 20G
-            qemu-img snapshot -croot {0}
-        ",
-        sda_path,
-    });
+    env.assert_history(&expected_history);
 }
 
 #[test]

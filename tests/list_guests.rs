@@ -62,14 +62,16 @@ fn happy_path_with_aliases() {
         zero  true    5902   bar
     "});
 
-    env.assert_history(indoc::formatdoc! {
+    let expected_history = indoc::formatdoc! {
         "
             pgrep --full --pidfile {beta_pidfile_path} qemu
             pgrep --full --pidfile {zero_pidfile_path} qemu
         ",
         beta_pidfile_path = beta_pidfile_path,
         zero_pidfile_path = zero_pidfile_path,
-    });
+    };
+
+    env.assert_history(&expected_history);
 
     command_macros::command!(
         {env.bin()} -c (env.config_path()) list
@@ -83,14 +85,7 @@ fn happy_path_with_aliases() {
         zero  true    5902   bar
     "});
 
-    env.assert_history(indoc::formatdoc! {
-        "
-            pgrep --full --pidfile {beta_pidfile_path} qemu
-            pgrep --full --pidfile {zero_pidfile_path} qemu
-        ",
-        beta_pidfile_path = beta_pidfile_path,
-        zero_pidfile_path = zero_pidfile_path,
-    });
+    env.assert_history(&expected_history);
 
     command_macros::command!(
         {env.bin()} -c (env.config_path()) guests
@@ -104,14 +99,7 @@ fn happy_path_with_aliases() {
         zero  true    5902   bar
     "});
 
-    env.assert_history(indoc::formatdoc! {
-        "
-            pgrep --full --pidfile {beta_pidfile_path} qemu
-            pgrep --full --pidfile {zero_pidfile_path} qemu
-        ",
-        beta_pidfile_path = beta_pidfile_path,
-        zero_pidfile_path = zero_pidfile_path,
-    });
+    env.assert_history(&expected_history);
 }
 
 #[test]

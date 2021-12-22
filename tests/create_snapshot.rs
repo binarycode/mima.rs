@@ -70,13 +70,15 @@ fn happy_path_with_aliases() {
     .stdout("")
     .stderr("");
 
-    env.assert_history(indoc::formatdoc! {
+    let expected_history = indoc::formatdoc! {
         "
             qemu-img info --force-share --output=json {0}
             qemu-img snapshot -cdev {0}
         ",
         sda_path,
-    });
+    };
+
+    env.assert_history(&expected_history);
 
     command_macros::command!(
         {env.bin()} -c (env.config_path()) snapshot zero dev
@@ -86,13 +88,7 @@ fn happy_path_with_aliases() {
     .stdout("")
     .stderr("");
 
-    env.assert_history(indoc::formatdoc! {
-        "
-            qemu-img info --force-share --output=json {0}
-            qemu-img snapshot -cdev {0}
-        ",
-        sda_path,
-    });
+    env.assert_history(&expected_history);
 }
 
 #[test]
