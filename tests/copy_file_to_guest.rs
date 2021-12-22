@@ -17,9 +17,75 @@ fn happy_path_with_aliases() {
             ip_address = '1.1.1.1'
     "});
 
-    env.stub_ok("ssh -o ConnectionAttempts=3 -o ConnectTimeout=60 -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@1.1.1.1 mkdir -p /root/mima");
+    env.stub_ok("ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@1.1.1.1 exit 0");
+    env.stub_ok("ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -A root@1.1.1.1 mkdir -p /root/mima");
     env.stub_ok(format!{
-        "scp -o ConnectionAttempts=3 -o ConnectTimeout=60 -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null {} root@1.1.1.1:/root/mima/",
+        "scp -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null {} root@1.1.1.1:/root/mima",
+        file_path,
+    });
+
+    command_macros::command!(
+        {env.bin()} -c (env.config_path()) copy-file-to-guest zero ((file_path))
+    )
+    .assert()
+    .success()
+    .stderr("")
+    .stdout("");
+
+    let expected_history = indoc::formatdoc! {
+        "
+            ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@1.1.1.1 exit 0
+            ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -A root@1.1.1.1 mkdir -p /root/mima
+            scp -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null {} root@1.1.1.1:/root/mima
+        ",
+        file_path,
+    };
+
+    env.assert_history(&expected_history);
+
+    command_macros::command!(
+        {env.bin()} -c (env.config_path()) copy zero ((file_path))
+    )
+    .assert()
+    .success()
+    .stderr("")
+    .stdout("");
+
+    env.assert_history(&expected_history);
+
+    command_macros::command!(
+        {env.bin()} -c (env.config_path()) upload zero ((file_path))
+    )
+    .assert()
+    .success()
+    .stderr("")
+    .stdout("");
+
+    env.assert_history(&expected_history);
+}
+
+#[test]
+fn connection_is_established_from_second_attempt() {
+    let mut env = Env::new();
+
+    let file = env.child("file");
+    let file_path = file.path().display();
+    file.touch().unwrap();
+
+    env.add_guest_config("zero");
+    env.append_config(indoc::indoc! {"
+        [guests.zero]
+            ip_address = '1.1.1.1'
+    "});
+
+    env.stub(
+        "ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@1.1.1.1 exit 0",
+        "exit 1",
+    );
+    env.stub_ok("ssh -o BatchMode=yes -o ConnectTimeout=2 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@1.1.1.1 exit 0");
+    env.stub_ok("ssh -o BatchMode=yes -o ConnectTimeout=2 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -A root@1.1.1.1 mkdir -p /root/mima");
+    env.stub_ok(format!{
+        "scp -o BatchMode=yes -o ConnectTimeout=2 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null {} root@1.1.1.1:/root/mima",
         file_path,
     });
 
@@ -33,43 +99,62 @@ fn happy_path_with_aliases() {
 
     env.assert_history(indoc::formatdoc! {
         "
-            ssh -o ConnectionAttempts=3 -o ConnectTimeout=60 -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@1.1.1.1 mkdir -p /root/mima
-            scp -o ConnectionAttempts=3 -o ConnectTimeout=60 -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null {} root@1.1.1.1:/root/mima/
+            ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@1.1.1.1 exit 0
+            ssh -o BatchMode=yes -o ConnectTimeout=2 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@1.1.1.1 exit 0
+            ssh -o BatchMode=yes -o ConnectTimeout=2 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -A root@1.1.1.1 mkdir -p /root/mima
+            scp -o BatchMode=yes -o ConnectTimeout=2 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null {} root@1.1.1.1:/root/mima
         ",
         file_path,
     });
+}
+
+#[test]
+fn failure_to_establish_connection() {
+    let mut env = Env::new();
+
+    let file = env.child("file");
+    let file_path = file.path().display();
+    file.touch().unwrap();
+
+    env.add_guest_config("zero");
+    env.append_config(indoc::indoc! {"
+        [guests.zero]
+            ip_address = '1.1.1.1'
+    "});
+
+    env.stub(
+        "ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@1.1.1.1 exit 0",
+        "exit 1",
+    );
+    // TODO: real failure output
+    env.stub(
+        "ssh -o BatchMode=yes -o ConnectTimeout=2 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@1.1.1.1 exit 0",
+        indoc::indoc! {"
+            echo 'foobar'
+            exit 1
+        "},
+    );
 
     command_macros::command!(
-        {env.bin()} -c (env.config_path()) copy zero ((file_path))
+        {env.bin()} -c (env.config_path()) copy-file-to-guest --timeout 3 zero ((file_path))
     )
     .assert()
-    .success()
-    .stderr("")
-    .stdout("");
+    .failure()
+    .stdout("")
+    .stderr(indoc::indoc! {r#"
+        Error: Failed to run "ssh" "-o" "BatchMode=yes" "-o" "ConnectTimeout=2" "-o" "StrictHostKeyChecking=no" "-o" "UserKnownHostsFile=/dev/null" "root@1.1.1.1" "exit" "0"
+        stdout:
+        foobar
 
-    env.assert_history(indoc::formatdoc! {
-        "
-            ssh -o ConnectionAttempts=3 -o ConnectTimeout=60 -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@1.1.1.1 mkdir -p /root/mima
-            scp -o ConnectionAttempts=3 -o ConnectTimeout=60 -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null {} root@1.1.1.1:/root/mima/
-        ",
-        file_path,
-    });
+        stderr:
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) upload zero ((file_path))
-    )
-    .assert()
-    .success()
-    .stderr("")
-    .stdout("");
 
-    env.assert_history(indoc::formatdoc! {
-        "
-            ssh -o ConnectionAttempts=3 -o ConnectTimeout=60 -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@1.1.1.1 mkdir -p /root/mima
-            scp -o ConnectionAttempts=3 -o ConnectTimeout=60 -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null {} root@1.1.1.1:/root/mima/
-        ",
-        file_path,
-    });
+    "#});
+
+    env.assert_history(indoc::indoc! {"
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@1.1.1.1 exit 0
+        ssh -o BatchMode=yes -o ConnectTimeout=2 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@1.1.1.1 exit 0
+    "});
 }
 
 #[test]
@@ -109,9 +194,10 @@ fn ssh_failure() {
             ip_address = '1.1.1.1'
     "});
 
+    env.stub_ok("ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@1.1.1.1 exit 0");
     // TODO: real failure output
     env.stub(
-        "ssh -o ConnectionAttempts=3 -o ConnectTimeout=60 -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@1.1.1.1 mkdir -p /root/mima",
+        "ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -A root@1.1.1.1 mkdir -p /root/mima",
         indoc::indoc! {"
             echo 'foobar'
             exit 1
@@ -125,7 +211,7 @@ fn ssh_failure() {
     .failure()
     .stdout("")
     .stderr(indoc::indoc! {r#"
-        Error: Failed to run "ssh" "-o" "ConnectionAttempts=3" "-o" "ConnectTimeout=60" "-o" "BatchMode=yes" "-o" "StrictHostKeyChecking=no" "-o" "UserKnownHostsFile=/dev/null" "root@1.1.1.1" "mkdir" "-p" "/root/mima"
+        Error: Failed to run "ssh" "-o" "BatchMode=yes" "-o" "ConnectTimeout=1" "-o" "StrictHostKeyChecking=no" "-o" "UserKnownHostsFile=/dev/null" "-A" "root@1.1.1.1" "mkdir" "-p" "/root/mima"
         stdout:
         foobar
 
@@ -135,7 +221,8 @@ fn ssh_failure() {
     "#});
 
     env.assert_history(indoc::indoc! {"
-        ssh -o ConnectionAttempts=3 -o ConnectTimeout=60 -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@1.1.1.1 mkdir -p /root/mima
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@1.1.1.1 exit 0
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -A root@1.1.1.1 mkdir -p /root/mima
     "});
 }
 
@@ -153,11 +240,12 @@ fn scp_failure() {
             ip_address = '1.1.1.1'
     "});
 
-    env.stub_ok("ssh -o ConnectionAttempts=3 -o ConnectTimeout=60 -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@1.1.1.1 mkdir -p /root/mima");
+    env.stub_ok("ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@1.1.1.1 exit 0");
+    env.stub_ok("ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -A root@1.1.1.1 mkdir -p /root/mima");
     // TODO: real failure output
     env.stub(
         format!(
-            "scp -o ConnectionAttempts=3 -o ConnectTimeout=60 -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null {} root@1.1.1.1:/root/mima/",
+            "scp -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null {} root@1.1.1.1:/root/mima",
             file_path,
         ),
         indoc::indoc! {"
@@ -174,7 +262,7 @@ fn scp_failure() {
     .stdout("")
     .stderr(indoc::formatdoc! {
         r#"
-            Error: Failed to run "scp" "-o" "ConnectionAttempts=3" "-o" "ConnectTimeout=60" "-o" "BatchMode=yes" "-o" "StrictHostKeyChecking=no" "-o" "UserKnownHostsFile=/dev/null" "{}" "root@1.1.1.1:/root/mima/"
+            Error: Failed to run "scp" "-o" "BatchMode=yes" "-o" "ConnectTimeout=1" "-o" "StrictHostKeyChecking=no" "-o" "UserKnownHostsFile=/dev/null" "{}" "root@1.1.1.1:/root/mima"
             stdout:
             foobar
 
@@ -187,8 +275,9 @@ fn scp_failure() {
 
     env.assert_history(indoc::formatdoc! {
         "
-            ssh -o ConnectionAttempts=3 -o ConnectTimeout=60 -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@1.1.1.1 mkdir -p /root/mima
-            scp -o ConnectionAttempts=3 -o ConnectTimeout=60 -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null {} root@1.1.1.1:/root/mima/
+            ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@1.1.1.1 exit 0
+            ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -A root@1.1.1.1 mkdir -p /root/mima
+            scp -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null {} root@1.1.1.1:/root/mima
         ",
         file_path,
     });
@@ -210,7 +299,7 @@ fn no_arguments() {
             <PATH>
 
         USAGE:
-            mima copy-file-to-guest <GUEST_ID> <PATH>
+            mima copy-file-to-guest [OPTIONS] <GUEST_ID> <PATH>
 
         For more information try --help
     "});
@@ -231,7 +320,7 @@ fn one_argument() {
             <PATH>
 
         USAGE:
-            mima copy-file-to-guest <GUEST_ID> <PATH>
+            mima copy-file-to-guest [OPTIONS] <GUEST_ID> <PATH>
 
         For more information try --help
     "});
@@ -251,7 +340,7 @@ fn more_than_two_arguments() {
         error: Found argument 'three' which wasn't expected, or isn't valid in this context
 
         USAGE:
-            mima copy-file-to-guest <GUEST_ID> <PATH>
+            mima copy-file-to-guest [OPTIONS] <GUEST_ID> <PATH>
 
         For more information try --help
     "});

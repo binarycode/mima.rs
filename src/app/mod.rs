@@ -11,6 +11,7 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
 use std::process::Stdio;
+use std::time::Duration;
 
 #[derive(Deserialize)]
 pub struct App {
@@ -28,7 +29,7 @@ pub struct Disk {
 #[derive(Deserialize)]
 pub struct Guest {
     pub description: String,
-    pub ip_address: String,
+    pub ip_address: Option<String>,
     pub memory: i64,
     pub cores: i64,
     pub spice_port: i64,
@@ -36,6 +37,11 @@ pub struct Guest {
     pub pidfile_path: PathBuf,
     pub network_interfaces: Vec<NetworkInterface>,
     pub disks: Vec<Disk>,
+}
+
+pub struct GuestConnection {
+    connection_timeout: u64,
+    ip_address: String,
 }
 
 #[derive(Deserialize)]
@@ -160,6 +166,24 @@ impl App {
         }
     }
 
+    pub fn get_guest_connection<T>(
+        &self,
+        guest_id: T,
+        max_connection_timeout: u64,
+    ) -> Result<GuestConnection>
+    where
+        T: AsRef<str>,
+    {
+        let guest_id = guest_id.as_ref();
+
+        let guest = self.get_guest(guest_id)?;
+
+        match &guest.ip_address {
+            Some(ip_address) => GuestConnection::new(ip_address, max_connection_timeout),
+            None => anyhow::bail!("IP address is not configured for guest `{}`", guest_id),
+        }
+    }
+
     pub fn get_guest_disk<T>(&self, guest_id: T, disk_id: usize) -> Result<&Disk>
     where
         T: AsRef<str>,
@@ -252,6 +276,87 @@ impl Guest {
         .status()?;
 
         Ok(status.success())
+    }
+}
+
+impl GuestConnection {
+    pub fn new<T>(ip_address: T, max_connection_timeout: u64) -> Result<Self>
+    where
+        T: AsRef<str>,
+    {
+        let ip_address = ip_address.as_ref().to_owned();
+
+        let mut connection_timeout = 1;
+        loop {
+            let result = command_macros::command!(
+                ssh
+                -o BatchMode=yes
+                -o ConnectTimeout=((connection_timeout))
+                -o StrictHostKeyChecking=no
+                -o UserKnownHostsFile=/dev/null
+                root@(ip_address)
+                exit 0
+            )
+            .execute();
+
+            if result.is_ok() {
+                return Ok(Self {
+                    connection_timeout,
+                    ip_address,
+                });
+            }
+
+            connection_timeout *= 2;
+
+            if connection_timeout >= max_connection_timeout {
+                return Err(result.unwrap_err());
+            } else {
+                std::thread::sleep(Duration::from_secs(connection_timeout));
+            }
+        }
+    }
+
+    pub fn execute<T>(&self, command: T) -> Result<()>
+    where
+        T: AsRef<str>,
+    {
+        let command = command.as_ref().split_whitespace();
+
+        command_macros::command!(
+            ssh
+            -o BatchMode=yes
+            -o ConnectTimeout=((self.connection_timeout))
+            -o StrictHostKeyChecking=no
+            -o UserKnownHostsFile=/dev/null
+            -A
+            root@(self.ip_address)
+            [command]
+        )
+        .execute()?;
+
+        Ok(())
+    }
+
+    pub fn upload<T, U>(&self, source_path: T, destination_path: U) -> Result<()>
+    where
+        T: AsRef<Path>,
+        U: AsRef<Path>,
+    {
+        let source_path = source_path.as_ref();
+        let destination_path = destination_path.as_ref();
+
+        command_macros::command!(
+            scp
+            -o BatchMode=yes
+            -o ConnectTimeout=((self.connection_timeout))
+            -o StrictHostKeyChecking=no
+            -o UserKnownHostsFile=/dev/null
+            (source_path)
+            root@(self.ip_address):(destination_path)
+        )
+        .execute()?;
+
+        Ok(())
     }
 }
 

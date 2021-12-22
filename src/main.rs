@@ -93,6 +93,11 @@ enum Command {
 
         #[clap(about = "File path")]
         path: PathBuf,
+
+        #[clap(about = "Maximum SSH connection timeout")]
+        #[clap(default_value = "100")]
+        #[clap(long = "timeout")]
+        max_connection_timeout: u64,
     },
 
     #[clap(about = "Execute script on guest")]
@@ -104,6 +109,11 @@ enum Command {
 
         #[clap(about = "Script path")]
         path: PathBuf,
+
+        #[clap(about = "Maximum SSH connection timeout")]
+        #[clap(default_value = "100")]
+        #[clap(long = "timeout")]
+        max_connection_timeout: u64,
     },
 
     #[clap(about = "List snapshots")]
@@ -163,9 +173,9 @@ fn main() -> Result<()> {
         Command::ShowGuestDetails { guest_id } => app.show_guest_details(guest_id)?,
         Command::InitializeGuest { guest_id } => app.initialize_guest(guest_id)?,
         Command::StartGuest {
+            guest_id,
             cdrom_path,
             floppy_path,
-            guest_id,
         } => app.start_guest(guest_id, cdrom_path, floppy_path)?,
         Command::StopGuest {
             guest_id,
@@ -173,10 +183,16 @@ fn main() -> Result<()> {
             force,
         } => app.stop_guest(guest_id, wait, force)?,
         Command::WaitForGuestToShutdown { guest_id } => app.wait_for_guest_to_shutdown(guest_id)?,
-        Command::CopyFileToGuest { guest_id, path } => app.copy_file_to_guest(guest_id, path)?,
-        Command::ExecuteScriptOnGuest { guest_id, path } => {
-            app.execute_script_on_guest(guest_id, path)?
-        }
+        Command::CopyFileToGuest {
+            guest_id,
+            path,
+            max_connection_timeout,
+        } => app.copy_file_to_guest(guest_id, path, max_connection_timeout)?,
+        Command::ExecuteScriptOnGuest {
+            guest_id,
+            path,
+            max_connection_timeout,
+        } => app.execute_script_on_guest(guest_id, path, max_connection_timeout)?,
         Command::ListSnapshots { guest_id } => app.list_snapshots(guest_id)?,
         Command::CreateSnapshot {
             guest_id,

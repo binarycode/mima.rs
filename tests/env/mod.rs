@@ -89,7 +89,6 @@ impl Env {
         self.append_config(indoc::formatdoc! {
             "
                 [guests.{0}]
-                    ip_address = '127.0.0.1'
                     memory = 4096
                     cores = 2
                     description = '{0}'
