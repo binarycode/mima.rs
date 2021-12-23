@@ -1,6 +1,9 @@
 mod env;
 
+use assert_fs::prelude::*;
 use env::Env;
+use std::fs::Permissions;
+use std::os::unix::fs::PermissionsExt;
 
 #[test]
 fn simple_happy_path_with_aliases() {
@@ -41,6 +44,47 @@ fn simple_happy_path_with_aliases() {
     .stdout("");
 
     env.assert_history(expected_history);
+}
+
+#[test]
+fn setting_pidfile_permissions() {
+    let mut env = Env::new();
+
+    let pidfile = env.child("zero.pid");
+    let pidfile_path = pidfile.path();
+    pidfile.touch().unwrap();
+
+    let permissions = Permissions::from_mode(0o777);
+    std::fs::set_permissions(&pidfile_path, permissions).unwrap();
+
+    env.add_guest_config("zero");
+    env.append_config(indoc::formatdoc! {
+        "
+            [guests.zero]
+                memory = 8192
+                cores = 4
+                spice_port = 5901
+                monitor_socket_path = '/tmp/zero.socket'
+                pidfile_path = '{}'
+        ",
+        pidfile_path.display()
+    });
+
+    env.stub_ok(format!(
+        "qemu-system-x86_64 -name zero -machine q35,accel=kvm -cpu host -m 8192M -smp 4 -no-user-config -nodefaults -daemonize -runas nobody -monitor unix:/tmp/zero.socket,server,nowait -pidfile {} -vga std -spice port=5901,disable-ticketing=on -object iothread,id=iothread1 -device virtio-scsi-pci-non-transitional,iothread=iothread1",
+        pidfile_path.display(),
+    ));
+
+    command_macros::command!(
+        {env.bin()} -c (env.config_path()) start-guest zero
+    )
+    .assert()
+    .success()
+    .stderr("")
+    .stdout("");
+
+    let permissions = pidfile.metadata().unwrap().permissions().mode();
+    assert_eq!(permissions, 0o100644);
 }
 
 #[test]

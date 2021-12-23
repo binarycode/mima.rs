@@ -1,6 +1,8 @@
 use crate::command::Execute;
 use crate::App;
 use anyhow::Result;
+use std::fs::Permissions;
+use std::os::unix::fs::PermissionsExt;
 use std::path::PathBuf;
 
 impl App {
@@ -59,6 +61,11 @@ impl App {
                 ip link set (network_interface.tap_name) master (network.bridge_name) up
             )
             .execute()?;
+        }
+
+        if guest.pidfile_path.exists() {
+            let permissions = Permissions::from_mode(0o644);
+            std::fs::set_permissions(&guest.pidfile_path, permissions)?;
         }
 
         Ok(())
