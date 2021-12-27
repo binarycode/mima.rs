@@ -4,6 +4,7 @@
     san.bridge_name = 'mima-san'
 [guests.beta]
     description = 'Dev VM'
+    ip_address = '192.168.1.2'
     memory = 4096
     cores = 4
     spice_port = 5900
