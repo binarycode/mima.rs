@@ -141,6 +141,47 @@ fn happy_path_with_complex_configuration() {
 }
 
 #[test]
+fn noop_when_guest_is_already_running() {
+    let mut env = Env::new();
+
+    let monitor_socket = env.child("zero.socket");
+    let monitor_socket_path = monitor_socket.path().display();
+    monitor_socket.touch().unwrap();
+
+    let pidfile = env.child("zero.pid");
+    let pidfile_path = pidfile.path().display();
+    pidfile.touch().unwrap();
+
+    env.add_guest_config("zero");
+    env.append_config(indoc::formatdoc! {
+        "
+            [guests.zero]
+                monitor_socket_path = '{monitor_socket_path}'
+                pidfile_path = '{pidfile_path}'
+        ",
+        monitor_socket_path = monitor_socket_path,
+        pidfile_path = pidfile_path,
+    });
+
+    env.stub_ok(format!("pgrep --full --pidfile {} qemu", pidfile_path));
+
+    command_macros::command!(
+        {env.bin()} -c (env.config_path()) start-guest zero
+    )
+    .assert()
+    .success()
+    .stderr("")
+    .stdout("");
+
+    env.assert_history(indoc::formatdoc! {
+        "
+            pgrep --full --pidfile {} qemu
+        ",
+        pidfile_path,
+    });
+}
+
+#[test]
 fn no_arguments() {
     let env = Env::new();
 

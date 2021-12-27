@@ -19,6 +19,10 @@ impl App {
 
         let guest = self.get_guest(guest_id)?;
 
+        if guest.is_booted()? {
+            return Ok(());
+        }
+
         command_macros::command!(
             qemu-system-x86_64
             -name (guest_id)
