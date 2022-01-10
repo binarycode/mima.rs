@@ -2,6 +2,7 @@ mod env;
 
 use assert_fs::prelude::*;
 use env::Env;
+use predicates::prelude::*;
 use std::fs::Permissions;
 use std::os::unix::fs::PermissionsExt;
 
@@ -178,6 +179,102 @@ fn noop_when_guest_is_already_running() {
             pgrep --full --pidfile {} qemu
         ",
         pidfile_path,
+    });
+}
+
+#[test]
+fn pidfile_parent_dir_creation() {
+    let mut env = Env::new();
+
+    let pidfile_parent_dir = env.child("pids");
+    let pidfile = pidfile_parent_dir.child("zero.pid");
+    let pidfile_path = pidfile.path().display();
+
+    env.add_guest_config("zero");
+    env.append_config(indoc::formatdoc! {
+        "
+            [guests.zero]
+                memory = 8192
+                cores = 4
+                spice_port = 5901
+                monitor_socket_path = '/tmp/zero.socket'
+                pidfile_path = '{}'
+        ",
+        pidfile_path
+    });
+
+    env.stub_ok(format!("qemu-system-x86_64 -name zero -machine q35,accel=kvm -cpu host -m 8192M -smp 4 -no-user-config -nodefaults -daemonize -runas nobody -monitor unix:/tmp/zero.socket,server,nowait -pidfile {} -vga std -spice port=5901,disable-ticketing=on -object iothread,id=iothread1 -device virtio-scsi-pci-non-transitional,iothread=iothread1", pidfile_path));
+
+    pidfile_parent_dir.assert(predicate::path::missing());
+
+    command_macros::command!(
+        {env.bin()} -c (env.config_path()) start-guest zero
+    )
+    .assert()
+    .success()
+    .stderr("")
+    .stdout("");
+
+    pidfile_parent_dir.assert(predicate::path::exists());
+
+    let permissions = pidfile_parent_dir.metadata().unwrap().permissions().mode();
+    assert_eq!(permissions, 0o40755);
+
+    env.assert_history(indoc::formatdoc! {
+        "
+            qemu-system-x86_64 -name zero -machine q35,accel=kvm -cpu host -m 8192M -smp 4 -no-user-config -nodefaults -daemonize -runas nobody -monitor unix:/tmp/zero.socket,server,nowait -pidfile {} -vga std -spice port=5901,disable-ticketing=on -object iothread,id=iothread1 -device virtio-scsi-pci-non-transitional,iothread=iothread1
+        ",
+        pidfile_path
+    });
+}
+
+#[test]
+fn monitor_socket_parent_dir_creation() {
+    let mut env = Env::new();
+
+    let monitor_socket_parent_dir = env.child("sockets");
+    let monitor_socket = monitor_socket_parent_dir.child("zero.socket");
+    let monitor_socket_path = monitor_socket.path().display();
+
+    env.add_guest_config("zero");
+    env.append_config(indoc::formatdoc! {
+        "
+            [guests.zero]
+                memory = 8192
+                cores = 4
+                spice_port = 5901
+                monitor_socket_path = '{}'
+                pidfile_path = '/tmp/zero.pid'
+        ",
+        monitor_socket_path
+    });
+
+    env.stub_ok(format!("qemu-system-x86_64 -name zero -machine q35,accel=kvm -cpu host -m 8192M -smp 4 -no-user-config -nodefaults -daemonize -runas nobody -monitor unix:{},server,nowait -pidfile /tmp/zero.pid -vga std -spice port=5901,disable-ticketing=on -object iothread,id=iothread1 -device virtio-scsi-pci-non-transitional,iothread=iothread1", monitor_socket_path));
+
+    monitor_socket_parent_dir.assert(predicate::path::missing());
+
+    command_macros::command!(
+        {env.bin()} -c (env.config_path()) start-guest zero
+    )
+    .assert()
+    .success()
+    .stderr("")
+    .stdout("");
+
+    monitor_socket_parent_dir.assert(predicate::path::exists());
+
+    let permissions = monitor_socket_parent_dir
+        .metadata()
+        .unwrap()
+        .permissions()
+        .mode();
+    assert_eq!(permissions, 0o40755);
+
+    env.assert_history(indoc::formatdoc! {
+        "
+            qemu-system-x86_64 -name zero -machine q35,accel=kvm -cpu host -m 8192M -smp 4 -no-user-config -nodefaults -daemonize -runas nobody -monitor unix:{},server,nowait -pidfile /tmp/zero.pid -vga std -spice port=5901,disable-ticketing=on -object iothread,id=iothread1 -device virtio-scsi-pci-non-transitional,iothread=iothread1
+        ",
+        monitor_socket_path
     });
 }
 

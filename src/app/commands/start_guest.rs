@@ -1,8 +1,10 @@
 use crate::command::Execute;
 use crate::App;
+use anyhow::Context;
 use anyhow::Result;
 use std::fs::Permissions;
 use std::os::unix::fs::PermissionsExt;
+use std::path::Path;
 use std::path::PathBuf;
 
 impl App {
@@ -22,6 +24,9 @@ impl App {
         if guest.is_booted()? {
             return Ok(());
         }
+
+        create_parent_dir(&guest.monitor_socket_path)?;
+        create_parent_dir(&guest.pidfile_path)?;
 
         command_macros::command!(
             qemu-system-x86_64
@@ -74,4 +79,24 @@ impl App {
 
         Ok(())
     }
+}
+
+fn create_parent_dir<T>(path: T) -> Result<()>
+where
+    T: AsRef<Path>,
+{
+    let path = path.as_ref();
+
+    if let Some(parent_path) = path.parent() {
+        if !parent_path.exists() {
+            std::fs::create_dir_all(parent_path).with_context(|| {
+                format!("Failed to create parent folder for `{}`", path.display())
+            })?;
+
+            let permissions = Permissions::from_mode(0o755);
+            std::fs::set_permissions(parent_path, permissions)?;
+        }
+    }
+
+    Ok(())
 }
