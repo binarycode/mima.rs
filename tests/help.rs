@@ -13,7 +13,7 @@ fn happy_path() {
     .success()
     .stderr("")
     .stdout(indoc::indoc! {"
-        mima 0.5.0
+        mima 0.6.0
 
         Igor Sidorov <igor.sidorov@binarycode.ru>
 
@@ -24,7 +24,7 @@ fn happy_path() {
             -h, --help    Print help information
 
         OPTIONS:
-            -c, --config <CONFIG_PATH>    Path to configuration [default: /etc/mima.toml]
+            -c, --config <CONFIG_PATH>    Path to configuration [default: ./mima.toml]
 
         SUBCOMMANDS:
             list-guests                   List all guests

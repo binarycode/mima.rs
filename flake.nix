@@ -22,11 +22,11 @@
     in {
       defaultPackage = pkgs.rustPlatform.buildRustPackage {
         pname = "mima-rs";
-        version = "0.5.0";
+        version = "0.6.0";
         src = ./.;
         nativeBuildInputs = [ pkgs.rust-bin.nightly.latest.default ];
         doCheck = false; # FIXME requires a lot of packages for some reason
-        cargoSha256 = "sha256-DWSKMzFr2U59iy00j1m/rZ6zQZmfW+rSJMtN1tkw3gE=";
+        cargoSha256 = "sha256-pKzoIIx59QIn5yh4SzO/S9tELbbdjILihyINabryN9w=";
 
         # XXX: use this hash when updating versions
         #cargoSha256 = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";

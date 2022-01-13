@@ -14,7 +14,7 @@ use std::path::PathBuf;
 #[clap(version)]
 struct Options {
     #[clap(about = "Path to configuration")]
-    #[clap(default_value = "/etc/mima.toml")]
+    #[clap(default_value = "./mima.toml")]
     #[clap(long = "config")]
     #[clap(short)]
     config_path: PathBuf,
