@@ -19,12 +19,13 @@
         inherit system;
         overlays = [ inputs.rust-overlay.overlay ];
       };
+      rust = pkgs.rust-bin.nightly."2022-01-15".default;
     in {
       defaultPackage = pkgs.rustPlatform.buildRustPackage {
         pname = "mima-rs";
         version = "0.6.0";
         src = ./.;
-        nativeBuildInputs = [ pkgs.rust-bin.nightly.latest.default ];
+        nativeBuildInputs = [ rust ];
         doCheck = false; # FIXME requires a lot of packages for some reason
         cargoSha256 = "sha256-pKzoIIx59QIn5yh4SzO/S9tELbbdjILihyINabryN9w=";
 
@@ -33,7 +34,7 @@
       };
       devShell = pkgs.mkShell {
         name = "mima-rs";
-        buildInputs = [ pkgs.rust-bin.nightly.latest.default ];
+        buildInputs = [ rust ];
       };
     }
   );
