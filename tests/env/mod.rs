@@ -86,20 +86,17 @@ impl Env {
     {
         let guest_id = guest_id.as_ref();
 
-        self.append_config(indoc::formatdoc! {
-            "
-                [guests.{0}]
-                    memory = 4096
-                    cores = 2
-                    description = '{0}'
-                    monitor_socket_path = '/tmp/{0}.socket'
-                    pidfile_path = '/tmp/{0}.pid'
-                    spice_port = 5900
-                    network_interfaces = []
-                    disks = []
-            ",
-            guest_id,
-        });
+        self.append_config(indoc::formatdoc! {"
+            [guests.{guest_id}]
+                memory = 4096
+                cores = 2
+                description = '{guest_id}'
+                monitor_socket_path = '/tmp/{guest_id}.socket'
+                pidfile_path = '/tmp/{guest_id}.pid'
+                spice_port = 5900
+                network_interfaces = []
+                disks = []
+        "});
     }
 
     pub fn append_config<T>(&mut self, config: T)
@@ -149,15 +146,12 @@ impl Env {
             scripts.push_str(&indoc::formatdoc! {
                 r#"
                     if [[ "$@" == "{arguments}" ]]; then
-                        echo "{bin} $@" >> {history_path}
+                        echo "{bin} $@" >> {path}
                         {script}
                         exit 0
                     fi
                 "#,
-                arguments = arguments,
-                bin = bin,
-                history_path = self.history_file.path().display(),
-                script = script,
+                path = self.history_file.path().display(),
             });
         }
 
@@ -172,12 +166,11 @@ impl Env {
                     echo "ERROR: Incorrect arguments"
                     echo "ARGS: $@"
                     echo "HISTORY:"
-                    cat {history_path}
+                    cat {path}
 
                     exit 1
                 "#,
-                history_path = self.history_file.path().display(),
-                scripts = scripts,
+                path = self.history_file.path().display(),
             })
             .unwrap();
         let permissions = Permissions::from_mode(0o777);

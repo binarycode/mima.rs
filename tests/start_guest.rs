@@ -58,23 +58,19 @@ fn setting_pidfile_permissions() {
     let permissions = Permissions::from_mode(0o777);
     std::fs::set_permissions(&pidfile_path, permissions).unwrap();
 
-    env.add_guest_config("zero");
-    env.append_config(indoc::formatdoc! {
-        "
-            [guests.zero]
-                memory = 8192
-                cores = 4
-                spice_port = 5901
-                monitor_socket_path = '/tmp/zero.socket'
-                pidfile_path = '{}'
-        ",
-        pidfile_path.display()
-    });
+    let pidfile_path = pidfile_path.display();
 
-    env.stub_ok(format!(
-        "qemu-system-x86_64 -name zero -machine q35,accel=kvm -cpu host -m 8192M -smp 4 -no-user-config -nodefaults -daemonize -runas nobody -monitor unix:/tmp/zero.socket,server,nowait -pidfile {} -vga std -spice port=5901,disable-ticketing=on -object iothread,id=iothread1 -device virtio-scsi-pci-non-transitional,iothread=iothread1",
-        pidfile_path.display(),
-    ));
+    env.add_guest_config("zero");
+    env.append_config(indoc::formatdoc! {"
+        [guests.zero]
+            memory = 8192
+            cores = 4
+            spice_port = 5901
+            monitor_socket_path = '/tmp/zero.socket'
+            pidfile_path = '{pidfile_path}'
+    "});
+
+    env.stub_ok(format!("qemu-system-x86_64 -name zero -machine q35,accel=kvm -cpu host -m 8192M -smp 4 -no-user-config -nodefaults -daemonize -runas nobody -monitor unix:/tmp/zero.socket,server,nowait -pidfile {pidfile_path} -vga std -spice port=5901,disable-ticketing=on -object iothread,id=iothread1 -device virtio-scsi-pci-non-transitional,iothread=iothread1"));
 
     command_macros::command!(
         {env.bin()} -c (env.config_path()) start-guest zero
@@ -154,17 +150,13 @@ fn noop_when_guest_is_already_running() {
     pidfile.touch().unwrap();
 
     env.add_guest_config("zero");
-    env.append_config(indoc::formatdoc! {
-        "
-            [guests.zero]
-                monitor_socket_path = '{monitor_socket_path}'
-                pidfile_path = '{pidfile_path}'
-        ",
-        monitor_socket_path = monitor_socket_path,
-        pidfile_path = pidfile_path,
-    });
+    env.append_config(indoc::formatdoc! {"
+        [guests.zero]
+            monitor_socket_path = '{monitor_socket_path}'
+            pidfile_path = '{pidfile_path}'
+    "});
 
-    env.stub_ok(format!("pgrep --full --pidfile {} qemu", pidfile_path));
+    env.stub_ok(format!("pgrep --full --pidfile {pidfile_path} qemu"));
 
     command_macros::command!(
         {env.bin()} -c (env.config_path()) start-guest zero
@@ -174,12 +166,9 @@ fn noop_when_guest_is_already_running() {
     .stderr("")
     .stdout("");
 
-    env.assert_history(indoc::formatdoc! {
-        "
-            pgrep --full --pidfile {} qemu
-        ",
-        pidfile_path,
-    });
+    env.assert_history(indoc::formatdoc! {"
+        pgrep --full --pidfile {pidfile_path} qemu
+    "});
 }
 
 #[test]
@@ -191,19 +180,16 @@ fn pidfile_parent_dir_creation() {
     let pidfile_path = pidfile.path().display();
 
     env.add_guest_config("zero");
-    env.append_config(indoc::formatdoc! {
-        "
-            [guests.zero]
-                memory = 8192
-                cores = 4
-                spice_port = 5901
-                monitor_socket_path = '/tmp/zero.socket'
-                pidfile_path = '{}'
-        ",
-        pidfile_path
-    });
+    env.append_config(indoc::formatdoc! {"
+        [guests.zero]
+            memory = 8192
+            cores = 4
+            spice_port = 5901
+            monitor_socket_path = '/tmp/zero.socket'
+            pidfile_path = '{pidfile_path}'
+    "});
 
-    env.stub_ok(format!("qemu-system-x86_64 -name zero -machine q35,accel=kvm -cpu host -m 8192M -smp 4 -no-user-config -nodefaults -daemonize -runas nobody -monitor unix:/tmp/zero.socket,server,nowait -pidfile {} -vga std -spice port=5901,disable-ticketing=on -object iothread,id=iothread1 -device virtio-scsi-pci-non-transitional,iothread=iothread1", pidfile_path));
+    env.stub_ok(format!("qemu-system-x86_64 -name zero -machine q35,accel=kvm -cpu host -m 8192M -smp 4 -no-user-config -nodefaults -daemonize -runas nobody -monitor unix:/tmp/zero.socket,server,nowait -pidfile {pidfile_path} -vga std -spice port=5901,disable-ticketing=on -object iothread,id=iothread1 -device virtio-scsi-pci-non-transitional,iothread=iothread1"));
 
     pidfile_parent_dir.assert(predicate::path::missing());
 
@@ -220,12 +206,9 @@ fn pidfile_parent_dir_creation() {
     let permissions = pidfile_parent_dir.metadata().unwrap().permissions().mode();
     assert_eq!(permissions, 0o40755);
 
-    env.assert_history(indoc::formatdoc! {
-        "
-            qemu-system-x86_64 -name zero -machine q35,accel=kvm -cpu host -m 8192M -smp 4 -no-user-config -nodefaults -daemonize -runas nobody -monitor unix:/tmp/zero.socket,server,nowait -pidfile {} -vga std -spice port=5901,disable-ticketing=on -object iothread,id=iothread1 -device virtio-scsi-pci-non-transitional,iothread=iothread1
-        ",
-        pidfile_path
-    });
+    env.assert_history(indoc::formatdoc! {"
+        qemu-system-x86_64 -name zero -machine q35,accel=kvm -cpu host -m 8192M -smp 4 -no-user-config -nodefaults -daemonize -runas nobody -monitor unix:/tmp/zero.socket,server,nowait -pidfile {pidfile_path} -vga std -spice port=5901,disable-ticketing=on -object iothread,id=iothread1 -device virtio-scsi-pci-non-transitional,iothread=iothread1
+    "});
 }
 
 #[test]
@@ -237,19 +220,16 @@ fn monitor_socket_parent_dir_creation() {
     let monitor_socket_path = monitor_socket.path().display();
 
     env.add_guest_config("zero");
-    env.append_config(indoc::formatdoc! {
-        "
-            [guests.zero]
-                memory = 8192
-                cores = 4
-                spice_port = 5901
-                monitor_socket_path = '{}'
-                pidfile_path = '/tmp/zero.pid'
-        ",
-        monitor_socket_path
-    });
+    env.append_config(indoc::formatdoc! {"
+        [guests.zero]
+            memory = 8192
+            cores = 4
+            spice_port = 5901
+            monitor_socket_path = '{monitor_socket_path}'
+            pidfile_path = '/tmp/zero.pid'
+    "});
 
-    env.stub_ok(format!("qemu-system-x86_64 -name zero -machine q35,accel=kvm -cpu host -m 8192M -smp 4 -no-user-config -nodefaults -daemonize -runas nobody -monitor unix:{},server,nowait -pidfile /tmp/zero.pid -vga std -spice port=5901,disable-ticketing=on -object iothread,id=iothread1 -device virtio-scsi-pci-non-transitional,iothread=iothread1", monitor_socket_path));
+    env.stub_ok(format!("qemu-system-x86_64 -name zero -machine q35,accel=kvm -cpu host -m 8192M -smp 4 -no-user-config -nodefaults -daemonize -runas nobody -monitor unix:{monitor_socket_path},server,nowait -pidfile /tmp/zero.pid -vga std -spice port=5901,disable-ticketing=on -object iothread,id=iothread1 -device virtio-scsi-pci-non-transitional,iothread=iothread1"));
 
     monitor_socket_parent_dir.assert(predicate::path::missing());
 
@@ -270,12 +250,9 @@ fn monitor_socket_parent_dir_creation() {
         .mode();
     assert_eq!(permissions, 0o40755);
 
-    env.assert_history(indoc::formatdoc! {
-        "
-            qemu-system-x86_64 -name zero -machine q35,accel=kvm -cpu host -m 8192M -smp 4 -no-user-config -nodefaults -daemonize -runas nobody -monitor unix:{},server,nowait -pidfile /tmp/zero.pid -vga std -spice port=5901,disable-ticketing=on -object iothread,id=iothread1 -device virtio-scsi-pci-non-transitional,iothread=iothread1
-        ",
-        monitor_socket_path
-    });
+    env.assert_history(indoc::formatdoc! {"
+        qemu-system-x86_64 -name zero -machine q35,accel=kvm -cpu host -m 8192M -smp 4 -no-user-config -nodefaults -daemonize -runas nobody -monitor unix:{monitor_socket_path},server,nowait -pidfile /tmp/zero.pid -vga std -spice port=5901,disable-ticketing=on -object iothread,id=iothread1 -device virtio-scsi-pci-non-transitional,iothread=iothread1
+    "});
 }
 
 #[test]
@@ -329,9 +306,9 @@ fn unknown_guest() {
     .assert()
     .failure()
     .stdout("")
-    .stderr(indoc::indoc! {"
-        Error: Unknown guest `zero`
-    "});
+    .stderr(indoc::indoc! {r#"
+        Error: Unknown guest "zero"
+    "#});
 }
 
 #[test]

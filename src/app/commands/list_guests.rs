@@ -8,11 +8,12 @@ impl App {
         let mut tw = TabWriter::new(std::io::stdout());
         writeln!(tw, "ID\tBOOTED\tSPICE\tDESCRIPTION")?;
         for (id, guest) in &self.guests {
-            let booted = guest.is_booted()?;
             writeln!(
                 tw,
-                "{}\t{}\t{}\t{}",
-                id, booted, guest.spice_port, guest.description
+                "{id}\t{booted}\t{spice_port}\t{description}",
+                booted = guest.is_booted()?,
+                description = guest.description,
+                spice_port = guest.spice_port,
             )?;
         }
         tw.flush()?;

@@ -12,17 +12,15 @@ impl App {
 
         let disks = self.get_guest_disks(guest_id)?;
         for disk in disks {
-            if disk.path.exists() {
+            let path = &disk.path;
+
+            if path.exists() {
                 continue;
             }
 
-            if let Some(parent_path) = disk.path.parent() {
-                std::fs::create_dir_all(parent_path).with_context(|| {
-                    format!(
-                        "Failed to create parent folder for disk `{}`",
-                        disk.path.display()
-                    )
-                })?;
+            if let Some(parent_path) = path.parent() {
+                std::fs::create_dir_all(parent_path)
+                    .with_context(|| format!("Failed to create parent folder for disk {path:?}"))?;
             }
 
             command_macros::command!(
@@ -31,7 +29,7 @@ impl App {
                 -fqcow2
                 -olazy_refcounts=on
                 -opreallocation=metadata
-                (disk.path)
+                (path)
                 ((disk.size))G
             )
             .execute()?;
@@ -39,7 +37,7 @@ impl App {
             command_macros::command!(
                 qemu-img snapshot
                 -croot
-                (disk.path)
+                (path)
             )
             .execute()?;
         }

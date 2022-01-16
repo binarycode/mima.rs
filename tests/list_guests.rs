@@ -25,30 +25,30 @@ fn happy_path_with_aliases() {
 
     env.add_guest_config("beta");
     env.add_guest_config("zero");
-    env.append_config(indoc::formatdoc! {
-        "
-            [guests.beta]
-                description = 'foo'
-                spice_port = 5901
-                monitor_socket_path = '{beta_monitor_socket_path}'
-                pidfile_path = '{beta_pidfile_path}'
-            [guests.zero]
-                description = 'bar'
-                spice_port = 5902
-                monitor_socket_path = '{zero_monitor_socket_path}'
-                pidfile_path = '{zero_pidfile_path}'
-        ",
-        beta_monitor_socket_path = beta_monitor_socket_path,
-        beta_pidfile_path = beta_pidfile_path,
-        zero_monitor_socket_path = zero_monitor_socket_path,
-        zero_pidfile_path = zero_pidfile_path,
-    });
+    env.append_config(indoc::formatdoc! {"
+        [guests.beta]
+            description = 'foo'
+            spice_port = 5901
+            monitor_socket_path = '{beta_monitor_socket_path}'
+            pidfile_path = '{beta_pidfile_path}'
+        [guests.zero]
+            description = 'bar'
+            spice_port = 5902
+            monitor_socket_path = '{zero_monitor_socket_path}'
+            pidfile_path = '{zero_pidfile_path}'
+    "});
 
     env.stub(
-        format!("pgrep --full --pidfile {} qemu", beta_pidfile_path),
+        format!("pgrep --full --pidfile {beta_pidfile_path} qemu"),
         "exit 1",
     );
-    env.stub_ok(format!("pgrep --full --pidfile {} qemu", zero_pidfile_path));
+    env.stub_ok(format!("pgrep --full --pidfile {zero_pidfile_path} qemu"));
+
+    let expected_output = indoc::indoc! {"
+        ID    BOOTED  SPICE  DESCRIPTION
+        beta  false   5901   foo
+        zero  true    5902   bar
+    "};
 
     command_macros::command!(
         {env.bin()} -c (env.config_path()) list-guests
@@ -56,20 +56,12 @@ fn happy_path_with_aliases() {
     .assert()
     .success()
     .stderr("")
-    .stdout(indoc::indoc! {"
-        ID    BOOTED  SPICE  DESCRIPTION
-        beta  false   5901   foo
-        zero  true    5902   bar
-    "});
+    .stdout(expected_output);
 
-    let expected_history = indoc::formatdoc! {
-        "
-            pgrep --full --pidfile {beta_pidfile_path} qemu
-            pgrep --full --pidfile {zero_pidfile_path} qemu
-        ",
-        beta_pidfile_path = beta_pidfile_path,
-        zero_pidfile_path = zero_pidfile_path,
-    };
+    let expected_history = indoc::formatdoc! {"
+        pgrep --full --pidfile {beta_pidfile_path} qemu
+        pgrep --full --pidfile {zero_pidfile_path} qemu
+    "};
 
     env.assert_history(&expected_history);
 
@@ -79,11 +71,7 @@ fn happy_path_with_aliases() {
     .assert()
     .success()
     .stderr("")
-    .stdout(indoc::indoc! {"
-        ID    BOOTED  SPICE  DESCRIPTION
-        beta  false   5901   foo
-        zero  true    5902   bar
-    "});
+    .stdout(expected_output);
 
     env.assert_history(&expected_history);
 
@@ -93,11 +81,7 @@ fn happy_path_with_aliases() {
     .assert()
     .success()
     .stderr("")
-    .stdout(indoc::indoc! {"
-        ID    BOOTED  SPICE  DESCRIPTION
-        beta  false   5901   foo
-        zero  true    5902   bar
-    "});
+    .stdout(expected_output);
 
     env.assert_history(&expected_history);
 }

@@ -16,7 +16,7 @@ impl App {
         let path = path.as_ref();
 
         if !path.is_file() {
-            anyhow::bail!("`{}` is not a file", path.display());
+            anyhow::bail!("{path:?} is not a file");
         }
 
         let file_name = path.file_name().unwrap().to_string_lossy();
@@ -24,8 +24,8 @@ impl App {
         let guest_connection = self.get_guest_connection(guest_id, max_connection_timeout)?;
         guest_connection.execute("mkdir -p /root/mima")?;
         guest_connection.upload(path, "/root/mima")?;
-        guest_connection.execute(format!("chmod +x /root/mima/{}", file_name))?;
-        guest_connection.execute(format!("/root/mima/{}", file_name))?;
+        guest_connection.execute(format!("chmod +x /root/mima/{file_name}"))?;
+        guest_connection.execute(format!("/root/mima/{file_name}"))?;
 
         Ok(())
     }

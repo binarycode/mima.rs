@@ -10,55 +10,50 @@ fn happy_path() {
     let sda_path = sda.path().display();
 
     env.add_guest_config("zero");
-    env.append_config(indoc::formatdoc! {
-        "
-            [guests.zero]
-                disks = [
-                    {{ label = 'sda', path = '{}', size = 20 }},
-                ]
-        ",
-        sda_path,
-    });
+    env.append_config(indoc::formatdoc! {"
+        [guests.zero]
+            disks = [
+                {{ label = 'sda', path = '{sda_path}', size = 20 }},
+            ]
+    "});
 
     env.stub(
-        format!("qemu-img info --force-share --output=json {}", sda_path),
-        indoc::indoc! {
-            r#"
-                echo '
-                    {
-                        "snapshots": [
-                            {
-                                "icount": 0,
-                                "vm-clock-nsec": 0,
-                                "name": "root",
-                                "date-sec": 1,
-                                "date-nsec": 0,
-                                "vm-clock-sec": 0,
-                                "id": "0",
-                                "vm-state-size": 0
-                            }
-                        ],
-                        "virtual-size": 21474836480,
-                        "filename": "zero-sda.qcow2",
-                        "cluster-size": 65536,
-                        "format": "qcow2",
-                        "actual-size": 0,
-                        "format-specific": {
-                            "type": "qcow2",
-                            "data": {
-                                "compat": "1.1",
-                                "compression-type": "zlib",
-                                "lazy-refcounts": false,
-                                "refcount-bits": 16,
-                                "corrupt": false,
-                                "extended-l2": false
-                            }
-                        },
-                        "dirty-flag": false
-                    }
-                '
-            "#,
-        },
+        format!("qemu-img info --force-share --output=json {sda_path}"),
+        indoc::indoc! {r#"
+            echo '
+                {
+                    "snapshots": [
+                        {
+                            "icount": 0,
+                            "vm-clock-nsec": 0,
+                            "name": "root",
+                            "date-sec": 1,
+                            "date-nsec": 0,
+                            "vm-clock-sec": 0,
+                            "id": "0",
+                            "vm-state-size": 0
+                        }
+                    ],
+                    "virtual-size": 21474836480,
+                    "filename": "zero-sda.qcow2",
+                    "cluster-size": 65536,
+                    "format": "qcow2",
+                    "actual-size": 0,
+                    "format-specific": {
+                        "type": "qcow2",
+                        "data": {
+                            "compat": "1.1",
+                            "compression-type": "zlib",
+                            "lazy-refcounts": false,
+                            "refcount-bits": 16,
+                            "corrupt": false,
+                            "extended-l2": false
+                        }
+                    },
+                    "dirty-flag": false
+                }
+            '
+        "#},
     );
 
     command_macros::command!(
@@ -72,12 +67,9 @@ fn happy_path() {
         root  1970-01-01 00:00:01
     "});
 
-    env.assert_history(indoc::formatdoc! {
-        "
-            qemu-img info --force-share --output=json {}
-        ",
-        sda_path,
-    });
+    env.assert_history(indoc::formatdoc! {"
+        qemu-img info --force-share --output=json {sda_path}
+    "});
 }
 
 #[test]
@@ -88,43 +80,38 @@ fn no_snapshots() {
     let sda_path = sda.path().display();
 
     env.add_guest_config("zero");
-    env.append_config(indoc::formatdoc! {
-        "
-            [guests.zero]
-                disks = [
-                    {{ label = 'sda', path = '{}', size = 20 }},
-                ]
-        ",
-        sda_path,
-    });
+    env.append_config(indoc::formatdoc! {"
+        [guests.zero]
+            disks = [
+                {{ label = 'sda', path = '{sda_path}', size = 20 }},
+            ]
+    "});
 
     env.stub(
-        format!("qemu-img info --force-share --output=json {}", sda_path),
-        indoc::indoc! {
-            r#"
-                echo '
-                    {
-                        "virtual-size": 21474836480,
-                        "filename": "zero-sda.qcow2",
-                        "cluster-size": 65536,
-                        "format": "qcow2",
-                        "actual-size": 0,
-                        "format-specific": {
-                            "type": "qcow2",
-                            "data": {
-                                "compat": "1.1",
-                                "compression-type": "zlib",
-                                "lazy-refcounts": false,
-                                "refcount-bits": 16,
-                                "corrupt": false,
-                                "extended-l2": false
-                            }
-                        },
-                        "dirty-flag": false
-                    }
-                '
-            "#,
-        },
+        format!("qemu-img info --force-share --output=json {sda_path}"),
+        indoc::indoc! {r#"
+            echo '
+                {
+                    "virtual-size": 21474836480,
+                    "filename": "zero-sda.qcow2",
+                    "cluster-size": 65536,
+                    "format": "qcow2",
+                    "actual-size": 0,
+                    "format-specific": {
+                        "type": "qcow2",
+                        "data": {
+                            "compat": "1.1",
+                            "compression-type": "zlib",
+                            "lazy-refcounts": false,
+                            "refcount-bits": 16,
+                            "corrupt": false,
+                            "extended-l2": false
+                        }
+                    },
+                    "dirty-flag": false
+                }
+            '
+        "#},
     );
 
     command_macros::command!(
@@ -137,12 +124,9 @@ fn no_snapshots() {
         ID  TIMESTAMP
     "});
 
-    env.assert_history(indoc::formatdoc! {
-        "
-            qemu-img info --force-share --output=json {}
-        ",
-        sda_path,
-    });
+    env.assert_history(indoc::formatdoc! {"
+        qemu-img info --force-share --output=json {sda_path}
+    "});
 }
 
 #[test]
@@ -153,65 +137,60 @@ fn multiple_snapshots() {
     let sda_path = sda.path().display();
 
     env.add_guest_config("zero");
-    env.append_config(indoc::formatdoc! {
-        "
-            [guests.zero]
-                disks = [
-                    {{ label = 'sda', path = '{}', size = 20 }},
-                ]
-        ",
-        sda_path,
-    });
+    env.append_config(indoc::formatdoc! {"
+        [guests.zero]
+            disks = [
+                {{ label = 'sda', path = '{sda_path}', size = 20 }},
+            ]
+    "});
 
     env.stub(
-        format!("qemu-img info --force-share --output=json {}", sda_path),
-        indoc::indoc! {
-            r#"
-                echo '
-                    {
-                        "snapshots": [
-                            {
-                                "icount": 0,
-                                "vm-clock-nsec": 0,
-                                "name": "root",
-                                "date-sec": 1,
-                                "date-nsec": 0,
-                                "vm-clock-sec": 0,
-                                "id": "0",
-                                "vm-state-size": 0
-                            },
-                            {
-                                "icount": 0,
-                                "vm-clock-nsec": 0,
-                                "name": "centos7",
-                                "date-sec": 2,
-                                "date-nsec": 0,
-                                "vm-clock-sec": 0,
-                                "id": "1",
-                                "vm-state-size": 0
-                            }
-                        ],
-                        "virtual-size": 21474836480,
-                        "filename": "zero-sda.qcow2",
-                        "cluster-size": 65536,
-                        "format": "qcow2",
-                        "actual-size": 0,
-                        "format-specific": {
-                            "type": "qcow2",
-                            "data": {
-                                "compat": "1.1",
-                                "compression-type": "zlib",
-                                "lazy-refcounts": false,
-                                "refcount-bits": 16,
-                                "corrupt": false,
-                                "extended-l2": false
-                            }
+        format!("qemu-img info --force-share --output=json {sda_path}"),
+        indoc::indoc! {r#"
+            echo '
+                {
+                    "snapshots": [
+                        {
+                            "icount": 0,
+                            "vm-clock-nsec": 0,
+                            "name": "root",
+                            "date-sec": 1,
+                            "date-nsec": 0,
+                            "vm-clock-sec": 0,
+                            "id": "0",
+                            "vm-state-size": 0
                         },
-                        "dirty-flag": false
-                    }
-                '
-            "#,
-        },
+                        {
+                            "icount": 0,
+                            "vm-clock-nsec": 0,
+                            "name": "centos7",
+                            "date-sec": 2,
+                            "date-nsec": 0,
+                            "vm-clock-sec": 0,
+                            "id": "1",
+                            "vm-state-size": 0
+                        }
+                    ],
+                    "virtual-size": 21474836480,
+                    "filename": "zero-sda.qcow2",
+                    "cluster-size": 65536,
+                    "format": "qcow2",
+                    "actual-size": 0,
+                    "format-specific": {
+                        "type": "qcow2",
+                        "data": {
+                            "compat": "1.1",
+                            "compression-type": "zlib",
+                            "lazy-refcounts": false,
+                            "refcount-bits": 16,
+                            "corrupt": false,
+                            "extended-l2": false
+                        }
+                    },
+                    "dirty-flag": false
+                }
+            '
+        "#},
     );
 
     command_macros::command!(
@@ -226,12 +205,9 @@ fn multiple_snapshots() {
         centos7  1970-01-01 00:00:02
     "});
 
-    env.assert_history(indoc::formatdoc! {
-        "
-            qemu-img info --force-share --output=json {}
-        ",
-        sda_path,
-    });
+    env.assert_history(indoc::formatdoc! {"
+        qemu-img info --force-share --output=json {sda_path}
+    "});
 }
 
 #[test]
@@ -245,147 +221,139 @@ fn common_snapshots_for_multiple_disks() {
     let sdb_path = sdb.path().display();
 
     env.add_guest_config("zero");
-    env.append_config(indoc::formatdoc! {
-        "
-            [guests.zero]
-                disks = [
-                    {{ label = 'sda', path = '{sda_path}', size = 20 }},
-                    {{ label = 'sdb', path = '{sdb_path}', size = 100 }},
-                ]
-        ",
-        sda_path = sda_path,
-        sdb_path = sdb_path,
-    });
+    env.append_config(indoc::formatdoc! {"
+        [guests.zero]
+            disks = [
+                {{ label = 'sda', path = '{sda_path}', size = 20 }},
+                {{ label = 'sdb', path = '{sdb_path}', size = 100 }},
+            ]
+    "});
 
     env.stub(
-        format!("qemu-img info --force-share --output=json {}", sda_path),
-        indoc::indoc! {
-            r#"
-                echo '
-                    {
-                        "snapshots": [
-                            {
-                                "icount": 0,
-                                "vm-clock-nsec": 0,
-                                "name": "root",
-                                "date-sec": 1,
-                                "date-nsec": 0,
-                                "vm-clock-sec": 0,
-                                "id": "0",
-                                "vm-state-size": 0
-                            },
-                            {
-                                "icount": 0,
-                                "vm-clock-nsec": 0,
-                                "name": "centos7",
-                                "date-sec": 2,
-                                "date-nsec": 0,
-                                "vm-clock-sec": 0,
-                                "id": "1",
-                                "vm-state-size": 0
-                            },
-                            {
-                                "icount": 0,
-                                "vm-clock-nsec": 0,
-                                "name": "dev",
-                                "date-sec": 3,
-                                "date-nsec": 0,
-                                "vm-clock-sec": 0,
-                                "id": "2",
-                                "vm-state-size": 0
-                            }
-                        ],
-                        "virtual-size": 21474836480,
-                        "filename": "zero-sda.qcow2",
-                        "cluster-size": 65536,
-                        "format": "qcow2",
-                        "actual-size": 0,
-                        "format-specific": {
-                            "type": "qcow2",
-                            "data": {
-                                "compat": "1.1",
-                                "compression-type": "zlib",
-                                "lazy-refcounts": false,
-                                "refcount-bits": 16,
-                                "corrupt": false,
-                                "extended-l2": false
-                            }
+        format!("qemu-img info --force-share --output=json {sda_path}"),
+        indoc::indoc! {r#"
+            echo '
+                {
+                    "snapshots": [
+                        {
+                            "icount": 0,
+                            "vm-clock-nsec": 0,
+                            "name": "root",
+                            "date-sec": 1,
+                            "date-nsec": 0,
+                            "vm-clock-sec": 0,
+                            "id": "0",
+                            "vm-state-size": 0
                         },
-                        "dirty-flag": false
-                    }
-                '
-            "#,
-        },
+                        {
+                            "icount": 0,
+                            "vm-clock-nsec": 0,
+                            "name": "centos7",
+                            "date-sec": 2,
+                            "date-nsec": 0,
+                            "vm-clock-sec": 0,
+                            "id": "1",
+                            "vm-state-size": 0
+                        },
+                        {
+                            "icount": 0,
+                            "vm-clock-nsec": 0,
+                            "name": "dev",
+                            "date-sec": 3,
+                            "date-nsec": 0,
+                            "vm-clock-sec": 0,
+                            "id": "2",
+                            "vm-state-size": 0
+                        }
+                    ],
+                    "virtual-size": 21474836480,
+                    "filename": "zero-sda.qcow2",
+                    "cluster-size": 65536,
+                    "format": "qcow2",
+                    "actual-size": 0,
+                    "format-specific": {
+                        "type": "qcow2",
+                        "data": {
+                            "compat": "1.1",
+                            "compression-type": "zlib",
+                            "lazy-refcounts": false,
+                            "refcount-bits": 16,
+                            "corrupt": false,
+                            "extended-l2": false
+                        }
+                    },
+                    "dirty-flag": false
+                }
+            '
+        "#},
     );
     env.stub(
-        format!("qemu-img info --force-share --output=json {}", sdb_path),
-        indoc::indoc! {
-            r#"
-                echo '
-                    {
-                        "snapshots": [
-                            {
-                                "icount": 0,
-                                "vm-clock-nsec": 0,
-                                "name": "root",
-                                "date-sec": 1,
-                                "date-nsec": 0,
-                                "vm-clock-sec": 0,
-                                "id": "0",
-                                "vm-state-size": 0
-                            },
-                            {
-                                "icount": 0,
-                                "vm-clock-nsec": 0,
-                                "name": "centos6",
-                                "date-sec": 2,
-                                "date-nsec": 0,
-                                "vm-clock-sec": 0,
-                                "id": "1",
-                                "vm-state-size": 0
-                            },
-                            {
-                                "icount": 0,
-                                "vm-clock-nsec": 0,
-                                "name": "test",
-                                "date-sec": 3,
-                                "date-nsec": 0,
-                                "vm-clock-sec": 0,
-                                "id": "2",
-                                "vm-state-size": 0
-                            },
-                            {
-                                "icount": 0,
-                                "vm-clock-nsec": 0,
-                                "name": "dev",
-                                "date-sec": 4,
-                                "date-nsec": 0,
-                                "vm-clock-sec": 0,
-                                "id": "3",
-                                "vm-state-size": 0
-                            }
-                        ],
-                        "virtual-size": 107374182400,
-                        "filename": "zero-sdb.qcow2",
-                        "cluster-size": 65536,
-                        "format": "qcow2",
-                        "actual-size": 0,
-                        "format-specific": {
-                            "type": "qcow2",
-                            "data": {
-                                "compat": "1.1",
-                                "compression-type": "zlib",
-                                "lazy-refcounts": false,
-                                "refcount-bits": 16,
-                                "corrupt": false,
-                                "extended-l2": false
-                            }
+        format!("qemu-img info --force-share --output=json {sdb_path}"),
+        indoc::indoc! {r#"
+            echo '
+                {
+                    "snapshots": [
+                        {
+                            "icount": 0,
+                            "vm-clock-nsec": 0,
+                            "name": "root",
+                            "date-sec": 1,
+                            "date-nsec": 0,
+                            "vm-clock-sec": 0,
+                            "id": "0",
+                            "vm-state-size": 0
                         },
-                        "dirty-flag": false
-                    }
-                '
-            "#,
-        },
+                        {
+                            "icount": 0,
+                            "vm-clock-nsec": 0,
+                            "name": "centos6",
+                            "date-sec": 2,
+                            "date-nsec": 0,
+                            "vm-clock-sec": 0,
+                            "id": "1",
+                            "vm-state-size": 0
+                        },
+                        {
+                            "icount": 0,
+                            "vm-clock-nsec": 0,
+                            "name": "test",
+                            "date-sec": 3,
+                            "date-nsec": 0,
+                            "vm-clock-sec": 0,
+                            "id": "2",
+                            "vm-state-size": 0
+                        },
+                        {
+                            "icount": 0,
+                            "vm-clock-nsec": 0,
+                            "name": "dev",
+                            "date-sec": 4,
+                            "date-nsec": 0,
+                            "vm-clock-sec": 0,
+                            "id": "3",
+                            "vm-state-size": 0
+                        }
+                    ],
+                    "virtual-size": 107374182400,
+                    "filename": "zero-sdb.qcow2",
+                    "cluster-size": 65536,
+                    "format": "qcow2",
+                    "actual-size": 0,
+                    "format-specific": {
+                        "type": "qcow2",
+                        "data": {
+                            "compat": "1.1",
+                            "compression-type": "zlib",
+                            "lazy-refcounts": false,
+                            "refcount-bits": 16,
+                            "corrupt": false,
+                            "extended-l2": false
+                        }
+                    },
+                    "dirty-flag": false
+                }
+            '
+        "#},
     );
 
     command_macros::command!(
@@ -400,14 +368,10 @@ fn common_snapshots_for_multiple_disks() {
         dev   1970-01-01 00:00:03
     "});
 
-    env.assert_history(indoc::formatdoc! {
-        "
-            qemu-img info --force-share --output=json {sda_path}
-            qemu-img info --force-share --output=json {sdb_path}
-        ",
-        sda_path = sda_path,
-        sdb_path = sdb_path,
-    });
+    env.assert_history(indoc::formatdoc! {"
+        qemu-img info --force-share --output=json {sda_path}
+        qemu-img info --force-share --output=json {sdb_path}
+    "});
 }
 
 #[test]
@@ -421,117 +385,109 @@ fn big_difference_in_snapshot_timestamp_for_multiple_disks() {
     let sdb_path = sdb.path().display();
 
     env.add_guest_config("zero");
-    env.append_config(indoc::formatdoc! {
-        "
-            [guests.zero]
-                disks = [
-                    {{ label = 'sda', path = '{sda_path}', size = 20 }},
-                    {{ label = 'sdb', path = '{sdb_path}', size = 100 }},
-                ]
-        ",
-        sda_path = sda_path,
-        sdb_path = sdb_path,
-    });
+    env.append_config(indoc::formatdoc! {"
+        [guests.zero]
+            disks = [
+                {{ label = 'sda', path = '{sda_path}', size = 20 }},
+                {{ label = 'sdb', path = '{sdb_path}', size = 100 }},
+            ]
+    "});
 
     env.stub(
-        format!("qemu-img info --force-share --output=json {}", sda_path),
-        indoc::indoc! {
-            r#"
-                echo '
-                    {
-                        "snapshots": [
-                            {
-                                "icount": 0,
-                                "vm-clock-nsec": 0,
-                                "name": "root",
-                                "date-sec": 1,
-                                "date-nsec": 0,
-                                "vm-clock-sec": 0,
-                                "id": "0",
-                                "vm-state-size": 0
-                            },
-                            {
-                                "icount": 0,
-                                "vm-clock-nsec": 0,
-                                "name": "dev",
-                                "date-sec": 2,
-                                "date-nsec": 0,
-                                "vm-clock-sec": 0,
-                                "id": "1",
-                                "vm-state-size": 0
-                            }
-                        ],
-                        "virtual-size": 21474836480,
-                        "filename": "zero-sda.qcow2",
-                        "cluster-size": 65536,
-                        "format": "qcow2",
-                        "actual-size": 0,
-                        "format-specific": {
-                            "type": "qcow2",
-                            "data": {
-                                "compat": "1.1",
-                                "compression-type": "zlib",
-                                "lazy-refcounts": false,
-                                "refcount-bits": 16,
-                                "corrupt": false,
-                                "extended-l2": false
-                            }
+        format!("qemu-img info --force-share --output=json {sda_path}"),
+        indoc::indoc! {r#"
+            echo '
+                {
+                    "snapshots": [
+                        {
+                            "icount": 0,
+                            "vm-clock-nsec": 0,
+                            "name": "root",
+                            "date-sec": 1,
+                            "date-nsec": 0,
+                            "vm-clock-sec": 0,
+                            "id": "0",
+                            "vm-state-size": 0
                         },
-                        "dirty-flag": false
-                    }
-                '
-            "#,
-        },
+                        {
+                            "icount": 0,
+                            "vm-clock-nsec": 0,
+                            "name": "dev",
+                            "date-sec": 2,
+                            "date-nsec": 0,
+                            "vm-clock-sec": 0,
+                            "id": "1",
+                            "vm-state-size": 0
+                        }
+                    ],
+                    "virtual-size": 21474836480,
+                    "filename": "zero-sda.qcow2",
+                    "cluster-size": 65536,
+                    "format": "qcow2",
+                    "actual-size": 0,
+                    "format-specific": {
+                        "type": "qcow2",
+                        "data": {
+                            "compat": "1.1",
+                            "compression-type": "zlib",
+                            "lazy-refcounts": false,
+                            "refcount-bits": 16,
+                            "corrupt": false,
+                            "extended-l2": false
+                        }
+                    },
+                    "dirty-flag": false
+                }
+            '
+        "#},
     );
     env.stub(
-        format!("qemu-img info --force-share --output=json {}", sdb_path),
-        indoc::indoc! {
-            r#"
-                echo '
-                    {
-                        "snapshots": [
-                            {
-                                "icount": 0,
-                                "vm-clock-nsec": 0,
-                                "name": "root",
-                                "date-sec": 1,
-                                "date-nsec": 0,
-                                "vm-clock-sec": 0,
-                                "id": "0",
-                                "vm-state-size": 0
-                            },
-                            {
-                                "icount": 0,
-                                "vm-clock-nsec": 0,
-                                "name": "dev",
-                                "date-sec": 1000000,
-                                "date-nsec": 0,
-                                "vm-clock-sec": 0,
-                                "id": "1",
-                                "vm-state-size": 0
-                            }
-                        ],
-                        "virtual-size": 107374182400,
-                        "filename": "zero-sdb.qcow2",
-                        "cluster-size": 65536,
-                        "format": "qcow2",
-                        "actual-size": 0,
-                        "format-specific": {
-                            "type": "qcow2",
-                            "data": {
-                                "compat": "1.1",
-                                "compression-type": "zlib",
-                                "lazy-refcounts": false,
-                                "refcount-bits": 16,
-                                "corrupt": false,
-                                "extended-l2": false
-                            }
+        format!("qemu-img info --force-share --output=json {sdb_path}"),
+        indoc::indoc! {r#"
+            echo '
+                {
+                    "snapshots": [
+                        {
+                            "icount": 0,
+                            "vm-clock-nsec": 0,
+                            "name": "root",
+                            "date-sec": 1,
+                            "date-nsec": 0,
+                            "vm-clock-sec": 0,
+                            "id": "0",
+                            "vm-state-size": 0
                         },
-                        "dirty-flag": false
-                    }
-                '
-            "#,
-        },
+                        {
+                            "icount": 0,
+                            "vm-clock-nsec": 0,
+                            "name": "dev",
+                            "date-sec": 1000000,
+                            "date-nsec": 0,
+                            "vm-clock-sec": 0,
+                            "id": "1",
+                            "vm-state-size": 0
+                        }
+                    ],
+                    "virtual-size": 107374182400,
+                    "filename": "zero-sdb.qcow2",
+                    "cluster-size": 65536,
+                    "format": "qcow2",
+                    "actual-size": 0,
+                    "format-specific": {
+                        "type": "qcow2",
+                        "data": {
+                            "compat": "1.1",
+                            "compression-type": "zlib",
+                            "lazy-refcounts": false,
+                            "refcount-bits": 16,
+                            "corrupt": false,
+                            "extended-l2": false
+                        }
+                    },
+                    "dirty-flag": false
+                }
+            '
+        "#},
     );
 
     command_macros::command!(
@@ -545,14 +501,10 @@ fn big_difference_in_snapshot_timestamp_for_multiple_disks() {
         root  1970-01-01 00:00:01
     "});
 
-    env.assert_history(indoc::formatdoc! {
-        "
-            qemu-img info --force-share --output=json {sda_path}
-            qemu-img info --force-share --output=json {sdb_path}
-        ",
-        sda_path = sda_path,
-        sdb_path = sdb_path,
-    });
+    env.assert_history(indoc::formatdoc! {"
+        qemu-img info --force-share --output=json {sda_path}
+        qemu-img info --force-share --output=json {sdb_path}
+    "});
 }
 
 #[test]
@@ -606,9 +558,9 @@ fn unknown_guest() {
     .assert()
     .failure()
     .stdout("")
-    .stderr(indoc::indoc! {"
-        Error: Unknown guest `zero`
-    "});
+    .stderr(indoc::indoc! {r#"
+        Error: Unknown guest "zero"
+    "#});
 }
 
 #[test]
@@ -619,25 +571,19 @@ fn list_snapshots_failure() {
     let sda_path = sda.path().display();
 
     env.add_guest_config("zero");
-    env.append_config(indoc::formatdoc! {
-        "
-            [guests.zero]
-                disks = [
-                    {{ label = 'sda', path = '{}', size = 20 }},
-                ]
-        ",
-        sda_path,
-    });
+    env.append_config(indoc::formatdoc! {"
+        [guests.zero]
+            disks = [
+                {{ label = 'sda', path = '{sda_path}', size = 20 }},
+            ]
+    "});
 
     env.stub(
-        format!("qemu-img info --force-share --output=json {}", sda_path),
-        indoc::formatdoc! {
-            r#"
-                echo "qemu-img: Could not open {0}: Could not open '{0}': No such file or directory"
-                exit 1
-            "#,
-            sda_path,
-        },
+        format!("qemu-img info --force-share --output=json {sda_path}"),
+        indoc::formatdoc! {r#"
+            echo "qemu-img: Could not open {sda_path}: Could not open '{sda_path}': No such file or directory"
+            exit 1
+        "#},
     );
 
     command_macros::command!(
@@ -646,23 +592,17 @@ fn list_snapshots_failure() {
     .assert()
     .failure()
     .stdout("")
-    .stderr(indoc::formatdoc! {
-        r#"
-            Error: Failed to run "qemu-img" "info" "--force-share" "--output=json" "{0}"
-            stdout:
-            qemu-img: Could not open {0}: Could not open '{0}': No such file or directory
+    .stderr(indoc::formatdoc! {r#"
+        Error: Failed to run "qemu-img" "info" "--force-share" "--output=json" "{sda_path}"
+        stdout:
+        qemu-img: Could not open {sda_path}: Could not open '{sda_path}': No such file or directory
 
-            stderr:
+        stderr:
 
 
-        "#,
-        sda_path,
-    });
+    "#});
 
-    env.assert_history(indoc::formatdoc! {
-        "
-            qemu-img info --force-share --output=json {}
-        ",
-        sda_path,
-    });
+    env.assert_history(indoc::formatdoc! {"
+        qemu-img info --force-share --output=json {sda_path}
+    "});
 }

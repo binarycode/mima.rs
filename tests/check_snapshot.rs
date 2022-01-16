@@ -10,55 +10,50 @@ fn happy_path() {
     let sda_path = sda.path().display();
 
     env.add_guest_config("zero");
-    env.append_config(indoc::formatdoc! {
-        "
-            [guests.zero]
-                disks = [
-                    {{ label = 'sda', path = '{}', size = 20 }},
-                ]
-        ",
-        sda_path,
-    });
+    env.append_config(indoc::formatdoc! {"
+        [guests.zero]
+            disks = [
+                {{ label = 'sda', path = '{sda_path}', size = 20 }},
+            ]
+    "});
 
     env.stub(
-        format!("qemu-img info --force-share --output=json {}", sda_path),
-        indoc::indoc! {
-            r#"
-                echo '
-                    {
-                        "snapshots": [
-                            {
-                                "icount": 0,
-                                "vm-clock-nsec": 0,
-                                "name": "root",
-                                "date-sec": 1,
-                                "date-nsec": 0,
-                                "vm-clock-sec": 0,
-                                "id": "0",
-                                "vm-state-size": 0
-                            }
-                        ],
-                        "virtual-size": 21474836480,
-                        "filename": "zero-sda.qcow2",
-                        "cluster-size": 65536,
-                        "format": "qcow2",
-                        "actual-size": 0,
-                        "format-specific": {
-                            "type": "qcow2",
-                            "data": {
-                                "compat": "1.1",
-                                "compression-type": "zlib",
-                                "lazy-refcounts": false,
-                                "refcount-bits": 16,
-                                "corrupt": false,
-                                "extended-l2": false
-                            }
-                        },
-                        "dirty-flag": false
-                    }
-                '
-            "#,
-        },
+        format!("qemu-img info --force-share --output=json {sda_path}"),
+        indoc::indoc! {r#"
+            echo '
+                {
+                    "snapshots": [
+                        {
+                            "icount": 0,
+                            "vm-clock-nsec": 0,
+                            "name": "root",
+                            "date-sec": 1,
+                            "date-nsec": 0,
+                            "vm-clock-sec": 0,
+                            "id": "0",
+                            "vm-state-size": 0
+                        }
+                    ],
+                    "virtual-size": 21474836480,
+                    "filename": "zero-sda.qcow2",
+                    "cluster-size": 65536,
+                    "format": "qcow2",
+                    "actual-size": 0,
+                    "format-specific": {
+                        "type": "qcow2",
+                        "data": {
+                            "compat": "1.1",
+                            "compression-type": "zlib",
+                            "lazy-refcounts": false,
+                            "refcount-bits": 16,
+                            "corrupt": false,
+                            "extended-l2": false
+                        }
+                    },
+                    "dirty-flag": false
+                }
+            '
+        "#},
     );
 
     command_macros::command!(
@@ -69,12 +64,9 @@ fn happy_path() {
     .stdout("")
     .stderr("");
 
-    env.assert_history(indoc::formatdoc! {
-        "
-            qemu-img info --force-share --output=json {}
-        ",
-        sda_path,
-    });
+    env.assert_history(indoc::formatdoc! {"
+        qemu-img info --force-share --output=json {sda_path}
+    "});
 }
 
 #[test]
@@ -85,55 +77,50 @@ fn happy_negative_path() {
     let sda_path = sda.path().display();
 
     env.add_guest_config("zero");
-    env.append_config(indoc::formatdoc! {
-        "
-            [guests.zero]
-                disks = [
-                    {{ label = 'sda', path = '{}', size = 20 }},
-                ]
-        ",
-        sda_path,
-    });
+    env.append_config(indoc::formatdoc! {"
+        [guests.zero]
+            disks = [
+                {{ label = 'sda', path = '{sda_path}', size = 20 }},
+            ]
+    "});
 
     env.stub(
-        format!("qemu-img info --force-share --output=json {}", sda_path),
-        indoc::indoc! {
-            r#"
-                echo '
-                    {
-                        "snapshots": [
-                            {
-                                "icount": 0,
-                                "vm-clock-nsec": 0,
-                                "name": "root",
-                                "date-sec": 1,
-                                "date-nsec": 0,
-                                "vm-clock-sec": 0,
-                                "id": "0",
-                                "vm-state-size": 0
-                            }
-                        ],
-                        "virtual-size": 21474836480,
-                        "filename": "zero-sda.qcow2",
-                        "cluster-size": 65536,
-                        "format": "qcow2",
-                        "actual-size": 0,
-                        "format-specific": {
-                            "type": "qcow2",
-                            "data": {
-                                "compat": "1.1",
-                                "compression-type": "zlib",
-                                "lazy-refcounts": false,
-                                "refcount-bits": 16,
-                                "corrupt": false,
-                                "extended-l2": false
-                            }
-                        },
-                        "dirty-flag": false
-                    }
-                '
-            "#,
-        },
+        format!("qemu-img info --force-share --output=json {sda_path}"),
+        indoc::indoc! {r#"
+            echo '
+                {
+                    "snapshots": [
+                        {
+                            "icount": 0,
+                            "vm-clock-nsec": 0,
+                            "name": "root",
+                            "date-sec": 1,
+                            "date-nsec": 0,
+                            "vm-clock-sec": 0,
+                            "id": "0",
+                            "vm-state-size": 0
+                        }
+                    ],
+                    "virtual-size": 21474836480,
+                    "filename": "zero-sda.qcow2",
+                    "cluster-size": 65536,
+                    "format": "qcow2",
+                    "actual-size": 0,
+                    "format-specific": {
+                        "type": "qcow2",
+                        "data": {
+                            "compat": "1.1",
+                            "compression-type": "zlib",
+                            "lazy-refcounts": false,
+                            "refcount-bits": 16,
+                            "corrupt": false,
+                            "extended-l2": false
+                        }
+                    },
+                    "dirty-flag": false
+                }
+            '
+        "#},
     );
 
     command_macros::command!(
@@ -145,12 +132,9 @@ fn happy_negative_path() {
     .stdout("")
     .stderr("");
 
-    env.assert_history(indoc::formatdoc! {
-        "
-            qemu-img info --force-share --output=json {}
-        ",
-        sda_path,
-    });
+    env.assert_history(indoc::formatdoc! {"
+        qemu-img info --force-share --output=json {sda_path}
+    "});
 }
 
 #[test]
@@ -226,9 +210,9 @@ fn unknown_guest() {
     .assert()
     .failure()
     .stdout("")
-    .stderr(indoc::indoc! {"
-        Error: Unknown guest `zero`
-    "});
+    .stderr(indoc::indoc! {r#"
+        Error: Unknown guest "zero"
+    "#});
 }
 
 #[test]
@@ -239,25 +223,19 @@ fn list_snapshots_failure() {
     let sda_path = sda.path().display();
 
     env.add_guest_config("zero");
-    env.append_config(indoc::formatdoc! {
-        "
-            [guests.zero]
-                disks = [
-                    {{ label = 'sda', path = '{}', size = 20 }},
-                ]
-        ",
-        sda_path,
-    });
+    env.append_config(indoc::formatdoc! {"
+        [guests.zero]
+            disks = [
+                {{ label = 'sda', path = '{sda_path}', size = 20 }},
+            ]
+    "});
 
     env.stub(
-        format!("qemu-img info --force-share --output=json {}", sda_path),
-        indoc::formatdoc! {
-            r#"
-                echo "qemu-img: Could not open {0}: Could not open '{0}': No such file or directory"
-                exit 1
-            "#,
-            sda_path,
-        },
+        format!("qemu-img info --force-share --output=json {sda_path}"),
+        indoc::formatdoc! {r#"
+            echo "qemu-img: Could not open {sda_path}: Could not open '{sda_path}': No such file or directory"
+            exit 1
+        "#},
     );
 
     command_macros::command!(
@@ -266,23 +244,17 @@ fn list_snapshots_failure() {
     .assert()
     .failure()
     .stdout("")
-    .stderr(indoc::formatdoc! {
-        r#"
-            Error: Failed to run "qemu-img" "info" "--force-share" "--output=json" "{0}"
-            stdout:
-            qemu-img: Could not open {0}: Could not open '{0}': No such file or directory
+    .stderr(indoc::formatdoc! {r#"
+        Error: Failed to run "qemu-img" "info" "--force-share" "--output=json" "{sda_path}"
+        stdout:
+        qemu-img: Could not open {sda_path}: Could not open '{sda_path}': No such file or directory
 
-            stderr:
+        stderr:
 
 
-        "#,
-        sda_path,
-    });
+    "#});
 
-    env.assert_history(indoc::formatdoc! {
-        "
-            qemu-img info --force-share --output=json {}
-        ",
-        sda_path,
-    });
+    env.assert_history(indoc::formatdoc! {"
+        qemu-img info --force-share --output=json {sda_path}
+    "});
 }

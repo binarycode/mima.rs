@@ -15,7 +15,7 @@ impl App {
         for (disk_id, disk) in disks.iter().enumerate() {
             let snapshots = self.get_disk_snapshots(guest_id, disk_id)?;
             if snapshots.contains_key(snapshot_id) {
-                anyhow::bail!("Disk `{disk_label}` of guest `{guest_id}` already contains snapshot `{snapshot_id}`", disk_label = disk.label, guest_id = guest_id, snapshot_id = snapshot_id);
+                anyhow::bail!("Disk {label:?} of guest {guest_id:?} already contains snapshot {snapshot_id:?}", label = disk.label);
             }
         }
 

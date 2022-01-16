@@ -10,17 +10,14 @@ fn happy_path() {
     let sda_path = sda.path().display();
 
     env.add_guest_config("zero");
-    env.append_config(indoc::formatdoc! {
-        "
-            [guests.zero]
-                disks = [
-                    {{ label = 'sda', path = '{}', size = 20 }},
-                ]
-        ",
-        sda_path,
-    });
+    env.append_config(indoc::formatdoc! {"
+        [guests.zero]
+            disks = [
+                {{ label = 'sda', path = '{sda_path}', size = 20 }},
+            ]
+    "});
 
-    env.stub_ok(format!("qemu-img snapshot -droot {}", sda_path));
+    env.stub_ok(format!("qemu-img snapshot -droot {sda_path}"));
 
     command_macros::command!(
         {env.bin()} -c (env.config_path()) delete-snapshot zero root
@@ -30,12 +27,9 @@ fn happy_path() {
     .stdout("")
     .stderr("");
 
-    env.assert_history(indoc::formatdoc! {
-        "
-            qemu-img snapshot -droot {}
-        ",
-        sda_path,
-    });
+    env.assert_history(indoc::formatdoc! {"
+        qemu-img snapshot -droot {sda_path}
+    "});
 }
 
 #[test]
@@ -49,20 +43,16 @@ fn multiple_disks() {
     let sdb_path = sdb.path().display();
 
     env.add_guest_config("zero");
-    env.append_config(indoc::formatdoc! {
-        "
-            [guests.zero]
-                disks = [
-                    {{ label = 'sda', path = '{sda_path}', size = 20 }},
-                    {{ label = 'sdb', path = '{sdb_path}', size = 100 }},
-                ]
-        ",
-        sda_path = sda_path,
-        sdb_path = sdb_path,
-    });
+    env.append_config(indoc::formatdoc! {"
+        [guests.zero]
+            disks = [
+                {{ label = 'sda', path = '{sda_path}', size = 20 }},
+                {{ label = 'sdb', path = '{sdb_path}', size = 100 }},
+            ]
+    "});
 
-    env.stub_ok(format!("qemu-img snapshot -droot {}", sda_path));
-    env.stub_ok(format!("qemu-img snapshot -droot {}", sdb_path));
+    env.stub_ok(format!("qemu-img snapshot -droot {sda_path}"));
+    env.stub_ok(format!("qemu-img snapshot -droot {sdb_path}"));
 
     command_macros::command!(
         {env.bin()} -c (env.config_path()) delete-snapshot zero root
@@ -72,14 +62,10 @@ fn multiple_disks() {
     .stdout("")
     .stderr("");
 
-    env.assert_history(indoc::formatdoc! {
-        "
-            qemu-img snapshot -droot {sda_path}
-            qemu-img snapshot -droot {sdb_path}
-        ",
-        sda_path = sda_path,
-        sdb_path = sdb_path,
-    });
+    env.assert_history(indoc::formatdoc! {"
+        qemu-img snapshot -droot {sda_path}
+        qemu-img snapshot -droot {sdb_path}
+    "});
 }
 
 #[test]
@@ -155,9 +141,9 @@ fn unknown_guest() {
     .assert()
     .failure()
     .stdout("")
-    .stderr(indoc::indoc! {"
-        Error: Unknown guest `zero`
-    "});
+    .stderr(indoc::indoc! {r#"
+        Error: Unknown guest "zero"
+    "#});
 }
 
 #[test]
@@ -168,26 +154,20 @@ fn snapshot_removal_failure() {
     let sda_path = sda.path().display();
 
     env.add_guest_config("zero");
-    env.append_config(indoc::formatdoc! {
-        "
-            [guests.zero]
-                disks = [
-                    {{ label = 'sda', path = '{}', size = 20 }},
-                ]
-        ",
-        sda_path,
-    });
+    env.append_config(indoc::formatdoc! {"
+        [guests.zero]
+            disks = [
+                {{ label = 'sda', path = '{sda_path}', size = 20 }},
+            ]
+    "});
 
     env.stub(
-        format!("qemu-img snapshot -droot {}", sda_path),
-        indoc::formatdoc! {
-            r#"
-                echo "qemu-img: Could not open '{0}': Failed to get \"write\" lock"
-                echo "Is another process using the image [{0}]?"
-                exit 1
-            "#,
-            sda_path,
-        },
+        format!("qemu-img snapshot -droot {sda_path}"),
+        indoc::formatdoc! {r#"
+            echo "qemu-img: Could not open '{sda_path}': Failed to get \"write\" lock"
+            echo "Is another process using the image [{sda_path}]?"
+            exit 1
+        "#},
     );
 
     command_macros::command!(
@@ -196,24 +176,18 @@ fn snapshot_removal_failure() {
     .assert()
     .failure()
     .stdout("")
-    .stderr(indoc::formatdoc! {
-        r#"
-            Error: Failed to run "qemu-img" "snapshot" "-droot" "{0}"
-            stdout:
-            qemu-img: Could not open '{0}': Failed to get "write" lock
-            Is another process using the image [{0}]?
+    .stderr(indoc::formatdoc! {r#"
+        Error: Failed to run "qemu-img" "snapshot" "-droot" "{sda_path}"
+        stdout:
+        qemu-img: Could not open '{sda_path}': Failed to get "write" lock
+        Is another process using the image [{sda_path}]?
 
-            stderr:
+        stderr:
 
 
-        "#,
-        sda_path,
-    });
+    "#});
 
-    env.assert_history(indoc::formatdoc! {
-        "
-            qemu-img snapshot -droot {}
-        ",
-        sda_path,
-    });
+    env.assert_history(indoc::formatdoc! {"
+        qemu-img snapshot -droot {sda_path}
+    "});
 }

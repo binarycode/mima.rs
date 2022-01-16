@@ -89,9 +89,8 @@ where
 
     if let Some(parent_path) = path.parent() {
         if !parent_path.exists() {
-            std::fs::create_dir_all(parent_path).with_context(|| {
-                format!("Failed to create parent folder for `{}`", path.display())
-            })?;
+            std::fs::create_dir_all(parent_path)
+                .with_context(|| format!("Failed to create parent folder for {path:?}"))?;
 
             let permissions = Permissions::from_mode(0o755);
             std::fs::set_permissions(parent_path, permissions)?;

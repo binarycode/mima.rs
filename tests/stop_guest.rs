@@ -14,15 +14,11 @@ fn simple_happy_path_with_aliases() {
     let pidfile_path = pidfile.path().display();
 
     env.add_guest_config("zero");
-    env.append_config(indoc::formatdoc! {
-        "
-            [guests.zero]
-                monitor_socket_path = '{monitor_socket_path}'
-                pidfile_path = '{pidfile_path}'
-        ",
-        monitor_socket_path = monitor_socket_path,
-        pidfile_path = pidfile_path,
-    });
+    env.append_config(indoc::formatdoc! {"
+        [guests.zero]
+            monitor_socket_path = '{monitor_socket_path}'
+            pidfile_path = '{pidfile_path}'
+    "});
 
     command_macros::command!(
         {env.bin()} -c (env.config_path()) stop-guest zero
@@ -54,18 +50,14 @@ fn happy_path_when_the_guest_is_not_running() {
     pidfile.touch().unwrap();
 
     env.add_guest_config("zero");
-    env.append_config(indoc::formatdoc! {
-        "
-            [guests.zero]
-                monitor_socket_path = '{monitor_socket_path}'
-                pidfile_path = '{pidfile_path}'
-        ",
-        monitor_socket_path = monitor_socket_path,
-        pidfile_path = pidfile_path,
-    });
+    env.append_config(indoc::formatdoc! {"
+        [guests.zero]
+            monitor_socket_path = '{monitor_socket_path}'
+            pidfile_path = '{pidfile_path}'
+    "});
 
     env.stub(
-        format!("pgrep --full --pidfile {} qemu", pidfile_path),
+        format!("pgrep --full --pidfile {pidfile_path} qemu"),
         "exit 1",
     );
 
@@ -77,12 +69,9 @@ fn happy_path_when_the_guest_is_not_running() {
     .stderr("")
     .stdout("");
 
-    env.assert_history(indoc::formatdoc! {
-        "
-            pgrep --full --pidfile {} qemu
-        ",
-        pidfile_path,
-    });
+    env.assert_history(indoc::formatdoc! {"
+        pgrep --full --pidfile {pidfile_path} qemu
+    "});
 }
 
 #[test]
@@ -98,18 +87,14 @@ fn happy_path_with_force_flag() {
     pidfile.touch().unwrap();
 
     env.add_guest_config("zero");
-    env.append_config(indoc::formatdoc! {
-        "
-            [guests.zero]
-                monitor_socket_path = '{monitor_socket_path}'
-                pidfile_path = '{pidfile_path}'
-        ",
-        monitor_socket_path = monitor_socket_path,
-        pidfile_path = pidfile_path,
-    });
+    env.append_config(indoc::formatdoc! {"
+        [guests.zero]
+            monitor_socket_path = '{monitor_socket_path}'
+            pidfile_path = '{pidfile_path}'
+    "});
 
-    env.stub_ok(format!("pgrep --full --pidfile {} qemu", pidfile_path));
-    env.stub_ok(format!("pkill --full --pidfile {} qemu", pidfile_path));
+    env.stub_ok(format!("pgrep --full --pidfile {pidfile_path} qemu"));
+    env.stub_ok(format!("pkill --full --pidfile {pidfile_path} qemu"));
 
     command_macros::command!(
         {env.bin()} -c (env.config_path()) stop-guest --force zero
@@ -119,13 +104,10 @@ fn happy_path_with_force_flag() {
     .stderr("")
     .stdout("");
 
-    env.assert_history(indoc::formatdoc! {
-        "
-            pgrep --full --pidfile {0} qemu
-            pkill --full --pidfile {0} qemu
-        ",
-        pidfile_path,
-    });
+    env.assert_history(indoc::formatdoc! {"
+        pgrep --full --pidfile {pidfile_path} qemu
+        pkill --full --pidfile {pidfile_path} qemu
+    "});
 }
 
 #[test]
@@ -144,25 +126,21 @@ fn happy_path_with_soft_shutdown() {
     let flag_path = flag.path().display();
 
     env.add_guest_config("zero");
-    env.append_config(indoc::formatdoc! {
-        "
-            [guests.zero]
-                monitor_socket_path = '{monitor_socket_path}'
-                pidfile_path = '{pidfile_path}'
-        ",
-        monitor_socket_path = monitor_socket_path,
-        pidfile_path = pidfile_path,
-    });
+    env.append_config(indoc::formatdoc! {"
+        [guests.zero]
+            monitor_socket_path = '{monitor_socket_path}'
+            pidfile_path = '{pidfile_path}'
+    "});
 
     env.stub(
-        format!("pgrep --full --pidfile {} qemu", pidfile_path),
-        format!("[ -e {} ] && exit 1", flag_path),
+        format!("pgrep --full --pidfile {pidfile_path} qemu"),
+        format!("[ -e {flag_path} ] && exit 1"),
     );
     env.stub(
-        format!("socat - UNIX-CONNECT:{}", monitor_socket_path),
-        format!("touch {}", flag_path),
+        format!("socat - UNIX-CONNECT:{monitor_socket_path}"),
+        format!("touch {flag_path}"),
     );
-    env.stub_ok(format!("pkill --full --pidfile {} qemu", pidfile_path));
+    env.stub_ok(format!("pkill --full --pidfile {pidfile_path} qemu"));
 
     command_macros::command!(
         {env.bin()} -c (env.config_path()) stop-guest zero
@@ -172,15 +150,11 @@ fn happy_path_with_soft_shutdown() {
     .stderr("")
     .stdout("");
 
-    env.assert_history(indoc::formatdoc! {
-        "
-            pgrep --full --pidfile {pidfile_path} qemu
-            socat - UNIX-CONNECT:{monitor_socket_path}
-            pgrep --full --pidfile {pidfile_path} qemu
-        ",
-        monitor_socket_path = monitor_socket_path,
-        pidfile_path = pidfile_path,
-    });
+    env.assert_history(indoc::formatdoc! {"
+        pgrep --full --pidfile {pidfile_path} qemu
+        socat - UNIX-CONNECT:{monitor_socket_path}
+        pgrep --full --pidfile {pidfile_path} qemu
+    "});
 }
 
 #[test]
@@ -196,19 +170,15 @@ fn happy_path_with_soft_shutdown_timeout() {
     pidfile.touch().unwrap();
 
     env.add_guest_config("zero");
-    env.append_config(indoc::formatdoc! {
-        "
-            [guests.zero]
-                monitor_socket_path = '{monitor_socket_path}'
-                pidfile_path = '{pidfile_path}'
-        ",
-        monitor_socket_path = monitor_socket_path,
-        pidfile_path = pidfile_path,
-    });
+    env.append_config(indoc::formatdoc! {"
+        [guests.zero]
+            monitor_socket_path = '{monitor_socket_path}'
+            pidfile_path = '{pidfile_path}'
+    "});
 
-    env.stub_ok(format!("pgrep --full --pidfile {} qemu", pidfile_path));
-    env.stub_ok(format!("socat - UNIX-CONNECT:{}", monitor_socket_path));
-    env.stub_ok(format!("pkill --full --pidfile {} qemu", pidfile_path));
+    env.stub_ok(format!("pgrep --full --pidfile {pidfile_path} qemu"));
+    env.stub_ok(format!("socat - UNIX-CONNECT:{monitor_socket_path}"));
+    env.stub_ok(format!("pkill --full --pidfile {pidfile_path} qemu"));
 
     command_macros::command!(
         {env.bin()} -c (env.config_path()) stop-guest --wait 1 zero
@@ -218,16 +188,12 @@ fn happy_path_with_soft_shutdown_timeout() {
     .stderr("")
     .stdout("");
 
-    env.assert_history(indoc::formatdoc! {
-        "
-            pgrep --full --pidfile {pidfile_path} qemu
-            socat - UNIX-CONNECT:{monitor_socket_path}
-            pgrep --full --pidfile {pidfile_path} qemu
-            pkill --full --pidfile {pidfile_path} qemu
-        ",
-        monitor_socket_path = monitor_socket_path,
-        pidfile_path = pidfile_path,
-    });
+    env.assert_history(indoc::formatdoc! {"
+        pgrep --full --pidfile {pidfile_path} qemu
+        socat - UNIX-CONNECT:{monitor_socket_path}
+        pgrep --full --pidfile {pidfile_path} qemu
+        pkill --full --pidfile {pidfile_path} qemu
+    "});
 }
 
 #[test]
@@ -281,9 +247,9 @@ fn unknown_guest() {
     .assert()
     .failure()
     .stdout("")
-    .stderr(indoc::indoc! {"
-        Error: Unknown guest `zero`
-    "});
+    .stderr(indoc::indoc! {r#"
+        Error: Unknown guest "zero"
+    "#});
 }
 
 #[test]
@@ -299,20 +265,16 @@ fn pkill_failure() {
     pidfile.touch().unwrap();
 
     env.add_guest_config("zero");
-    env.append_config(indoc::formatdoc! {
-        "
-            [guests.zero]
-                monitor_socket_path = '{monitor_socket_path}'
-                pidfile_path = '{pidfile_path}'
-        ",
-        monitor_socket_path = monitor_socket_path,
-        pidfile_path = pidfile_path,
-    });
+    env.append_config(indoc::formatdoc! {"
+        [guests.zero]
+            monitor_socket_path = '{monitor_socket_path}'
+            pidfile_path = '{pidfile_path}'
+    "});
 
-    env.stub_ok(format!("pgrep --full --pidfile {} qemu", pidfile_path));
+    env.stub_ok(format!("pgrep --full --pidfile {pidfile_path} qemu"));
     // TODO: real failure output
     env.stub(
-        format!("pkill --full --pidfile {} qemu", pidfile_path),
+        format!("pkill --full --pidfile {pidfile_path} qemu"),
         indoc::indoc! {"
             echo 'foobar'
             exit 1
@@ -325,24 +287,18 @@ fn pkill_failure() {
     .assert()
     .failure()
     .stdout("")
-    .stderr(indoc::formatdoc! {
-        r#"
-            Error: Failed to run "pkill" "--full" "--pidfile" "{}" "qemu"
-            stdout:
-            foobar
+    .stderr(indoc::formatdoc! {r#"
+        Error: Failed to run "pkill" "--full" "--pidfile" "{pidfile_path}" "qemu"
+        stdout:
+        foobar
 
-            stderr:
+        stderr:
 
 
-        "#,
-        pidfile_path,
-    });
+    "#});
 
-    env.assert_history(indoc::formatdoc! {
-        "
-            pgrep --full --pidfile {0} qemu
-            pkill --full --pidfile {0} qemu
-        ",
-        pidfile_path,
-    });
+    env.assert_history(indoc::formatdoc! {"
+        pgrep --full --pidfile {pidfile_path} qemu
+        pkill --full --pidfile {pidfile_path} qemu
+    "});
 }

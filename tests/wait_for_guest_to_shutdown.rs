@@ -14,15 +14,11 @@ fn simple_happy_path_with_alias() {
     let pidfile_path = pidfile.path().display();
 
     env.add_guest_config("zero");
-    env.append_config(indoc::formatdoc! {
-        "
-            [guests.zero]
-                monitor_socket_path = '{monitor_socket_path}'
-                pidfile_path = '{pidfile_path}'
-        ",
-        monitor_socket_path = monitor_socket_path,
-        pidfile_path = pidfile_path,
-    });
+    env.append_config(indoc::formatdoc! {"
+        [guests.zero]
+            monitor_socket_path = '{monitor_socket_path}'
+            pidfile_path = '{pidfile_path}'
+    "});
 
     command_macros::command!(
         {env.bin()} -c (env.config_path()) "wait-for-guest-to-shutdown" zero
@@ -57,25 +53,18 @@ fn happy_path_with_wait() {
     let flag_path = flag.path().display();
 
     env.add_guest_config("zero");
-    env.append_config(indoc::formatdoc! {
-        "
-            [guests.zero]
-                monitor_socket_path = '{monitor_socket_path}'
-                pidfile_path = '{pidfile_path}'
-        ",
-        monitor_socket_path = monitor_socket_path,
-        pidfile_path = pidfile_path,
-    });
+    env.append_config(indoc::formatdoc! {"
+        [guests.zero]
+            monitor_socket_path = '{monitor_socket_path}'
+            pidfile_path = '{pidfile_path}'
+    "});
 
     env.stub(
-        format!("pgrep --full --pidfile {} qemu", pidfile_path),
-        indoc::formatdoc! {
-            "
-                [ -e {0} ] && exit 1
-                touch {0}
-            ",
-            flag_path
-        },
+        format!("pgrep --full --pidfile {pidfile_path} qemu"),
+        indoc::formatdoc! {"
+            [ -e {flag_path} ] && exit 1
+            touch {flag_path}
+        "},
     );
 
     command_macros::command!(
@@ -86,13 +75,10 @@ fn happy_path_with_wait() {
     .stderr("")
     .stdout("");
 
-    env.assert_history(indoc::formatdoc! {
-        "
-            pgrep --full --pidfile {0} qemu
-            pgrep --full --pidfile {0} qemu
-        ",
-        pidfile_path,
-    });
+    env.assert_history(indoc::formatdoc! {"
+        pgrep --full --pidfile {pidfile_path} qemu
+        pgrep --full --pidfile {pidfile_path} qemu
+    "});
 }
 
 #[test]
@@ -146,7 +132,7 @@ fn unknown_guest() {
     .assert()
     .failure()
     .stdout("")
-    .stderr(indoc::indoc! {"
-        Error: Unknown guest `zero`
-    "});
+    .stderr(indoc::indoc! {r#"
+        Error: Unknown guest "zero"
+    "#});
 }

@@ -17,9 +17,9 @@ impl App {
         for snapshot in snapshots {
             writeln!(
                 tw,
-                "{}\t{}",
-                snapshot.id,
-                snapshot.timestamp.format("%Y-%m-%d %H:%M:%S"),
+                "{id}\t{timestamp}",
+                id = snapshot.id,
+                timestamp = snapshot.timestamp.format("%Y-%m-%d %H:%M:%S"),
             )?;
         }
         tw.flush()?;
