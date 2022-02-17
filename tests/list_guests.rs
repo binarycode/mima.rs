@@ -38,11 +38,11 @@ fn happy_path_with_aliases() {
             pidfile_path = '{zero_pidfile_path}'
     "});
 
+    env.stub_default_ok("pgrep");
     env.stub(
         format!("pgrep --full --pidfile {beta_pidfile_path} qemu"),
         "exit 1",
     );
-    env.stub_ok(format!("pgrep --full --pidfile {zero_pidfile_path} qemu"));
 
     let expected_output = indoc::indoc! {"
         ID    BOOTED  SPICE  DESCRIPTION

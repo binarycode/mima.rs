@@ -1,4 +1,5 @@
 use crate::command::Execute;
+use crate::errors::DuplicateSnapshotError;
 use crate::App;
 use anyhow::Result;
 
@@ -15,7 +16,11 @@ impl App {
         for (disk_id, disk) in disks.iter().enumerate() {
             let snapshots = self.get_disk_snapshots(guest_id, disk_id)?;
             if snapshots.contains_key(snapshot_id) {
-                anyhow::bail!("Disk {label:?} of guest {guest_id:?} already contains snapshot {snapshot_id:?}", label = disk.label);
+                anyhow::bail!(DuplicateSnapshotError::new(
+                    guest_id,
+                    &disk.label,
+                    snapshot_id
+                ));
             }
         }
 

@@ -132,7 +132,7 @@ fn unknown_guest() {
     .assert()
     .failure()
     .stdout("")
-    .stderr(indoc::indoc! {r#"
-        Error: Unknown guest "zero"
-    "#});
+    .stderr(indoc::indoc! {"
+        error: Unknown guest 'zero'
+    "});
 }

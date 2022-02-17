@@ -1,4 +1,6 @@
 use crate::command::Execute;
+use crate::errors::MonitorCommandError;
+use crate::errors::ProcessExecutionError;
 use crate::App;
 use anyhow::Result;
 use std::io::Write;
@@ -19,17 +21,21 @@ impl App {
         }
 
         if !force {
-            let monitor = command_macros::command!(
+            let mut command = command_macros::command!(
                 socat
                 -
                 UNIX-CONNECT:(guest.monitor_socket_path)
-            )
-            .stdin(Stdio::piped())
-            .stderr(Stdio::null())
-            .stdout(Stdio::null())
-            .spawn()?;
+            );
+            let monitor = command
+                .stdin(Stdio::piped())
+                .stderr(Stdio::null())
+                .stdout(Stdio::null())
+                .spawn()
+                .map_err(|_| ProcessExecutionError::new(&command))?;
             if let Some(mut stdin) = monitor.stdin {
-                writeln!(stdin, "system_powerdown")?;
+                writeln!(stdin, "system_powerdown").map_err(|_| {
+                    MonitorCommandError::new(&guest.monitor_socket_path, "system_powerdown")
+                })?;
             }
 
             let delay = Duration::from_millis(1000);

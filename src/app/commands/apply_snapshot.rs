@@ -1,4 +1,5 @@
 use crate::command::Execute;
+use crate::errors::UnknownSnapshotError;
 use crate::App;
 use anyhow::Result;
 
@@ -13,7 +14,7 @@ impl App {
 
         let snapshots = self.get_guest_snapshots(guest_id)?;
         if !snapshots.contains_key(snapshot_id) {
-            anyhow::bail!("Unknown snapshot {snapshot_id:?} for guest {guest_id:?}");
+            anyhow::bail!(UnknownSnapshotError::new(guest_id, snapshot_id));
         }
 
         let disks = self.get_guest_disks(guest_id)?;

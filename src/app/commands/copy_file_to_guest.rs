@@ -1,3 +1,4 @@
+use crate::errors::InvalidFileError;
 use crate::App;
 use anyhow::Result;
 use std::path::Path;
@@ -16,7 +17,7 @@ impl App {
         let path = path.as_ref();
 
         if !path.is_file() {
-            anyhow::bail!("{path:?} is not a file");
+            anyhow::bail!(InvalidFileError::new(path));
         }
 
         let guest_connection = self.get_guest_connection(guest_id, max_connection_timeout)?;

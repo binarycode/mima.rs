@@ -15,6 +15,7 @@ pub struct Env {
     bin_path_env: String,
     config_file: ChildPath,
     flows: HashMap<String, BTreeMap<String, String>>,
+    default_flows: HashMap<String, String>,
     history_file: ChildPath,
     tmp_dir: TempDir,
 }
@@ -40,6 +41,7 @@ impl Env {
             .unwrap();
 
         let flows = HashMap::new();
+        let default_flows = HashMap::new();
 
         let history_file = tmp_dir.child("history");
         history_file.touch().unwrap();
@@ -58,6 +60,7 @@ impl Env {
             bin_path_env,
             config_file,
             flows,
+            default_flows,
             history_file,
             tmp_dir,
         }
@@ -132,49 +135,16 @@ impl Env {
         U: AsRef<str>,
     {
         let command = command.as_ref();
-        let script = script.as_ref();
+        let script = script.as_ref().to_owned();
 
         let mut splitter = command.splitn(2, " ");
-        let bin = splitter.next().unwrap();
-        let arguments = splitter.next().unwrap();
+        let binary = splitter.next().unwrap();
+        let arguments = splitter.next().unwrap().to_owned();
 
-        let bin_flows = self.flows.entry(bin.to_owned()).or_default();
-        bin_flows.insert(arguments.to_owned(), script.to_owned());
+        let flows = self.flows.entry(binary.to_owned()).or_default();
+        flows.insert(arguments, script);
 
-        let mut scripts = String::new();
-        for (arguments, script) in bin_flows {
-            scripts.push_str(&indoc::formatdoc! {
-                r#"
-                    if [[ "$@" == "{arguments}" ]]; then
-                        echo "{bin} $@" >> {path}
-                        {script}
-                        exit 0
-                    fi
-                "#,
-                path = self.history_file.path().display(),
-            });
-        }
-
-        let bin_file = self.tmp_dir.child(bin);
-        bin_file
-            .write_str(&indoc::formatdoc! {
-                r#"
-                    #! /usr/bin/env bash
-
-                    {scripts}
-
-                    echo "ERROR: Incorrect arguments"
-                    echo "ARGS: $@"
-                    echo "HISTORY:"
-                    cat {path}
-
-                    exit 1
-                "#,
-                path = self.history_file.path().display(),
-            })
-            .unwrap();
-        let permissions = Permissions::from_mode(0o777);
-        std::fs::set_permissions(&bin_file.path(), permissions).unwrap();
+        self.write_binary_stubs(binary);
     }
 
     pub fn stub_ok<T>(&mut self, command: T)
@@ -182,6 +152,70 @@ impl Env {
         T: AsRef<str>,
     {
         self.stub(command, "")
+    }
+
+    pub fn stub_default<T, U>(&mut self, binary: T, script: U)
+    where
+        T: AsRef<str>,
+        U: AsRef<str>,
+    {
+        let binary = binary.as_ref();
+        let script = script.as_ref().to_owned();
+
+        self.default_flows.insert(binary.to_owned(), script);
+
+        self.write_binary_stubs(binary);
+    }
+
+    pub fn stub_default_ok<T>(&mut self, binary: T)
+    where
+        T: AsRef<str>,
+    {
+        self.stub_default(binary, "")
+    }
+
+    fn write_binary_stubs<T>(&self, binary: T)
+    where
+        T: AsRef<str>,
+    {
+        let binary = binary.as_ref();
+
+        let history_path = self.history_file.path().display();
+
+        let mut script = "#! /usr/bin/env bash\n".to_owned();
+
+        if let Some(flows) = self.flows.get(binary) {
+            for (arguments, flow_script) in flows {
+                script.push_str(&indoc::formatdoc! {r#"
+                    if [[ "$@" == "{arguments}" ]]; then
+                        echo "{binary} $@" >> {history_path}
+                        {flow_script}
+                        exit 0
+                    fi
+                "#});
+            }
+        }
+
+        if let Some(flow_script) = self.default_flows.get(binary) {
+            script.push_str(&indoc::formatdoc! {r#"
+                echo "{binary} $@" >> {history_path}
+                {flow_script}
+            "#});
+        } else {
+            script.push_str(&indoc::formatdoc! {r#"
+                echo "ERROR: Incorrect arguments"
+                echo "ARGS: $@"
+                echo "HISTORY:"
+                cat {history_path}
+
+                exit 1
+            "#});
+        }
+
+        let file = self.tmp_dir.child(binary);
+        file.write_str(&script).unwrap();
+        let permissions = Permissions::from_mode(0o777);
+        std::fs::set_permissions(&file.path(), permissions).unwrap();
     }
 
     pub fn assert_history<I, P>(&self, pred: I)

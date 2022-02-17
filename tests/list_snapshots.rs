@@ -558,9 +558,9 @@ fn unknown_guest() {
     .assert()
     .failure()
     .stdout("")
-    .stderr(indoc::indoc! {r#"
-        Error: Unknown guest "zero"
-    "#});
+    .stderr(indoc::indoc! {"
+        error: Unknown guest 'zero'
+    "});
 }
 
 #[test]
@@ -592,15 +592,13 @@ fn list_snapshots_failure() {
     .assert()
     .failure()
     .stdout("")
-    .stderr(indoc::formatdoc! {r#"
-        Error: Failed to run "qemu-img" "info" "--force-share" "--output=json" "{sda_path}"
+    .stderr(indoc::formatdoc! {"
+        error: Failed to run 'qemu-img info --force-share --output=json {sda_path}'
+
         stdout:
         qemu-img: Could not open {sda_path}: Could not open '{sda_path}': No such file or directory
 
-        stderr:
-
-
-    "#});
+    "});
 
     env.assert_history(indoc::formatdoc! {"
         qemu-img info --force-share --output=json {sda_path}

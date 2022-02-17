@@ -13,16 +13,17 @@ impl App {
         let snapshots = snapshots;
 
         let mut tw = TabWriter::new(std::io::stdout());
-        writeln!(tw, "ID\tTIMESTAMP")?;
+        writeln!(tw, "ID\tTIMESTAMP").unwrap();
         for snapshot in snapshots {
             writeln!(
                 tw,
                 "{id}\t{timestamp}",
                 id = snapshot.id,
                 timestamp = snapshot.timestamp.format("%Y-%m-%d %H:%M:%S"),
-            )?;
+            )
+            .unwrap();
         }
-        tw.flush()?;
+        tw.flush().unwrap();
 
         Ok(())
     }

@@ -1,4 +1,7 @@
-use anyhow::Context;
+use crate::errors::CommandExecutionFailedError;
+use crate::errors::ParseCommandOutputError;
+use crate::errors::ParseStreamError;
+use crate::errors::ProcessExecutionError;
 use anyhow::Result;
 use serde::de::DeserializeOwned;
 use std::process::Command;
@@ -12,19 +15,15 @@ impl Execute for Command {
     fn execute(&mut self) -> Result<String> {
         let output = self
             .output()
-            .with_context(|| format!("Failed to run {self:?}"))?;
+            .map_err(|_| ProcessExecutionError::new(self))?;
 
-        let stdout = String::from_utf8(output.stdout).context("Failed to parse stdout")?;
-        let stderr = String::from_utf8(output.stderr).context("Failed to parse stderr")?;
+        let stdout =
+            String::from_utf8(output.stdout).map_err(|_| ParseStreamError::new("stdout"))?;
+        let stderr =
+            String::from_utf8(output.stderr).map_err(|_| ParseStreamError::new("stderr"))?;
 
         if !output.status.success() {
-            anyhow::bail!(indoc::formatdoc! {"
-                Failed to run {self:?}
-                stdout:
-                {stdout}
-                stderr:
-                {stderr}
-            "});
+            anyhow::bail!(CommandExecutionFailedError::new(self, stdout, stderr));
         }
 
         Ok(stdout)
@@ -32,13 +31,8 @@ impl Execute for Command {
 
     fn execute_and_parse_json_output<T: DeserializeOwned>(&mut self) -> Result<T> {
         let stdout = self.execute()?;
-        let value = serde_json::from_str(&stdout).with_context(|| {
-            indoc::formatdoc! {"
-                Failed to parse output of {self:?}
-                stdout:
-                {stdout}
-            "}
-        })?;
+        let value = serde_json::from_str(&stdout)
+            .map_err(|_| ParseCommandOutputError::new(self, stdout))?;
 
         Ok(value)
     }

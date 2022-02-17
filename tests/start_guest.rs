@@ -20,7 +20,7 @@ fn simple_happy_path_with_aliases() {
             pidfile_path = '/tmp/zero.pid'
     "});
 
-    env.stub_ok("qemu-system-x86_64 -name zero -machine q35,accel=kvm -cpu host -m 8192M -smp 4 -no-user-config -nodefaults -daemonize -runas nobody -monitor unix:/tmp/zero.socket,server,nowait -pidfile /tmp/zero.pid -vga std -spice port=5901,disable-ticketing=on -object iothread,id=iothread1 -device virtio-scsi-pci-non-transitional,iothread=iothread1");
+    env.stub_default_ok("qemu-system-x86_64");
 
     command_macros::command!(
         {env.bin()} -c (env.config_path()) start-guest zero
@@ -70,7 +70,7 @@ fn setting_pidfile_permissions() {
             pidfile_path = '{pidfile_path}'
     "});
 
-    env.stub_ok(format!("qemu-system-x86_64 -name zero -machine q35,accel=kvm -cpu host -m 8192M -smp 4 -no-user-config -nodefaults -daemonize -runas nobody -monitor unix:/tmp/zero.socket,server,nowait -pidfile {pidfile_path} -vga std -spice port=5901,disable-ticketing=on -object iothread,id=iothread1 -device virtio-scsi-pci-non-transitional,iothread=iothread1"));
+    env.stub_default_ok("qemu-system-x86_64");
 
     command_macros::command!(
         {env.bin()} -c (env.config_path()) start-guest zero
@@ -114,11 +114,8 @@ fn happy_path_with_complex_configuration() {
             ]
     "});
 
-    env.stub_ok("qemu-system-x86_64 -name zero -machine q35,accel=kvm -cpu host -m 8192M -smp 4 -no-user-config -nodefaults -daemonize -runas nobody -monitor unix:/tmp/zero.socket,server,nowait -pidfile /tmp/zero.pid -vga std -spice port=5901,disable-ticketing=on -object iothread,id=iothread1 -device virtio-scsi-pci-non-transitional,iothread=iothread1 -device virtio-net-pci-non-transitional,netdev=network.mima-pub-zero,mac=52:54:00:00:00:10 -netdev tap,id=network.mima-pub-zero,ifname=mima-pub-zero,script=no,downscript=no -device virtio-net-pci-non-transitional,netdev=network.mima-mgt-zero,mac=52:54:00:00:09:10 -netdev tap,id=network.mima-mgt-zero,ifname=mima-mgt-zero,script=no,downscript=no -device e1000e,netdev=network.mima-san0-zero,mac=52:54:00:00:0A:10 -netdev tap,id=network.mima-san0-zero,ifname=mima-san0-zero,script=no,downscript=no -device e1000e,netdev=network.mima-san1-zero,mac=52:54:00:01:0A:10 -netdev tap,id=network.mima-san1-zero,ifname=mima-san1-zero,script=no,downscript=no -device scsi-hd,drive=drive.sda -drive if=none,id=drive.sda,format=qcow2,file=/tmp/zero.sda.qcow2 -device scsi-hd,drive=drive.sdb -drive if=none,id=drive.sdb,format=qcow2,file=/tmp/zero.sdb.qcow2 -boot d -device scsi-cd,drive=drive.cd0 -drive if=none,id=drive.cd0,format=raw,media=cdrom,file=/tmp/centos7.iso -drive if=floppy,id=drive.fd0,format=raw,file=fat:floppy:rw:/tmp/zero.ks");
-    env.stub_ok("ip link set mima-pub-zero master mima-pub up");
-    env.stub_ok("ip link set mima-mgt-zero master mima-mgt up");
-    env.stub_ok("ip link set mima-san0-zero master mima-san up");
-    env.stub_ok("ip link set mima-san1-zero master mima-san up");
+    env.stub_default_ok("qemu-system-x86_64");
+    env.stub_default_ok("ip");
 
     command_macros::command!(
         {env.bin()} -c (env.config_path()) start-guest zero --cdrom /tmp/centos7.iso --floppy /tmp/zero.ks
@@ -156,7 +153,7 @@ fn noop_when_guest_is_already_running() {
             pidfile_path = '{pidfile_path}'
     "});
 
-    env.stub_ok(format!("pgrep --full --pidfile {pidfile_path} qemu"));
+    env.stub_default_ok("pgrep");
 
     command_macros::command!(
         {env.bin()} -c (env.config_path()) start-guest zero
@@ -189,7 +186,7 @@ fn pidfile_parent_dir_creation() {
             pidfile_path = '{pidfile_path}'
     "});
 
-    env.stub_ok(format!("qemu-system-x86_64 -name zero -machine q35,accel=kvm -cpu host -m 8192M -smp 4 -no-user-config -nodefaults -daemonize -runas nobody -monitor unix:/tmp/zero.socket,server,nowait -pidfile {pidfile_path} -vga std -spice port=5901,disable-ticketing=on -object iothread,id=iothread1 -device virtio-scsi-pci-non-transitional,iothread=iothread1"));
+    env.stub_default_ok("qemu-system-x86_64");
 
     pidfile_parent_dir.assert(predicate::path::missing());
 
@@ -229,7 +226,7 @@ fn monitor_socket_parent_dir_creation() {
             pidfile_path = '/tmp/zero.pid'
     "});
 
-    env.stub_ok(format!("qemu-system-x86_64 -name zero -machine q35,accel=kvm -cpu host -m 8192M -smp 4 -no-user-config -nodefaults -daemonize -runas nobody -monitor unix:{monitor_socket_path},server,nowait -pidfile /tmp/zero.pid -vga std -spice port=5901,disable-ticketing=on -object iothread,id=iothread1 -device virtio-scsi-pci-non-transitional,iothread=iothread1"));
+    env.stub_default_ok("qemu-system-x86_64");
 
     monitor_socket_parent_dir.assert(predicate::path::missing());
 
@@ -306,9 +303,9 @@ fn unknown_guest() {
     .assert()
     .failure()
     .stdout("")
-    .stderr(indoc::indoc! {r#"
-        Error: Unknown guest "zero"
-    "#});
+    .stderr(indoc::indoc! {"
+        error: Unknown guest 'zero'
+    "});
 }
 
 #[test]
@@ -326,8 +323,8 @@ fn guest_start_failure() {
     "});
 
     // TODO: real failure output
-    env.stub(
-        "qemu-system-x86_64 -name zero -machine q35,accel=kvm -cpu host -m 8192M -smp 4 -no-user-config -nodefaults -daemonize -runas nobody -monitor unix:/tmp/zero.socket,server,nowait -pidfile /tmp/zero.pid -vga std -spice port=5901,disable-ticketing=on -object iothread,id=iothread1 -device virtio-scsi-pci-non-transitional,iothread=iothread1",
+    env.stub_default(
+        "qemu-system-x86_64",
         indoc::indoc! {"
             echo 'foobar'
             exit 1
@@ -340,15 +337,13 @@ fn guest_start_failure() {
     .assert()
     .failure()
     .stdout("")
-    .stderr(indoc::indoc! {r#"
-        Error: Failed to run "qemu-system-x86_64" "-name" "zero" "-machine" "q35,accel=kvm" "-cpu" "host" "-m" "8192M" "-smp" "4" "-no-user-config" "-nodefaults" "-daemonize" "-runas" "nobody" "-monitor" "unix:/tmp/zero.socket,server,nowait" "-pidfile" "/tmp/zero.pid" "-vga" "std" "-spice" "port=5901,disable-ticketing=on" "-object" "iothread,id=iothread1" "-device" "virtio-scsi-pci-non-transitional,iothread=iothread1"
+    .stderr(indoc::indoc! {"
+        error: Failed to run 'qemu-system-x86_64 -name zero -machine q35,accel=kvm -cpu host -m 8192M -smp 4 -no-user-config -nodefaults -daemonize -runas nobody -monitor unix:/tmp/zero.socket,server,nowait -pidfile /tmp/zero.pid -vga std -spice port=5901,disable-ticketing=on -object iothread,id=iothread1 -device virtio-scsi-pci-non-transitional,iothread=iothread1'
+
         stdout:
         foobar
 
-        stderr:
-
-
-    "#});
+    "});
 
     env.assert_history(indoc::indoc! {"
         qemu-system-x86_64 -name zero -machine q35,accel=kvm -cpu host -m 8192M -smp 4 -no-user-config -nodefaults -daemonize -runas nobody -monitor unix:/tmp/zero.socket,server,nowait -pidfile /tmp/zero.pid -vga std -spice port=5901,disable-ticketing=on -object iothread,id=iothread1 -device virtio-scsi-pci-non-transitional,iothread=iothread1
@@ -377,8 +372,8 @@ fn iproute_failure() {
             ]
     "});
 
-    env.stub_ok("qemu-system-x86_64 -name zero -machine q35,accel=kvm -cpu host -m 8192M -smp 4 -no-user-config -nodefaults -daemonize -runas nobody -monitor unix:/tmp/zero.socket,server,nowait -pidfile /tmp/zero.pid -vga std -spice port=5901,disable-ticketing=on -object iothread,id=iothread1 -device virtio-scsi-pci-non-transitional,iothread=iothread1 -device virtio-net-pci-non-transitional,netdev=network.mima-pub-zero,mac=52:54:00:00:00:10 -netdev tap,id=network.mima-pub-zero,ifname=mima-pub-zero,script=no,downscript=no -device virtio-net-pci-non-transitional,netdev=network.mima-mgt-zero,mac=52:54:00:00:09:10 -netdev tap,id=network.mima-mgt-zero,ifname=mima-mgt-zero,script=no,downscript=no");
-    env.stub_ok("ip link set mima-pub-zero master mima-pub up");
+    env.stub_default_ok("qemu-system-x86_64");
+    env.stub_default_ok("ip");
     // TODO: real failure output
     env.stub(
         "ip link set mima-mgt-zero master mima-mgt up",
@@ -394,15 +389,13 @@ fn iproute_failure() {
     .assert()
     .failure()
     .stdout("")
-    .stderr(indoc::indoc! {r#"
-        Error: Failed to run "ip" "link" "set" "mima-mgt-zero" "master" "mima-mgt" "up"
+    .stderr(indoc::indoc! {"
+        error: Failed to run 'ip link set mima-mgt-zero master mima-mgt up'
+
         stdout:
         foobar
 
-        stderr:
-
-
-    "#});
+    "});
 
     env.assert_history(indoc::indoc! {"
         qemu-system-x86_64 -name zero -machine q35,accel=kvm -cpu host -m 8192M -smp 4 -no-user-config -nodefaults -daemonize -runas nobody -monitor unix:/tmp/zero.socket,server,nowait -pidfile /tmp/zero.pid -vga std -spice port=5901,disable-ticketing=on -object iothread,id=iothread1 -device virtio-scsi-pci-non-transitional,iothread=iothread1 -device virtio-net-pci-non-transitional,netdev=network.mima-pub-zero,mac=52:54:00:00:00:10 -netdev tap,id=network.mima-pub-zero,ifname=mima-pub-zero,script=no,downscript=no -device virtio-net-pci-non-transitional,netdev=network.mima-mgt-zero,mac=52:54:00:00:09:10 -netdev tap,id=network.mima-mgt-zero,ifname=mima-mgt-zero,script=no,downscript=no

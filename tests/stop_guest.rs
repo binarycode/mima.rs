@@ -56,10 +56,7 @@ fn happy_path_when_the_guest_is_not_running() {
             pidfile_path = '{pidfile_path}'
     "});
 
-    env.stub(
-        format!("pgrep --full --pidfile {pidfile_path} qemu"),
-        "exit 1",
-    );
+    env.stub_default("pgrep", "exit 1");
 
     command_macros::command!(
         {env.bin()} -c (env.config_path()) stop-guest zero
@@ -93,8 +90,8 @@ fn happy_path_with_force_flag() {
             pidfile_path = '{pidfile_path}'
     "});
 
-    env.stub_ok(format!("pgrep --full --pidfile {pidfile_path} qemu"));
-    env.stub_ok(format!("pkill --full --pidfile {pidfile_path} qemu"));
+    env.stub_default_ok("pgrep");
+    env.stub_default_ok("pkill");
 
     command_macros::command!(
         {env.bin()} -c (env.config_path()) stop-guest --force zero
@@ -140,7 +137,6 @@ fn happy_path_with_soft_shutdown() {
         format!("socat - UNIX-CONNECT:{monitor_socket_path}"),
         format!("touch {flag_path}"),
     );
-    env.stub_ok(format!("pkill --full --pidfile {pidfile_path} qemu"));
 
     command_macros::command!(
         {env.bin()} -c (env.config_path()) stop-guest zero
@@ -176,9 +172,9 @@ fn happy_path_with_soft_shutdown_timeout() {
             pidfile_path = '{pidfile_path}'
     "});
 
-    env.stub_ok(format!("pgrep --full --pidfile {pidfile_path} qemu"));
-    env.stub_ok(format!("socat - UNIX-CONNECT:{monitor_socket_path}"));
-    env.stub_ok(format!("pkill --full --pidfile {pidfile_path} qemu"));
+    env.stub_default_ok("pgrep");
+    env.stub_default_ok("pkill");
+    env.stub_default_ok("socat");
 
     command_macros::command!(
         {env.bin()} -c (env.config_path()) stop-guest --wait 1 zero
@@ -247,9 +243,9 @@ fn unknown_guest() {
     .assert()
     .failure()
     .stdout("")
-    .stderr(indoc::indoc! {r#"
-        Error: Unknown guest "zero"
-    "#});
+    .stderr(indoc::indoc! {"
+        error: Unknown guest 'zero'
+    "});
 }
 
 #[test]
@@ -271,7 +267,7 @@ fn pkill_failure() {
             pidfile_path = '{pidfile_path}'
     "});
 
-    env.stub_ok(format!("pgrep --full --pidfile {pidfile_path} qemu"));
+    env.stub_default_ok("pgrep");
     // TODO: real failure output
     env.stub(
         format!("pkill --full --pidfile {pidfile_path} qemu"),
@@ -287,15 +283,13 @@ fn pkill_failure() {
     .assert()
     .failure()
     .stdout("")
-    .stderr(indoc::formatdoc! {r#"
-        Error: Failed to run "pkill" "--full" "--pidfile" "{pidfile_path}" "qemu"
+    .stderr(indoc::formatdoc! {"
+        error: Failed to run 'pkill --full --pidfile {pidfile_path} qemu'
+
         stdout:
         foobar
 
-        stderr:
-
-
-    "#});
+    "});
 
     env.assert_history(indoc::formatdoc! {"
         pgrep --full --pidfile {pidfile_path} qemu

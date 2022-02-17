@@ -1,7 +1,13 @@
 mod commands;
 
 use crate::command::Execute;
-use anyhow::Context;
+use crate::errors::MissingDependenciesError;
+use crate::errors::MissingIPAddressConfigurationError;
+use crate::errors::ParseConfigurationError;
+use crate::errors::ProcessExecutionError;
+use crate::errors::ReadConfigurationError;
+use crate::errors::UnknownGuestError;
+use crate::errors::UnknownNetworkError;
 use anyhow::Result;
 use chrono::NaiveDateTime;
 use serde::Deserialize;
@@ -71,10 +77,11 @@ impl App {
     {
         let path = path.as_ref();
 
-        let config = std::fs::read_to_string(path)
-            .with_context(|| format!("Failed to read configuration from {path:?}"))?;
-        let app = toml::from_str::<Self>(&config)
-            .with_context(|| format!("Failed to parse configuration in {path:?}"))?;
+        let config =
+            std::fs::read_to_string(path).map_err(|_| ReadConfigurationError::new(path))?;
+
+        let app =
+            toml::from_str::<Self>(&config).map_err(|_| ParseConfigurationError::new(path))?;
 
         let mut binaries = vec![
             "ip",
@@ -97,7 +104,7 @@ impl App {
             }
         });
         if !binaries.is_empty() {
-            anyhow::bail!("Dependency missing: {}", binaries.join(", "));
+            anyhow::bail!(MissingDependenciesError::new(binaries));
         }
 
         Ok(app)
@@ -111,7 +118,9 @@ impl App {
     where
         T: AsRef<str>,
     {
-        let disk = self.get_guest_disk(guest_id, disk_id)?;
+        // we receive disk by index, not by label, so we can be sure it exists
+        // so we can use unwrap here
+        let disk = self.get_guest_disks(guest_id)?.get(disk_id).unwrap();
 
         #[derive(Deserialize)]
         struct QemuImgInfo {
@@ -162,7 +171,7 @@ impl App {
 
         match self.guests.get(guest_id) {
             Some(guest) => Ok(guest),
-            None => anyhow::bail!("Unknown guest {guest_id:?}"),
+            None => anyhow::bail!(UnknownGuestError::new(guest_id)),
         }
     }
 
@@ -180,20 +189,7 @@ impl App {
 
         match &guest.ip_address {
             Some(ip_address) => GuestConnection::new(ip_address, max_connection_timeout),
-            None => anyhow::bail!("IP address is not configured for guest {guest_id:?}"),
-        }
-    }
-
-    pub fn get_guest_disk<T>(&self, guest_id: T, disk_id: usize) -> Result<&Disk>
-    where
-        T: AsRef<str>,
-    {
-        let guest_id = guest_id.as_ref();
-
-        let disks = self.get_guest_disks(guest_id)?;
-        match disks.get(disk_id) {
-            Some(disk) => Ok(disk),
-            None => anyhow::bail!("Unknown disk {disk_id:?} for guest {guest_id:?}"),
+            None => anyhow::bail!(MissingIPAddressConfigurationError::new(guest_id)),
         }
     }
 
@@ -250,7 +246,7 @@ impl App {
 
         match self.networks.get(network_id) {
             Some(network) => Ok(network),
-            None => anyhow::bail!("Unknown network {network_id:?}"),
+            None => anyhow::bail!(UnknownNetworkError::new(network_id)),
         }
     }
 }
@@ -261,15 +257,17 @@ impl Guest {
             return Ok(false);
         }
 
-        let status = command_macros::command!(
+        let mut command = command_macros::command!(
             pgrep
             --full
             --pidfile (self.pidfile_path)
             qemu
-        )
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()?;
+        );
+        let status = command
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .status()
+            .map_err(|_| ProcessExecutionError::new(&command))?;
 
         Ok(status.success())
     }

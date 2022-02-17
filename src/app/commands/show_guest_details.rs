@@ -14,7 +14,7 @@ impl App {
 
         let mut tw = TabWriter::new(std::io::stdout());
 
-        writeln!(tw, "GUEST\tID\tBOOTED\tSPICE\tMEMORY\tCORES\tDESCRIPTION")?;
+        writeln!(tw, "GUEST\tID\tBOOTED\tSPICE\tMEMORY\tCORES\tDESCRIPTION").unwrap();
         writeln!(
             tw,
             "\t{guest_id}\t{booted}\t{spice_port}\t{memory}\t{cores}\t{description}",
@@ -23,11 +23,12 @@ impl App {
             description = guest.description,
             memory = guest.memory,
             spice_port = guest.spice_port,
-        )?;
-        writeln!(tw)?;
-        tw.flush()?;
+        )
+        .unwrap();
+        writeln!(tw).unwrap();
+        tw.flush().unwrap();
 
-        writeln!(tw, "DISKS\tLABEL\tSIZE\tPATH")?;
+        writeln!(tw, "DISKS\tLABEL\tSIZE\tPATH").unwrap();
         for disk in &guest.disks {
             writeln!(
                 tw,
@@ -35,12 +36,13 @@ impl App {
                 label = disk.label,
                 path = disk.path.display(),
                 size = disk.size,
-            )?;
+            )
+            .unwrap();
         }
-        writeln!(tw)?;
-        tw.flush()?;
+        writeln!(tw).unwrap();
+        tw.flush().unwrap();
 
-        writeln!(tw, "NETWORK INTERFACES\tNETWORK\tMODEL\tMAC\tTAP")?;
+        writeln!(tw, "NETWORK INTERFACES\tNETWORK\tMODEL\tMAC\tTAP").unwrap();
         for network_interface in &guest.network_interfaces {
             writeln!(
                 tw,
@@ -49,9 +51,10 @@ impl App {
                 mac_address = network_interface.mac_address,
                 model = network_interface.model,
                 tap_name = network_interface.tap_name,
-            )?;
+            )
+            .unwrap();
         }
-        tw.flush()?;
+        tw.flush().unwrap();
 
         Ok(())
     }

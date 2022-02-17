@@ -18,10 +18,7 @@ fn happy_path_with_aliases() {
             ]
     "});
 
-    env.stub_ok(format!(
-        "qemu-img create -q -fqcow2 -olazy_refcounts=on -opreallocation=metadata {sda_path} 20G"
-    ));
-    env.stub_ok(format!("qemu-img snapshot -croot {sda_path}"));
+    env.stub_default_ok("qemu-img");
 
     command_macros::command!(
         {env.bin()} -c (env.config_path()) initialize-guest zero
@@ -78,14 +75,7 @@ fn happy_path_with_multiple_disks() {
             ]
     "});
 
-    env.stub_ok(format!(
-        "qemu-img create -q -fqcow2 -olazy_refcounts=on -opreallocation=metadata {sda_path} 20G"
-    ));
-    env.stub_ok(format!(
-        "qemu-img create -q -fqcow2 -olazy_refcounts=on -opreallocation=metadata {sdb_path} 100G"
-    ));
-    env.stub_ok(format!("qemu-img snapshot -croot {sda_path}"));
-    env.stub_ok(format!("qemu-img snapshot -croot {sdb_path}"));
+    env.stub_default_ok("qemu-img");
 
     command_macros::command!(
         {env.bin()} -c (env.config_path()) initialize-guest zero
@@ -181,9 +171,9 @@ fn unknown_guest() {
     .assert()
     .failure()
     .stdout("")
-    .stderr(indoc::indoc! {r#"
-        Error: Unknown guest "zero"
-    "#});
+    .stderr(indoc::indoc! {"
+        error: Unknown guest 'zero'
+    "});
 }
 
 #[test]
@@ -215,15 +205,13 @@ fn disk_creation_failure() {
     .assert()
     .failure()
     .stdout("")
-    .stderr(indoc::formatdoc! {r#"
-        Error: Failed to run "qemu-img" "create" "-q" "-fqcow2" "-olazy_refcounts=on" "-opreallocation=metadata" "{sda_path}" "20G"
+    .stderr(indoc::formatdoc! {"
+        error: Failed to run 'qemu-img create -q -fqcow2 -olazy_refcounts=on -opreallocation=metadata {sda_path} 20G'
+
         stdout:
         qemu-img: {sda_path}: Could not create '{sda_path}': No such file or directory
 
-        stderr:
-
-
-    "#});
+    "});
 
     env.assert_history(indoc::formatdoc! {"
         qemu-img create -q -fqcow2 -olazy_refcounts=on -opreallocation=metadata {sda_path} 20G
@@ -245,9 +233,7 @@ fn snapshot_creation_failure() {
             ]
     "});
 
-    env.stub_ok(format!(
-        "qemu-img create -q -fqcow2 -olazy_refcounts=on -opreallocation=metadata {sda_path} 20G"
-    ));
+    env.stub_default_ok("qemu-img");
     env.stub(
         format!("qemu-img snapshot -croot {sda_path}"),
         indoc::formatdoc! {r#"
@@ -264,13 +250,11 @@ fn snapshot_creation_failure() {
     .failure()
     .stdout("")
     .stderr(indoc::formatdoc! {r#"
-        Error: Failed to run "qemu-img" "snapshot" "-croot" "{sda_path}"
+        error: Failed to run 'qemu-img snapshot -croot {sda_path}'
+
         stdout:
         qemu-img: Could not open '{sda_path}': Failed to get "write" lock
         Is another process using the image [{sda_path}]?
-
-        stderr:
-
 
     "#});
 

@@ -1,6 +1,7 @@
 use crate::command::Execute;
+use crate::errors::ParentFolderCreationError;
+use crate::errors::SetPermissionsError;
 use crate::App;
-use anyhow::Context;
 use anyhow::Result;
 use std::fs::Permissions;
 use std::os::unix::fs::PermissionsExt;
@@ -74,7 +75,8 @@ impl App {
 
         if guest.pidfile_path.exists() {
             let permissions = Permissions::from_mode(0o644);
-            std::fs::set_permissions(&guest.pidfile_path, permissions)?;
+            std::fs::set_permissions(&guest.pidfile_path, permissions.clone())
+                .map_err(|_| SetPermissionsError::new(&guest.pidfile_path, permissions))?;
         }
 
         Ok(())
@@ -90,10 +92,11 @@ where
     if let Some(parent_path) = path.parent() {
         if !parent_path.exists() {
             std::fs::create_dir_all(parent_path)
-                .with_context(|| format!("Failed to create parent folder for {path:?}"))?;
+                .map_err(|_| ParentFolderCreationError::new(path, parent_path))?;
 
             let permissions = Permissions::from_mode(0o755);
-            std::fs::set_permissions(parent_path, permissions)?;
+            std::fs::set_permissions(parent_path, permissions.clone())
+                .map_err(|_| SetPermissionsError::new(parent_path, permissions))?;
         }
     }
 

@@ -1,6 +1,6 @@
 use crate::command::Execute;
+use crate::errors::ParentFolderCreationError;
 use crate::App;
-use anyhow::Context;
 use anyhow::Result;
 
 impl App {
@@ -20,7 +20,7 @@ impl App {
 
             if let Some(parent_path) = path.parent() {
                 std::fs::create_dir_all(parent_path)
-                    .with_context(|| format!("Failed to create parent folder for disk {path:?}"))?;
+                    .map_err(|_| ParentFolderCreationError::new(path, parent_path))?;
             }
 
             command_macros::command!(

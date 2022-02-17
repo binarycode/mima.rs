@@ -17,7 +17,7 @@ fn happy_path() {
             ]
     "});
 
-    env.stub_ok(format!("qemu-img snapshot -droot {sda_path}"));
+    env.stub_default_ok("qemu-img");
 
     command_macros::command!(
         {env.bin()} -c (env.config_path()) delete-snapshot zero root
@@ -51,8 +51,7 @@ fn multiple_disks() {
             ]
     "});
 
-    env.stub_ok(format!("qemu-img snapshot -droot {sda_path}"));
-    env.stub_ok(format!("qemu-img snapshot -droot {sdb_path}"));
+    env.stub_default_ok("qemu-img");
 
     command_macros::command!(
         {env.bin()} -c (env.config_path()) delete-snapshot zero root
@@ -141,9 +140,9 @@ fn unknown_guest() {
     .assert()
     .failure()
     .stdout("")
-    .stderr(indoc::indoc! {r#"
-        Error: Unknown guest "zero"
-    "#});
+    .stderr(indoc::indoc! {"
+        error: Unknown guest 'zero'
+    "});
 }
 
 #[test]
@@ -177,13 +176,11 @@ fn snapshot_removal_failure() {
     .failure()
     .stdout("")
     .stderr(indoc::formatdoc! {r#"
-        Error: Failed to run "qemu-img" "snapshot" "-droot" "{sda_path}"
+        error: Failed to run 'qemu-img snapshot -droot {sda_path}'
+
         stdout:
         qemu-img: Could not open '{sda_path}': Failed to get "write" lock
         Is another process using the image [{sda_path}]?
-
-        stderr:
-
 
     "#});
 

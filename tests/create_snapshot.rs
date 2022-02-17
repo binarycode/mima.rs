@@ -17,6 +17,7 @@ fn happy_path_with_aliases() {
             ]
     "});
 
+    env.stub_default_ok("qemu-img");
     env.stub(
         format!("qemu-img info --force-share --output=json {sda_path}"),
         indoc::indoc! {r#"
@@ -55,7 +56,6 @@ fn happy_path_with_aliases() {
             '
         "#},
     );
-    env.stub_ok(format!("qemu-img snapshot -cdev {sda_path}"));
 
     command_macros::command!(
         {env.bin()} -c (env.config_path()) create-snapshot zero dev
@@ -102,6 +102,7 @@ fn common_snapshots_for_multiple_disks() {
             ]
     "});
 
+    env.stub_default_ok("qemu-img");
     env.stub(
         format!("qemu-img info --force-share --output=json {sda_path}"),
         indoc::indoc! {r#"
@@ -178,8 +179,6 @@ fn common_snapshots_for_multiple_disks() {
             '
         "#},
     );
-    env.stub_ok(format!("qemu-img snapshot -cdev {sda_path}"));
-    env.stub_ok(format!("qemu-img snapshot -cdev {sdb_path}"));
 
     command_macros::command!(
         {env.bin()} -c (env.config_path()) create-snapshot zero dev
@@ -309,9 +308,9 @@ fn snapshot_already_exists_failure() {
     .assert()
     .failure()
     .stdout("")
-    .stderr(indoc::indoc! {r#"
-        Error: Disk "sdb" of guest "zero" already contains snapshot "centos7"
-    "#});
+    .stderr(indoc::indoc! {"
+        error: Disk 'sdb' of guest 'zero' already contains snapshot 'centos7'
+    "});
 
     env.assert_history(indoc::formatdoc! {"
         qemu-img info --force-share --output=json {sda_path}
@@ -392,9 +391,9 @@ fn unknown_guest() {
     .assert()
     .failure()
     .stdout("")
-    .stderr(indoc::indoc! {r#"
-        Error: Unknown guest "zero"
-    "#});
+    .stderr(indoc::indoc! {"
+        error: Unknown guest 'zero'
+    "});
 }
 
 #[test]
@@ -426,15 +425,13 @@ fn list_snapshots_failure() {
     .assert()
     .failure()
     .stdout("")
-    .stderr(indoc::formatdoc! {r#"
-        Error: Failed to run "qemu-img" "info" "--force-share" "--output=json" "{sda_path}"
+    .stderr(indoc::formatdoc! {"
+        error: Failed to run 'qemu-img info --force-share --output=json {sda_path}'
+
         stdout:
         qemu-img: Could not open {sda_path}: Could not open '{sda_path}': No such file or directory
 
-        stderr:
-
-
-    "#});
+    "});
 
     env.assert_history(indoc::formatdoc! {"
         qemu-img info --force-share --output=json {sda_path}
@@ -510,13 +507,11 @@ fn create_snapshot_failure() {
     .failure()
     .stdout("")
     .stderr(indoc::formatdoc! {r#"
-        Error: Failed to run "qemu-img" "snapshot" "-cdev" "{sda_path}"
+        error: Failed to run 'qemu-img snapshot -cdev {sda_path}'
+
         stdout:
         qemu-img: Could not open '{sda_path}': Failed to get "write" lock
         Is another process using the image [{sda_path}]?
-
-        stderr:
-
 
     "#});
 

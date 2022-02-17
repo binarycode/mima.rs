@@ -38,7 +38,7 @@ fn happy_path_with_aliases() {
             ]
     "});
 
-    env.stub_ok(format!("pgrep --full --pidfile {pidfile_path} qemu"));
+    env.stub_default_ok("pgrep");
 
     let expected_output = indoc::indoc! {"
         GUEST  ID    BOOTED  SPICE  MEMORY  CORES  DESCRIPTION
@@ -139,7 +139,7 @@ fn unknown_guest() {
     .assert()
     .failure()
     .stdout("")
-    .stderr(indoc::indoc! {r#"
-        Error: Unknown guest "zero"
-    "#});
+    .stderr(indoc::indoc! {"
+        error: Unknown guest 'zero'
+    "});
 }

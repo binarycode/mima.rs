@@ -6,7 +6,7 @@ use tabwriter::TabWriter;
 impl App {
     pub fn list_guests(&self) -> Result<()> {
         let mut tw = TabWriter::new(std::io::stdout());
-        writeln!(tw, "ID\tBOOTED\tSPICE\tDESCRIPTION")?;
+        writeln!(tw, "ID\tBOOTED\tSPICE\tDESCRIPTION").unwrap();
         for (id, guest) in &self.guests {
             writeln!(
                 tw,
@@ -14,9 +14,10 @@ impl App {
                 booted = guest.is_booted()?,
                 description = guest.description,
                 spice_port = guest.spice_port,
-            )?;
+            )
+            .unwrap();
         }
-        tw.flush()?;
+        tw.flush().unwrap();
 
         Ok(())
     }

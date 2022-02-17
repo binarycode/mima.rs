@@ -1,9 +1,13 @@
+#![feature(backtrace)]
+
 use anyhow::Result;
 use clap::AppSettings::DeriveDisplayOrder;
 use clap::AppSettings::DisableVersionFlag;
 use clap::AppSettings::PropagateVersion;
 use clap::Parser;
+use colored::*;
 use mima::App;
+use std::backtrace::BacktraceStatus::Captured as BacktraceCaptured;
 use std::path::PathBuf;
 
 #[derive(Parser)]
@@ -164,8 +168,23 @@ enum Command {
     },
 }
 
-fn main() -> Result<()> {
+fn main() {
     let options = Options::parse();
+
+    if let Err(error) = run(options) {
+        eprintln!("{} {}", "error:".red().bold(), error);
+
+        let backtrace = error.backtrace();
+        if backtrace.status() == BacktraceCaptured {
+            let backtrace = format!("{}", backtrace).red();
+            eprintln!("\n{}", backtrace);
+        }
+
+        std::process::exit(1);
+    }
+}
+
+fn run(options: Options) -> Result<()> {
     let app = App::new(&options.config_path)?;
 
     match options.command {
