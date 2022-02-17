@@ -2,18 +2,18 @@ use anyhow::Result;
 use clap::AppSettings::DeriveDisplayOrder;
 use clap::AppSettings::DisableVersionFlag;
 use clap::AppSettings::PropagateVersion;
-use clap::Clap;
+use clap::Parser;
 use mima::App;
 use std::path::PathBuf;
 
-#[derive(Clap)]
+#[derive(Parser)]
 #[clap(author)]
 #[clap(global_setting = DeriveDisplayOrder)]
 #[clap(global_setting = DisableVersionFlag)]
 #[clap(setting = PropagateVersion)]
 #[clap(version)]
 struct Options {
-    #[clap(about = "Path to configuration")]
+    #[clap(help = "Path to configuration")]
     #[clap(default_value = "./mima.toml")]
     #[clap(long = "config")]
     #[clap(short)]
@@ -23,7 +23,7 @@ struct Options {
     command: Command,
 }
 
-#[derive(Clap)]
+#[derive(Parser)]
 enum Command {
     #[clap(about = "List all guests")]
     #[clap(alias = "list")]
@@ -34,7 +34,7 @@ enum Command {
     #[clap(alias = "show")]
     #[clap(alias = "guest")]
     ShowGuestDetails {
-        #[clap(about = "Guest ID")]
+        #[clap(help = "Guest ID")]
         guest_id: String,
     },
 
@@ -42,21 +42,21 @@ enum Command {
     #[clap(alias = "init")]
     #[clap(alias = "init-guest")]
     InitializeGuest {
-        #[clap(about = "Guest ID")]
+        #[clap(help = "Guest ID")]
         guest_id: String,
     },
 
     #[clap(about = "Start guest")]
     #[clap(alias = "start")]
     StartGuest {
-        #[clap(about = "Guest ID")]
+        #[clap(help = "Guest ID")]
         guest_id: String,
 
-        #[clap(about = "Insert CD-ROM image from specified path and boot from it")]
+        #[clap(help = "Insert CD-ROM image from specified path and boot from it")]
         #[clap(long = "cdrom")]
         cdrom_path: Option<PathBuf>,
 
-        #[clap(about = "Insert floppy image from specified path")]
+        #[clap(help = "Insert floppy image from specified path")]
         #[clap(long = "floppy")]
         floppy_path: Option<PathBuf>,
     },
@@ -64,15 +64,15 @@ enum Command {
     #[clap(about = "Stop guest")]
     #[clap(alias = "stop")]
     StopGuest {
-        #[clap(about = "Guest ID")]
+        #[clap(help = "Guest ID")]
         guest_id: String,
 
-        #[clap(about = "Seconds to wait for soft shutdown")]
+        #[clap(help = "Seconds to wait for soft shutdown")]
         #[clap(default_value = "60")]
         #[clap(long)]
         wait: u64,
 
-        #[clap(about = "Kill the guest immediately")]
+        #[clap(help = "Kill the guest immediately")]
         #[clap(long)]
         force: bool,
     },
@@ -80,7 +80,7 @@ enum Command {
     #[clap(about = "Wait until the guest shuts down")]
     #[clap(alias = "wait")]
     WaitForGuestToShutdown {
-        #[clap(about = "Guest ID")]
+        #[clap(help = "Guest ID")]
         guest_id: String,
     },
 
@@ -88,13 +88,13 @@ enum Command {
     #[clap(alias = "copy")]
     #[clap(alias = "upload")]
     CopyFileToGuest {
-        #[clap(about = "Guest ID")]
+        #[clap(help = "Guest ID")]
         guest_id: String,
 
-        #[clap(about = "File path")]
+        #[clap(help = "File path")]
         path: PathBuf,
 
-        #[clap(about = "Maximum SSH connection timeout")]
+        #[clap(help = "Maximum SSH connection timeout")]
         #[clap(default_value = "100")]
         #[clap(long = "timeout")]
         max_connection_timeout: u64,
@@ -104,13 +104,13 @@ enum Command {
     #[clap(alias = "execute")]
     #[clap(alias = "run")]
     ExecuteScriptOnGuest {
-        #[clap(about = "Guest ID")]
+        #[clap(help = "Guest ID")]
         guest_id: String,
 
-        #[clap(about = "Script path")]
+        #[clap(help = "Script path")]
         path: PathBuf,
 
-        #[clap(about = "Maximum SSH connection timeout")]
+        #[clap(help = "Maximum SSH connection timeout")]
         #[clap(default_value = "100")]
         #[clap(long = "timeout")]
         max_connection_timeout: u64,
@@ -118,26 +118,26 @@ enum Command {
 
     #[clap(about = "List snapshots")]
     ListSnapshots {
-        #[clap(about = "Guest ID")]
+        #[clap(help = "Guest ID")]
         guest_id: String,
     },
 
     #[clap(about = "Create new snapshot")]
     #[clap(alias = "snapshot")]
     CreateSnapshot {
-        #[clap(about = "Guest ID")]
+        #[clap(help = "Guest ID")]
         guest_id: String,
 
-        #[clap(about = "Snapshot ID")]
+        #[clap(help = "Snapshot ID")]
         snapshot_id: String,
     },
 
     #[clap(about = "Delete snapshot")]
     DeleteSnapshot {
-        #[clap(about = "Guest ID")]
+        #[clap(help = "Guest ID")]
         guest_id: String,
 
-        #[clap(about = "Snapshot ID")]
+        #[clap(help = "Snapshot ID")]
         snapshot_id: String,
     },
 
@@ -147,19 +147,19 @@ enum Command {
     #[clap(alias = "revert")]
     #[clap(alias = "switch")]
     ApplySnapshot {
-        #[clap(about = "Guest ID")]
+        #[clap(help = "Guest ID")]
         guest_id: String,
 
-        #[clap(about = "Snapshot ID")]
+        #[clap(help = "Snapshot ID")]
         snapshot_id: String,
     },
 
     #[clap(about = "Check if snapshot exists")]
     CheckSnapshot {
-        #[clap(about = "Guest ID")]
+        #[clap(help = "Guest ID")]
         guest_id: String,
 
-        #[clap(about = "Snapshot ID")]
+        #[clap(help = "Snapshot ID")]
         snapshot_id: String,
     },
 }

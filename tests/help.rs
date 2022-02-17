@@ -14,17 +14,14 @@ fn happy_path() {
     .stderr("")
     .stdout(indoc::indoc! {"
         mima 0.6.0
-
         Igor Sidorov <igor.sidorov@binarycode.ru>
 
         USAGE:
             mima [OPTIONS] <SUBCOMMAND>
 
-        FLAGS:
-            -h, --help    Print help information
-
         OPTIONS:
             -c, --config <CONFIG_PATH>    Path to configuration [default: ./mima.toml]
+            -h, --help                    Print help information
 
         SUBCOMMANDS:
             list-guests                   List all guests

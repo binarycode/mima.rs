@@ -211,7 +211,7 @@ fn no_arguments() {
             <GUEST_ID>
 
         USAGE:
-            mima stop-guest [FLAGS] [OPTIONS] <GUEST_ID>
+            mima stop-guest [OPTIONS] <GUEST_ID>
 
         For more information try --help
     "});
@@ -231,7 +231,7 @@ fn more_than_one_argument() {
         error: Found argument 'two' which wasn't expected, or isn't valid in this context
 
         USAGE:
-            mima stop-guest [FLAGS] [OPTIONS] <GUEST_ID>
+            mima stop-guest [OPTIONS] <GUEST_ID>
 
         For more information try --help
     "});
