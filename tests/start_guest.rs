@@ -126,11 +126,40 @@ fn happy_path_with_complex_configuration() {
     .stdout("");
 
     env.assert_history(indoc::indoc! {"
-        qemu-system-x86_64 -name zero -machine q35,accel=kvm -cpu host -m 8192M -smp 4 -no-user-config -nodefaults -daemonize -runas nobody -monitor unix:/tmp/zero.socket,server,nowait -pidfile /tmp/zero.pid -vga std -spice port=5901,disable-ticketing=on -object iothread,id=iothread1 -device virtio-scsi-pci-non-transitional,iothread=iothread1 -device virtio-net-pci-non-transitional,netdev=network.mima-pub-zero,mac=52:54:00:00:00:10 -netdev tap,id=network.mima-pub-zero,ifname=mima-pub-zero,script=no,downscript=no -device virtio-net-pci-non-transitional,netdev=network.mima-mgt-zero,mac=52:54:00:00:09:10 -netdev tap,id=network.mima-mgt-zero,ifname=mima-mgt-zero,script=no,downscript=no -device e1000e,netdev=network.mima-san0-zero,mac=52:54:00:00:0A:10 -netdev tap,id=network.mima-san0-zero,ifname=mima-san0-zero,script=no,downscript=no -device e1000e,netdev=network.mima-san1-zero,mac=52:54:00:01:0A:10 -netdev tap,id=network.mima-san1-zero,ifname=mima-san1-zero,script=no,downscript=no -device scsi-hd,drive=drive.sda -drive if=none,id=drive.sda,format=qcow2,file=/tmp/zero.sda.qcow2 -device scsi-hd,drive=drive.sdb -drive if=none,id=drive.sdb,format=qcow2,file=/tmp/zero.sdb.qcow2 -boot d -device scsi-cd,drive=drive.cd0 -drive if=none,id=drive.cd0,format=raw,media=cdrom,file=/tmp/centos7.iso -drive if=floppy,id=drive.fd0,format=raw,file=fat:floppy:rw:/tmp/zero.ks
+        qemu-system-x86_64 -name zero -machine q35,accel=kvm -cpu host -m 8192M -smp 4 -no-user-config -nodefaults -daemonize -runas nobody -monitor unix:/tmp/zero.socket,server,nowait -pidfile /tmp/zero.pid -vga std -spice port=5901,disable-ticketing=on -object iothread,id=iothread1 -device virtio-scsi-pci-non-transitional,iothread=iothread1 -device virtio-net-pci-non-transitional,netdev=network.mima-pub-zero,mac=52:54:00:00:00:10 -netdev tap,id=network.mima-pub-zero,ifname=mima-pub-zero,script=no,downscript=no -device virtio-net-pci-non-transitional,netdev=network.mima-mgt-zero,mac=52:54:00:00:09:10 -netdev tap,id=network.mima-mgt-zero,ifname=mima-mgt-zero,script=no,downscript=no -device e1000e,netdev=network.mima-san0-zero,mac=52:54:00:00:0A:10 -netdev tap,id=network.mima-san0-zero,ifname=mima-san0-zero,script=no,downscript=no -device e1000e,netdev=network.mima-san1-zero,mac=52:54:00:01:0A:10 -netdev tap,id=network.mima-san1-zero,ifname=mima-san1-zero,script=no,downscript=no -device scsi-hd,drive=drive.sda -drive if=none,id=drive.sda,format=qcow2,file=/tmp/zero.sda.qcow2 -device scsi-hd,drive=drive.sdb -drive if=none,id=drive.sdb,format=qcow2,file=/tmp/zero.sdb.qcow2 -device scsi-cd,drive=drive.cd0 -drive if=none,id=drive.cd0,format=raw,media=cdrom,file=/tmp/centos7.iso -drive if=floppy,id=drive.fd0,format=raw,file=fat:floppy:rw:/tmp/zero.ks
         ip link set mima-pub-zero master mima-pub up
         ip link set mima-mgt-zero master mima-mgt up
         ip link set mima-san0-zero master mima-san up
         ip link set mima-san1-zero master mima-san up
+    "});
+}
+
+#[test]
+fn happy_path_with_boot_from_cdrom() {
+    let mut env = Env::new();
+
+    env.add_guest_config("zero");
+    env.append_config(indoc::indoc! {"
+        [guests.zero]
+            memory = 8192
+            cores = 4
+            spice_port = 5901
+            monitor_socket_path = '/tmp/zero.socket'
+            pidfile_path = '/tmp/zero.pid'
+    "});
+
+    env.stub_default_ok("qemu-system-x86_64");
+
+    command_macros::command!(
+        {env.bin()} -c (env.config_path()) start-guest zero --boot-from-cdrom --cdrom /tmp/centos7.iso
+    )
+    .assert()
+    .success()
+    .stderr("")
+    .stdout("");
+
+    env.assert_history(indoc::indoc! {"
+        qemu-system-x86_64 -name zero -machine q35,accel=kvm -cpu host -m 8192M -smp 4 -no-user-config -nodefaults -daemonize -runas nobody -monitor unix:/tmp/zero.socket,server,nowait -pidfile /tmp/zero.pid -vga std -spice port=5901,disable-ticketing=on -object iothread,id=iothread1 -device virtio-scsi-pci-non-transitional,iothread=iothread1 -boot d -device scsi-cd,drive=drive.cd0 -drive if=none,id=drive.cd0,format=raw,media=cdrom,file=/tmp/centos7.iso
     "});
 }
 

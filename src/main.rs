@@ -56,7 +56,11 @@ enum Command {
         #[clap(help = "Guest ID")]
         guest_id: String,
 
-        #[clap(help = "Insert CD-ROM image from specified path and boot from it")]
+        #[clap(help = "Boot from CD-ROM")]
+        #[clap(long = "boot-from-cdrom")]
+        boot_from_cdrom: bool,
+
+        #[clap(help = "Insert CD-ROM image from specified path")]
         #[clap(long = "cdrom")]
         cdrom_path: Option<PathBuf>,
 
@@ -192,10 +196,11 @@ fn run(options: Options) -> Result<()> {
         Command::ShowGuestDetails { guest_id } => app.show_guest_details(guest_id)?,
         Command::InitializeGuest { guest_id } => app.initialize_guest(guest_id)?,
         Command::StartGuest {
-            guest_id,
+            boot_from_cdrom,
             cdrom_path,
             floppy_path,
-        } => app.start_guest(guest_id, cdrom_path, floppy_path)?,
+            guest_id,
+        } => app.start_guest(guest_id, boot_from_cdrom, cdrom_path, floppy_path)?,
         Command::StopGuest {
             guest_id,
             wait,

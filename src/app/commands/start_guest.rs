@@ -12,6 +12,7 @@ impl App {
     pub fn start_guest<T>(
         &self,
         guest_id: T,
+        boot_from_cdrom: bool,
         cdrom_path: Option<PathBuf>,
         floppy_path: Option<PathBuf>,
     ) -> Result<()>
@@ -54,8 +55,10 @@ impl App {
                 -device scsi-hd,drive=drive.(disk.label)
                 -drive "if"=none,id=drive.(disk.label),format=qcow2,file=(disk.path)
             }
-            if let Some(path) = cdrom_path {
+            if boot_from_cdrom {
                 -boot d
+            }
+            if let Some(path) = cdrom_path {
                 -device scsi-cd,drive=drive.cd0
                 -drive "if"=none,id=drive.cd0,format=raw,media=cdrom,file=(path)
             }
