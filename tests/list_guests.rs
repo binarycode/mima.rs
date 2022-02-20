@@ -4,6 +4,28 @@ use assert_fs::prelude::*;
 use env::Env;
 
 #[test]
+fn help() {
+    let env = Env::new();
+
+    command_macros::command!(
+        {env.bin()} -c (env.config_path()) help list-guests
+    )
+    .assert()
+    .success()
+    .stderr("")
+    .stdout(indoc::indoc! {"
+        mima-list-guests 0.6.0
+        List all guests
+
+        USAGE:
+            mima list-guests
+
+        OPTIONS:
+            -h, --help    Print help information
+    "});
+}
+
+#[test]
 fn happy_path_with_aliases() {
     let mut env = Env::new();
 

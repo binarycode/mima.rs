@@ -4,6 +4,33 @@ use assert_fs::prelude::*;
 use env::Env;
 
 #[test]
+fn help() {
+    let env = Env::new();
+
+    command_macros::command!(
+        {env.bin()} -c (env.config_path()) help stop-guest
+    )
+    .assert()
+    .success()
+    .stderr("")
+    .stdout(indoc::indoc! {"
+        mima-stop-guest 0.6.0
+        Stop guest
+
+        USAGE:
+            mima stop-guest [OPTIONS] <GUEST_ID>
+
+        ARGS:
+            <GUEST_ID>    Guest ID
+
+        OPTIONS:
+                --wait <WAIT>    Seconds to wait for soft shutdown [default: 60]
+                --force          Kill the guest immediately
+            -h, --help           Print help information
+    "});
+}
+
+#[test]
 fn simple_happy_path_with_aliases() {
     let mut env = Env::new();
 

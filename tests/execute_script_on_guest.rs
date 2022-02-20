@@ -4,6 +4,33 @@ use assert_fs::prelude::*;
 use env::Env;
 
 #[test]
+fn help() {
+    let env = Env::new();
+
+    command_macros::command!(
+        {env.bin()} -c (env.config_path()) help execute-script-on-guest
+    )
+    .assert()
+    .success()
+    .stderr("")
+    .stdout(indoc::indoc! {"
+        mima-execute-script-on-guest 0.6.0
+        Execute script on guest
+
+        USAGE:
+            mima execute-script-on-guest [OPTIONS] <GUEST_ID> <PATH>
+
+        ARGS:
+            <GUEST_ID>    Guest ID
+            <PATH>        Script path
+
+        OPTIONS:
+                --timeout <MAX_CONNECTION_TIMEOUT>    Maximum SSH connection timeout [default: 100]
+            -h, --help                                Print help information
+    "});
+}
+
+#[test]
 fn happy_path_with_aliases() {
     let mut env = Env::new();
 

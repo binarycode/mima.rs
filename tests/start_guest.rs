@@ -7,6 +7,34 @@ use std::fs::Permissions;
 use std::os::unix::fs::PermissionsExt;
 
 #[test]
+fn help() {
+    let env = Env::new();
+
+    command_macros::command!(
+        {env.bin()} -c (env.config_path()) help start-guest
+    )
+    .assert()
+    .success()
+    .stderr("")
+    .stdout(indoc::indoc! {"
+        mima-start-guest 0.6.0
+        Start guest
+
+        USAGE:
+            mima start-guest [OPTIONS] <GUEST_ID>
+
+        ARGS:
+            <GUEST_ID>    Guest ID
+
+        OPTIONS:
+                --boot-from-cdrom         Boot from CD-ROM
+                --cdrom <CDROM_PATH>      Insert CD-ROM image from specified path
+                --floppy <FLOPPY_PATH>    Insert floppy image from specified path
+            -h, --help                    Print help information
+    "});
+}
+
+#[test]
 fn simple_happy_path_with_aliases() {
     let mut env = Env::new();
 

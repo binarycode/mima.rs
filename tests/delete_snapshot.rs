@@ -3,6 +3,32 @@ mod env;
 use env::Env;
 
 #[test]
+fn help() {
+    let env = Env::new();
+
+    command_macros::command!(
+        {env.bin()} -c (env.config_path()) help delete-snapshot
+    )
+    .assert()
+    .success()
+    .stderr("")
+    .stdout(indoc::indoc! {"
+        mima-delete-snapshot 0.6.0
+        Delete snapshot
+
+        USAGE:
+            mima delete-snapshot <GUEST_ID> <SNAPSHOT_ID>
+
+        ARGS:
+            <GUEST_ID>       Guest ID
+            <SNAPSHOT_ID>    Snapshot ID
+
+        OPTIONS:
+            -h, --help    Print help information
+    "});
+}
+
+#[test]
 fn happy_path() {
     let mut env = Env::new();
 
