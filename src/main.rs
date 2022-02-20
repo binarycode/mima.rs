@@ -2,8 +2,6 @@
 
 use anyhow::Result;
 use clap::AppSettings::DeriveDisplayOrder;
-use clap::AppSettings::DisableVersionFlag;
-use clap::AppSettings::PropagateVersion;
 use clap::Parser;
 use colored::*;
 use mima::App;
@@ -13,8 +11,8 @@ use std::path::PathBuf;
 #[derive(Parser)]
 #[clap(author)]
 #[clap(global_setting = DeriveDisplayOrder)]
-#[clap(global_setting = DisableVersionFlag)]
-#[clap(setting = PropagateVersion)]
+#[clap(disable_version_flag = true)]
+#[clap(propagate_version = true)]
 #[clap(version)]
 struct Options {
     #[clap(help = "Path to configuration")]
