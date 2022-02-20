@@ -164,6 +164,36 @@ fn happy_path_with_boot_from_cdrom() {
 }
 
 #[test]
+fn happy_path_with_several_cdroms() {
+    let mut env = Env::new();
+
+    env.add_guest_config("zero");
+    env.append_config(indoc::indoc! {"
+        [guests.zero]
+            memory = 8192
+            cores = 4
+            spice_port = 5901
+            monitor_socket_path = '/tmp/zero.socket'
+            pidfile_path = '/tmp/zero.pid'
+    "});
+
+    env.stub_default_ok("qemu-system-x86_64");
+    env.stub_default_ok("ip");
+
+    command_macros::command!(
+        {env.bin()} -c (env.config_path()) start-guest zero --cdrom /tmp/centos7.iso --cdrom /tmp/ks.iso
+    )
+    .assert()
+    .success()
+    .stderr("")
+    .stdout("");
+
+    env.assert_history(indoc::indoc! {"
+        qemu-system-x86_64 -name zero -machine q35,accel=kvm -cpu host -m 8192M -smp 4 -no-user-config -nodefaults -daemonize -runas nobody -monitor unix:/tmp/zero.socket,server,nowait -pidfile /tmp/zero.pid -vga std -spice port=5901,disable-ticketing=on -object iothread,id=iothread1 -device virtio-scsi-pci-non-transitional,iothread=iothread1 -device scsi-cd,drive=drive.cd0 -drive if=none,id=drive.cd0,format=raw,media=cdrom,file=/tmp/centos7.iso -device scsi-cd,drive=drive.cd0 -drive if=none,id=drive.cd0,format=raw,media=cdrom,file=/tmp/ks.iso
+    "});
+}
+
+#[test]
 fn noop_when_guest_is_already_running() {
     let mut env = Env::new();
 
