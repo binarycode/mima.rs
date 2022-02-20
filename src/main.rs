@@ -62,7 +62,6 @@ enum Command {
 
         #[clap(help = "Insert CD-ROM image from specified path")]
         #[clap(long = "cdrom")]
-        #[clap(multiple_occurrences = true)]
         #[clap(value_name = "CDROM_PATH")]
         cdrom_paths: Vec<PathBuf>,
 
