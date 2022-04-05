@@ -14,7 +14,7 @@ fn help() {
     .success()
     .stderr("")
     .stdout(indoc::indoc! {"
-        mima-show-guest-details 0.7.0
+        mima-show-guest-details 0.7.1
         Show guest details
 
         USAGE:

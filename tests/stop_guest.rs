@@ -14,7 +14,7 @@ fn help() {
     .success()
     .stderr("")
     .stdout(indoc::indoc! {"
-        mima-stop-guest 0.7.0
+        mima-stop-guest 0.7.1
         Stop guest
 
         USAGE:

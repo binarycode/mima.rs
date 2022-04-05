@@ -14,7 +14,7 @@ fn help() {
     .success()
     .stderr("")
     .stdout(indoc::indoc! {"
-        mima-execute-script-on-guest 0.7.0
+        mima-execute-script-on-guest 0.7.1
         Execute script on guest
 
         USAGE:
