@@ -14,7 +14,7 @@ fn help() {
     .success()
     .stderr("")
     .stdout(indoc::indoc! {"
-        mima-initialize-guest 0.7.1
+        mima-initialize-guest 0.7.2
         Initialize guest
 
         USAGE:
