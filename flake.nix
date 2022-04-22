@@ -19,7 +19,7 @@
         inherit system;
         overlays = [ inputs.rust-overlay.overlay ];
       };
-      rust = pkgs.rust-bin.nightly."2022-01-15".default;
+      rust = pkgs.rust-bin.nightly.latest.default;
     in {
       defaultPackage = pkgs.rustPlatform.buildRustPackage {
         pname = "mima-rs";
