@@ -58,7 +58,9 @@ enum Command {
 
         #[clap(about = "Insert CD-ROM image from specified path")]
         #[clap(long = "cdrom")]
-        cdrom_path: Option<PathBuf>,
+        #[clap(multiple_occurrences = true)]
+        #[clap(value_name = "CDROM_PATH")]
+        cdrom_paths: Vec<PathBuf>,
 
         #[clap(about = "Insert floppy image from specified path")]
         #[clap(long = "floppy")]
@@ -178,10 +180,10 @@ fn main() -> Result<()> {
         Command::InitializeGuest { guest_id } => app.initialize_guest(guest_id)?,
         Command::StartGuest {
             boot_from_cdrom,
-            cdrom_path,
+            cdrom_paths,
             floppy_path,
             guest_id,
-        } => app.start_guest(guest_id, boot_from_cdrom, cdrom_path, floppy_path)?,
+        } => app.start_guest(guest_id, boot_from_cdrom, cdrom_paths, floppy_path)?,
         Command::StopGuest {
             guest_id,
             wait,

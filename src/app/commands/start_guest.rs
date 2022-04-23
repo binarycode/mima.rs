@@ -12,7 +12,7 @@ impl App {
         &self,
         guest_id: T,
         boot_from_cdrom: bool,
-        cdrom_path: Option<PathBuf>,
+        cdrom_paths: Vec<PathBuf>,
         floppy_path: Option<PathBuf>,
     ) -> Result<()>
     where
@@ -57,9 +57,9 @@ impl App {
             if boot_from_cdrom {
                 -boot d
             }
-            if let Some(path) = cdrom_path {
-                -device scsi-cd,drive=drive.cd0
-                -drive "if"=none,id=drive.cd0,format=raw,media=cdrom,file=(path)
+            for (i, path) in cdrom_paths.iter().enumerate() {
+                -device scsi-cd,drive=drive.cd((i))
+                -drive "if"=none,id=drive.cd((i)),format=raw,media=cdrom,file=(path)
             }
             if let Some(path) = floppy_path {
                 -drive "if"=floppy,id=drive.fd0,format=raw,file=fat:floppy:rw:(path)
