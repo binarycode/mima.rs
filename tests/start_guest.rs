@@ -28,6 +28,7 @@ fn help() {
 
         OPTIONS:
                 --boot-from-cdrom         Boot from CD-ROM
+                --boot-from-network       Boot from network
                 --cdrom <CDROM_PATH>      Insert CD-ROM image from specified path
                 --floppy <FLOPPY_PATH>    Insert floppy image from specified path
             -h, --help                    Print help information
@@ -218,6 +219,67 @@ fn happy_path_with_several_cdroms() {
 
     env.assert_history(indoc::indoc! {"
         qemu-system-x86_64 -name zero -machine q35,accel=kvm -cpu host -m 8192M -smp 4 -no-user-config -nodefaults -daemonize -runas nobody -monitor unix:/tmp/zero.socket,server,nowait -pidfile /tmp/zero.pid -vga std -spice port=5901,disable-ticketing=on -object iothread,id=iothread1 -device virtio-scsi-pci-non-transitional,iothread=iothread1 -device scsi-cd,drive=drive.cd0 -drive if=none,id=drive.cd0,format=raw,media=cdrom,file=/tmp/centos7.iso -device scsi-cd,drive=drive.cd1 -drive if=none,id=drive.cd1,format=raw,media=cdrom,file=/tmp/ks.iso
+    "});
+}
+
+#[test]
+fn happy_path_with_boot_from_network() {
+    let mut env = Env::new();
+
+    env.add_guest_config("zero");
+    env.append_config(indoc::indoc! {"
+        [guests.zero]
+            memory = 8192
+            cores = 4
+            spice_port = 5901
+            monitor_socket_path = '/tmp/zero.socket'
+            pidfile_path = '/tmp/zero.pid'
+    "});
+
+    env.stub_default_ok("qemu-system-x86_64");
+
+    command_macros::command!(
+        {env.bin()} -c (env.config_path()) start-guest zero --boot-from-network
+    )
+    .assert()
+    .success()
+    .stderr("")
+    .stdout("");
+
+    env.assert_history(indoc::indoc! {"
+        qemu-system-x86_64 -name zero -machine q35,accel=kvm -cpu host -m 8192M -smp 4 -no-user-config -nodefaults -daemonize -runas nobody -monitor unix:/tmp/zero.socket,server,nowait -pidfile /tmp/zero.pid -vga std -spice port=5901,disable-ticketing=on -object iothread,id=iothread1 -device virtio-scsi-pci-non-transitional,iothread=iothread1 -boot n
+    "});
+}
+
+#[test]
+fn boot_from_more_than_one_source_failure() {
+    let mut env = Env::new();
+
+    env.add_guest_config("zero");
+    env.append_config(indoc::indoc! {"
+        [guests.zero]
+            memory = 8192
+            cores = 4
+            spice_port = 5901
+            monitor_socket_path = '/tmp/zero.socket'
+            pidfile_path = '/tmp/zero.pid'
+    "});
+
+    env.stub_default_ok("qemu-system-x86_64");
+
+    command_macros::command!(
+        {env.bin()} -c (env.config_path()) start-guest zero --boot-from-network --boot-from-cdrom
+    )
+    .assert()
+    .failure()
+    .stdout("")
+    .stderr(indoc::indoc! {"
+        error: The argument '--boot-from-network' cannot be used with '--boot-from-cdrom'
+
+        USAGE:
+            mima start-guest --boot-from-network <GUEST_ID> <GUEST_ID>
+
+        For more information try --help
     "});
 }
 
