@@ -1,6 +1,6 @@
 [package]
 name = "mima"
-version = "0.7.2"
+version = "0.8.0"
 authors = ["Igor Sidorov <igor.sidorov@binarycode.ru>"]
 edition = "2018"
 
