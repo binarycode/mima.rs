@@ -12,6 +12,7 @@ impl App {
         &self,
         guest_id: T,
         boot_from_cdrom: bool,
+        boot_from_network: bool,
         cdrom_paths: Vec<PathBuf>,
         floppy_path: Option<PathBuf>,
     ) -> Result<()>
@@ -56,6 +57,9 @@ impl App {
             }
             if boot_from_cdrom {
                 -boot d
+            }
+            if boot_from_network {
+                -boot n
             }
             for (i, path) in cdrom_paths.iter().enumerate() {
                 -device scsi-cd,drive=drive.cd((i))

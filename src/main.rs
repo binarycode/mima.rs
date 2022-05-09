@@ -54,7 +54,13 @@ enum Command {
 
         #[clap(about = "Boot from CD-ROM")]
         #[clap(long = "boot-from-cdrom")]
+        #[clap(group = "boot")]
         boot_from_cdrom: bool,
+
+        #[clap(about = "Boot from network")]
+        #[clap(long = "boot-from-network")]
+        #[clap(group = "boot")]
+        boot_from_network: bool,
 
         #[clap(about = "Insert CD-ROM image from specified path")]
         #[clap(long = "cdrom")]
@@ -180,10 +186,17 @@ fn main() -> Result<()> {
         Command::InitializeGuest { guest_id } => app.initialize_guest(guest_id)?,
         Command::StartGuest {
             boot_from_cdrom,
+            boot_from_network,
             cdrom_paths,
             floppy_path,
             guest_id,
-        } => app.start_guest(guest_id, boot_from_cdrom, cdrom_paths, floppy_path)?,
+        } => app.start_guest(
+            guest_id,
+            boot_from_cdrom,
+            boot_from_network,
+            cdrom_paths,
+            floppy_path,
+        )?,
         Command::StopGuest {
             guest_id,
             wait,
