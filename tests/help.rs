@@ -34,7 +34,7 @@ fn happy_path() {
             stop-guest                    Stop guest
             wait-for-guest-to-shutdown    Wait until the guest shuts down
             copy-file-to-guest            Copy file to guest
-            execute-script-on-guest       Execute script on guest
+            execute-file-on-guest         Execute file on guest
             list-snapshots                List snapshots
             create-snapshot               Create new snapshot
             delete-snapshot               Delete snapshot

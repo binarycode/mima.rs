@@ -13,6 +13,8 @@ use std::process::Command;
 use std::process::Stdio;
 use std::time::Duration;
 
+const GUEST_WORKSPACE_PATH: &str = "/root/mima";
+
 #[derive(Deserialize)]
 pub struct App {
     pub guests: BTreeMap<String, Guest>,
@@ -320,6 +322,13 @@ impl GuestConnection {
     where
         T: AsRef<str>,
     {
+        self.execute_with_args(command, Vec::new())
+    }
+
+    pub fn execute_with_args<T>(&self, command: T, args: Vec<String>) -> Result<()>
+    where
+        T: AsRef<str>,
+    {
         let command = command.as_ref().split_whitespace();
 
         command_macros::command!(
@@ -331,6 +340,7 @@ impl GuestConnection {
             -A
             root@(self.ip_address)
             [command]
+            [args]
         )
         .execute()?;
 
