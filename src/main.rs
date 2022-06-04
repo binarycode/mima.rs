@@ -113,20 +113,26 @@ enum Command {
         max_connection_timeout: u64,
     },
 
-    #[clap(about = "Execute script on guest")]
+    #[clap(about = "Execute file on guest")]
+    #[clap(alias = "execute-script-on-guest")]
     #[clap(alias = "execute")]
     #[clap(alias = "run")]
-    ExecuteScriptOnGuest {
+    ExecuteFileOnGuest {
         #[clap(help = "Guest ID")]
         guest_id: String,
 
-        #[clap(help = "Script path")]
+        #[clap(help = "File path")]
         path: PathBuf,
 
         #[clap(help = "Maximum SSH connection timeout")]
         #[clap(default_value = "100")]
         #[clap(long = "timeout")]
         max_connection_timeout: u64,
+
+        #[clap(help = "Arguments to pass to the file")]
+        #[clap(last = true)]
+        #[clap(multiple_values = true)]
+        args: Vec<String>,
     },
 
     #[clap(about = "List snapshots")]
@@ -224,11 +230,12 @@ fn run(options: Options) -> Result<()> {
             path,
             max_connection_timeout,
         } => app.copy_file_to_guest(guest_id, path, max_connection_timeout)?,
-        Command::ExecuteScriptOnGuest {
+        Command::ExecuteFileOnGuest {
             guest_id,
             path,
             max_connection_timeout,
-        } => app.execute_script_on_guest(guest_id, path, max_connection_timeout)?,
+            args,
+        } => app.execute_file_on_guest(guest_id, path, max_connection_timeout, args)?,
         Command::ListSnapshots { guest_id } => app.list_snapshots(guest_id)?,
         Command::CreateSnapshot {
             guest_id,

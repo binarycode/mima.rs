@@ -8,21 +8,22 @@ fn help() {
     let env = Env::new();
 
     command_macros::command!(
-        {env.bin()} -c (env.config_path()) help execute-script-on-guest
+        {env.bin()} -c (env.config_path()) help execute-file-on-guest
     )
     .assert()
     .success()
     .stderr("")
     .stdout(indoc::indoc! {"
-        mima-execute-script-on-guest 0.8.0
-        Execute script on guest
+        mima-execute-file-on-guest 0.8.0
+        Execute file on guest
 
         USAGE:
-            mima execute-script-on-guest [OPTIONS] <GUEST_ID> <PATH>
+            mima execute-file-on-guest [OPTIONS] <GUEST_ID> <PATH> [-- <ARGS>...]
 
         ARGS:
             <GUEST_ID>    Guest ID
-            <PATH>        Script path
+            <PATH>        File path
+            <ARGS>...     Arguments to pass to the file
 
         OPTIONS:
                 --timeout <MAX_CONNECTION_TIMEOUT>    Maximum SSH connection timeout [default: 100]
@@ -48,7 +49,7 @@ fn happy_path_with_aliases() {
     env.stub_default_ok("ssh");
 
     command_macros::command!(
-        {env.bin()} -c (env.config_path()) execute-script-on-guest zero ((script_path))
+        {env.bin()} -c (env.config_path()) execute-file-on-guest zero ((script_path))
     )
     .assert()
     .success()
@@ -62,6 +63,16 @@ fn happy_path_with_aliases() {
         ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -A root@1.1.1.1 chmod +x /root/mima/script
         ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -A root@1.1.1.1 /root/mima/script
     "};
+
+    env.assert_history(&expected_history);
+
+    command_macros::command!(
+        {env.bin()} -c (env.config_path()) execute-script-on-guest zero ((script_path))
+    )
+    .assert()
+    .success()
+    .stderr("")
+    .stdout("");
 
     env.assert_history(&expected_history);
 
@@ -87,6 +98,40 @@ fn happy_path_with_aliases() {
 }
 
 #[test]
+fn happy_path_with_extra_arguments() {
+    let mut env = Env::new();
+
+    let script = env.child("script");
+    let script_path = script.path().display();
+    script.touch().unwrap();
+
+    env.add_guest_config("zero");
+    env.append_config(indoc::indoc! {"
+        [guests.zero]
+            ip_address = '1.1.1.1'
+    "});
+
+    env.stub_default_ok("scp");
+    env.stub_default_ok("ssh");
+
+    command_macros::command!(
+        {env.bin()} -c (env.config_path()) execute-file-on-guest zero ((script_path)) -- foo bar
+    )
+    .assert()
+    .success()
+    .stderr("")
+    .stdout("");
+
+    env.assert_history(indoc::formatdoc! {"
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@1.1.1.1 exit 0
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -A root@1.1.1.1 mkdir -p /root/mima
+        scp -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null {script_path} root@1.1.1.1:/root/mima
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -A root@1.1.1.1 chmod +x /root/mima/script
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -A root@1.1.1.1 /root/mima/script foo bar
+    "});
+}
+
+#[test]
 fn connection_is_established_from_second_attempt() {
     let mut env = Env::new();
 
@@ -108,7 +153,7 @@ fn connection_is_established_from_second_attempt() {
     );
 
     command_macros::command!(
-        {env.bin()} -c (env.config_path()) execute-script-on-guest zero ((script_path))
+        {env.bin()} -c (env.config_path()) execute-file-on-guest zero ((script_path))
     )
     .assert()
     .success()
@@ -153,7 +198,7 @@ fn failure_to_establish_connection() {
     );
 
     command_macros::command!(
-        {env.bin()} -c (env.config_path()) execute-script-on-guest --timeout 3 zero ((script_path))
+        {env.bin()} -c (env.config_path()) execute-file-on-guest --timeout 3 zero ((script_path))
     )
     .assert()
     .failure()
@@ -182,7 +227,7 @@ fn failure_when_path_is_not_a_file() {
     env.add_guest_config("zero");
 
     command_macros::command!(
-        {env.bin()} -c (env.config_path()) execute-script-on-guest zero ((script_path))
+        {env.bin()} -c (env.config_path()) execute-file-on-guest zero ((script_path))
     )
     .assert()
     .failure()
@@ -217,7 +262,7 @@ fn first_ssh_failure() {
     );
 
     command_macros::command!(
-        {env.bin()} -c (env.config_path()) execute-script-on-guest zero ((script_path))
+        {env.bin()} -c (env.config_path()) execute-file-on-guest zero ((script_path))
     )
     .assert()
     .failure()
@@ -261,7 +306,7 @@ fn scp_failure() {
     );
 
     command_macros::command!(
-        {env.bin()} -c (env.config_path()) execute-script-on-guest zero ((script_path))
+        {env.bin()} -c (env.config_path()) execute-file-on-guest zero ((script_path))
     )
     .assert()
     .failure()
@@ -307,7 +352,7 @@ fn second_ssh_failure() {
     );
 
     command_macros::command!(
-        {env.bin()} -c (env.config_path()) execute-script-on-guest zero ((script_path))
+        {env.bin()} -c (env.config_path()) execute-file-on-guest zero ((script_path))
     )
     .assert()
     .failure()
@@ -354,7 +399,7 @@ fn third_ssh_failure() {
     );
 
     command_macros::command!(
-        {env.bin()} -c (env.config_path()) execute-script-on-guest zero ((script_path))
+        {env.bin()} -c (env.config_path()) execute-file-on-guest zero ((script_path))
     )
     .assert()
     .failure()
@@ -381,7 +426,7 @@ fn no_arguments() {
     let env = Env::new();
 
     command_macros::command!(
-        {env.bin()} -c (env.config_path()) execute-script-on-guest
+        {env.bin()} -c (env.config_path()) execute-file-on-guest
     )
     .assert()
     .failure()
@@ -392,7 +437,7 @@ fn no_arguments() {
             <PATH>
 
         USAGE:
-            mima execute-script-on-guest [OPTIONS] <GUEST_ID> <PATH>
+            mima execute-file-on-guest [OPTIONS] <GUEST_ID> <PATH> [-- <ARGS>...]
 
         For more information try --help
     "});
@@ -403,7 +448,7 @@ fn one_argument() {
     let env = Env::new();
 
     command_macros::command!(
-        {env.bin()} -c (env.config_path()) execute-script-on-guest one
+        {env.bin()} -c (env.config_path()) execute-file-on-guest one
     )
     .assert()
     .failure()
@@ -413,7 +458,7 @@ fn one_argument() {
             <PATH>
 
         USAGE:
-            mima execute-script-on-guest [OPTIONS] <GUEST_ID> <PATH>
+            mima execute-file-on-guest [OPTIONS] <GUEST_ID> <PATH> [-- <ARGS>...]
 
         For more information try --help
     "});
@@ -424,7 +469,7 @@ fn more_than_two_arguments() {
     let env = Env::new();
 
     command_macros::command!(
-        {env.bin()} -c (env.config_path()) execute-script-on-guest one two three
+        {env.bin()} -c (env.config_path()) execute-file-on-guest one two three
     )
     .assert()
     .failure()
@@ -433,7 +478,7 @@ fn more_than_two_arguments() {
         error: Found argument 'three' which wasn't expected, or isn't valid in this context
 
         USAGE:
-            mima execute-script-on-guest [OPTIONS] <GUEST_ID> <PATH>
+            mima execute-file-on-guest [OPTIONS] <GUEST_ID> <PATH> [-- <ARGS>...]
 
         For more information try --help
     "});
@@ -448,7 +493,7 @@ fn unknown_guest() {
     script.touch().unwrap();
 
     command_macros::command!(
-        {env.bin()} -c (env.config_path()) execute-script-on-guest zero ((script_path))
+        {env.bin()} -c (env.config_path()) execute-file-on-guest zero ((script_path))
     )
     .assert()
     .failure()
