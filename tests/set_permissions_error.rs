@@ -13,7 +13,7 @@ fn error() {
             cores = 4
             spice_port = 5901
             monitor_socket_path = '/tmp/zero.socket'
-            pidfile_path = '/root'
+            pidfile_path = '/'
     "});
 
     env.stub_default_ok("qemu-system-x86_64");
@@ -25,6 +25,6 @@ fn error() {
     .failure()
     .stdout("")
     .stderr(indoc::indoc! {"
-        error: Failed to set permissions '644' on '/root'
+        error: Failed to set permissions '644' on '/'
     "});
 }

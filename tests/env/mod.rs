@@ -18,6 +18,7 @@ pub struct Env {
     default_flows: HashMap<String, String>,
     history_file: ChildPath,
     tmp_dir: TempDir,
+    bash_path: String,
 }
 
 #[allow(dead_code)]
@@ -46,24 +47,21 @@ impl Env {
         let history_file = tmp_dir.child("history");
         history_file.touch().unwrap();
 
-        let which = tmp_dir.child("which");
-        which
-            .write_str(&indoc::indoc! {"
-                #! /usr/bin/env bash
-                exit 0
-            "})
-            .unwrap();
-        let permissions = Permissions::from_mode(0o777);
-        std::fs::set_permissions(&which.path(), permissions).unwrap();
+        let bash_path = which("bash");
 
-        Self {
+        let env = Self {
             bin_path_env,
             config_file,
             flows,
             default_flows,
             history_file,
             tmp_dir,
-        }
+            bash_path,
+        };
+
+        env.create_binary("which", "exit 0");
+
+        env
     }
 
     pub fn bin(&self) -> Command {
@@ -174,6 +172,27 @@ impl Env {
         self.stub_default(binary, "")
     }
 
+    pub fn create_binary<T, U>(&self, binary: T, script: U)
+    where
+        T: AsRef<str>,
+        U: AsRef<str>,
+    {
+        let binary = binary.as_ref();
+        let binary = self.tmp_dir.child(binary);
+        let script = script.as_ref();
+        binary
+            .write_str(&indoc::formatdoc! {
+                "
+                    #!{bash_path}
+                    {script}
+                ",
+                bash_path = self.bash_path
+            })
+            .unwrap();
+        let permissions = Permissions::from_mode(0o777);
+        std::fs::set_permissions(&binary.path(), permissions).unwrap();
+    }
+
     fn write_binary_stubs<T>(&self, binary: T)
     where
         T: AsRef<str>,
@@ -182,7 +201,7 @@ impl Env {
 
         let history_path = self.history_file.path().display();
 
-        let mut script = "#! /usr/bin/env bash\n".to_owned();
+        let mut script = "".to_owned();
 
         if let Some(flows) = self.flows.get(binary) {
             for (arguments, flow_script) in flows {
@@ -212,10 +231,7 @@ impl Env {
             "#});
         }
 
-        let file = self.tmp_dir.child(binary);
-        file.write_str(&script).unwrap();
-        let permissions = Permissions::from_mode(0o777);
-        std::fs::set_permissions(&file.path(), permissions).unwrap();
+        self.create_binary(binary, script);
     }
 
     pub fn assert_history<I, P>(&self, pred: I)
@@ -228,13 +244,17 @@ impl Env {
     }
 }
 
-fn command_path_str(command: &str) -> String {
+fn which(command: &str) -> String {
     let path = std::process::Command::new("which")
         .arg(command)
         .output()
         .unwrap()
         .stdout;
-    let path = String::from_utf8(path).unwrap();
+    String::from_utf8(path).unwrap()
+}
+
+fn command_path_str(command: &str) -> String {
+    let path = which(command);
     let path = Path::new(&path).parent().unwrap();
 
     path.display().to_string()

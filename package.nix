@@ -6,6 +6,8 @@ in pkgs.rustPlatform.buildRustPackage {
 
   src = pkgs.nix-gitignore.gitignoreSource [] ./.;
 
+  cargoLock.lockFile = ./Cargo.lock;
+
   buildInputs = [
     pkgs.iproute2
     pkgs.qemu_kvm
@@ -16,12 +18,12 @@ in pkgs.rustPlatform.buildRustPackage {
 
   nativeBuildInputs = [ rust ];
 
-  cargoLock.lockFile = ./Cargo.lock;
+  checkInputs = [ pkgs.which ];
 
-  # FIXME unable to run tests in checkPhase due to PATH/which fuckery
   checkPhase = ''
     ${rust}/bin/cargo clippy -- -D warnings
     ${rust}/bin/cargo fmt -- --check
+    ${rust}/bin/cargo test
   '';
 
   meta = {
