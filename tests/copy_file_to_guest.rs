@@ -314,7 +314,7 @@ fn one_argument() {
             <PATH>
 
         USAGE:
-            mima copy-file-to-guest [OPTIONS] <GUEST_ID> <PATH>
+            mima copy-file-to-guest <GUEST_ID> <PATH>
 
         For more information try --help
     "});

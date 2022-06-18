@@ -277,7 +277,7 @@ fn boot_from_more_than_one_source_failure() {
         error: The argument '--boot-from-network' cannot be used with '--boot-from-cdrom'
 
         USAGE:
-            mima start-guest --boot-from-network <GUEST_ID> <GUEST_ID>
+            mima start-guest --boot-from-network <GUEST_ID>
 
         For more information try --help
     "});

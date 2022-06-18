@@ -458,7 +458,7 @@ fn one_argument() {
             <PATH>
 
         USAGE:
-            mima execute-file-on-guest [OPTIONS] <GUEST_ID> <PATH> [-- <ARGS>...]
+            mima execute-file-on-guest <GUEST_ID> <PATH>
 
         For more information try --help
     "});
