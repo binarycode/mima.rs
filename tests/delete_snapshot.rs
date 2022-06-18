@@ -13,7 +13,7 @@ fn help() {
     .success()
     .stderr("")
     .stdout(indoc::indoc! {"
-        mima-delete-snapshot 0.10.0
+        mima-delete-snapshot 0.10.1
         Delete snapshot
 
         USAGE:

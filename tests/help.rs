@@ -13,7 +13,7 @@ fn happy_path() {
     .success()
     .stderr("")
     .stdout(indoc::indoc! {"
-        mima 0.10.0
+        mima 0.10.1
         Igor Sidorov <igor.sidorov@binarycode.ru>
 
         USAGE:

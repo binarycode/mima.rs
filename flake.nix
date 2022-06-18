@@ -25,13 +25,18 @@
       rust = pkgs.rust-bin.nightly."2022-06-13".default;
 
       mima = import ./package.nix pkgs rust;
+
+      module = import ./module.nix mima;
     in {
       defaultPackage = mima;
       devShell = pkgs.mkShell {
         name = cargoTOML.package.name;
         buildInputs = [ rust ];
       };
-      nixosModules.default = import ./module.nix mima;
+      nixosModules = {
+        default = module;
+        mima = module;
+      };
     }
   );
 }
