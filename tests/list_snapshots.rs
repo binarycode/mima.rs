@@ -13,7 +13,7 @@ fn help() {
     .success()
     .stderr("")
     .stdout(indoc::indoc! {"
-        mima-list-snapshots 0.10.1
+        mima-list-snapshots 0.11.0
         List snapshots
 
         USAGE:
