@@ -14,7 +14,7 @@ fn help() {
     .success()
     .stderr("")
     .stdout(indoc::indoc! {"
-        mima-wait-for-guest-to-shutdown 0.9.0
+        mima-wait-for-guest-to-shutdown 0.9.1
         Wait until the guest shuts down
 
         USAGE:

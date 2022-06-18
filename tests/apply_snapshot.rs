@@ -13,7 +13,7 @@ fn help() {
     .success()
     .stderr("")
     .stdout(indoc::indoc! {"
-        mima-apply-snapshot 0.9.0
+        mima-apply-snapshot 0.9.1
         Apply snapshot
 
         USAGE:
