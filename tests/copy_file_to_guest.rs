@@ -14,7 +14,7 @@ fn help() {
     .success()
     .stderr("")
     .stdout(indoc::indoc! {"
-        mima-copy-file-to-guest 0.9.1
+        mima-copy-file-to-guest 0.10.0
         Copy file to guest
 
         USAGE:
