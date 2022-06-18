@@ -1,6 +1,5 @@
 mima: { config, lib, pkgs, ... }: let
-  mountpoint = config.mima.mountpoint;
-  networks   = config.mima.networks;
+  networks = config.mima.networks;
 in {
   options.mima = let
     network = lib.types.submodule ({ name, ... }: {
@@ -29,13 +28,6 @@ in {
       config.name = name;
     });
   in {
-    mountpoint = lib.mkOption {
-      type = lib.types.str;
-      default = "/mnt/mima";
-      description = ''
-        Mountpoint for mima data
-      '';
-    };
     networks = lib.mkOption {
       type = lib.types.attrsOf network;
       default = {};
@@ -148,8 +140,6 @@ in {
           };
         in (mapNetworks bridge) // (mapNetworks dummy);
       };
-
-      tmpfiles.rules = [ "d ${mountpoint} 755 - - - -" ];
     };
   };
 }
