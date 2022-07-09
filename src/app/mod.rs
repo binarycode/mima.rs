@@ -9,7 +9,6 @@ use crate::errors::ReadConfigurationError;
 use crate::errors::UnknownGuestError;
 use crate::errors::UnknownNetworkError;
 use anyhow::Result;
-use chrono::NaiveDateTime;
 use serde::Deserialize;
 use std::collections::BTreeMap;
 use std::collections::HashMap;
@@ -69,7 +68,7 @@ pub struct NetworkInterface {
 
 pub struct Snapshot {
     pub id: String,
-    pub timestamp: NaiveDateTime,
+    pub timestamp: Duration,
 }
 
 impl App {
@@ -133,7 +132,7 @@ impl App {
         struct QemuImgSnapshot {
             name: String,
             #[serde(rename = "date-sec")]
-            timestamp_sec: i64,
+            timestamp_sec: u64,
             #[serde(rename = "date-nsec")]
             timestamp_nsec: u32,
         }
@@ -153,10 +152,7 @@ impl App {
                 snapshot.name.clone(),
                 Snapshot {
                     id: snapshot.name.clone(),
-                    timestamp: NaiveDateTime::from_timestamp(
-                        snapshot.timestamp_sec,
-                        snapshot.timestamp_nsec,
-                    ),
+                    timestamp: Duration::new(snapshot.timestamp_sec, snapshot.timestamp_nsec),
                 },
             )
         })
@@ -223,13 +219,12 @@ impl App {
             } else {
                 snapshots.retain(|id, snapshot| {
                     if let Some(disk_snapshot) = disk_snapshots.get(id) {
-                        let timestamp_difference = snapshot
-                            .timestamp
-                            .signed_duration_since(disk_snapshot.timestamp)
-                            .num_seconds()
-                            .abs();
-
-                        timestamp_difference < 300 // 5 minutes
+                        let difference = if snapshot.timestamp > disk_snapshot.timestamp {
+                            snapshot.timestamp - disk_snapshot.timestamp
+                        } else {
+                            disk_snapshot.timestamp - snapshot.timestamp
+                        };
+                        difference.as_secs() < 300 // 5 minutes
                     } else {
                         false
                     }

@@ -11,7 +11,6 @@ license = "MIT"
 
 [dependencies]
 anyhow = "1.0.57"
-chrono = "0.4.19"
 clap = { version = "3.2.5", features = ["derive"] }
 colored = "2.0.0"
 command-macros = { version = "0.2.9", features = ["nightly"] }
@@ -19,6 +18,7 @@ indoc = "1.0.6"
 serde = { version = "1.0.137", features = ["derive"] }
 serde_json = "1.0.81"
 tabwriter = "1.2.1"
+time = { version = "0.3.11", features = ["formatting"] }
 toml = "0.5.9"
 
 [dev-dependencies]
