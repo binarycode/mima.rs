@@ -13,7 +13,7 @@ fn help() {
     .success()
     .stderr("")
     .stdout(indoc::indoc! {"
-        mima-check-snapshot 0.11.0
+        mima-check-snapshot 0.12.0
         Check if snapshot exists
 
         USAGE:
