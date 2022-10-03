@@ -13,9 +13,7 @@
     };
   };
 
-  outputs = inputs: let
-    system = "x86_64-linux";
-
+  outputs = inputs: inputs.flake-utils.lib.eachDefaultSystem (system: let
     cargoTOML = builtins.fromTOML (builtins.readFile ./Cargo.toml);
 
     pkgs = import inputs.nixpkgs {
@@ -23,18 +21,14 @@
       overlays = [ inputs.rust-overlay.overlay ];
     };
 
-    rust = pkgs.rust-bin.nightly."2022-06-13".default;
-
-    mima = import ./package.nix pkgs rust;
+    rust = import ./rust.nix pkgs;
   in {
-      packages.${system} = {
-        inherit mima;
-        default = mima;
-      };
-      devShells.${system}.default = pkgs.mkShell {
-        name = cargoTOML.package.name;
-        buildInputs = [ rust ];
-      };
-      nixosModules.default = import ./module.nix mima;
+    devShells.default = pkgs.mkShell {
+      name = cargoTOML.package.name;
+      buildInputs = [ rust ];
+    };
+    packages.default = import ./package.nix pkgs;
+  }) // {
+    nixosModules.default = import ./module.nix inputs;
   };
 }

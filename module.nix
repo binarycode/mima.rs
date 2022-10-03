@@ -1,4 +1,4 @@
-mima: { config, lib, pkgs, ... }: let
+inputs: { config, lib, pkgs, ... }: let
   networks = config.mima.networks;
 in {
   options.mima = let
@@ -38,7 +38,11 @@ in {
   };
 
   config = {
-    environment.systemPackages = [ mima ];
+    environment.systemPackages = [
+      (import ./package.nix pkgs)
+    ];
+
+    nixpkgs.overlays = [ inputs.rust-overlay.overlay ];
 
     systemd = {
       network = let
