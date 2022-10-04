@@ -1,6 +1,7 @@
 mod command_execution_failed_error;
 mod duplicate_snapshot_error;
 mod invalid_file_error;
+mod missing_configuration_error;
 mod missing_dependencies_error;
 mod missing_ip_address_configuration_error;
 mod monitor_command_error;
@@ -18,6 +19,7 @@ mod unknown_snapshot_error;
 pub use command_execution_failed_error::CommandExecutionFailedError;
 pub use duplicate_snapshot_error::DuplicateSnapshotError;
 pub use invalid_file_error::InvalidFileError;
+pub use missing_configuration_error::MissingConfigurationError;
 pub use missing_dependencies_error::MissingDependenciesError;
 pub use missing_ip_address_configuration_error::MissingIPAddressConfigurationError;
 pub use monitor_command_error::MonitorCommandError;

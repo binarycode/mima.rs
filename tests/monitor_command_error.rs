@@ -1,1 +1,1 @@
-// looks like it's tricky to simlate MonitorCommandError
+// looks like it's tricky to simulate MonitorCommandError

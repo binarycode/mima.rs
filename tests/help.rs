@@ -20,7 +20,7 @@ fn happy_path() {
             mima [OPTIONS] <SUBCOMMAND>
 
         OPTIONS:
-            -c, --config <CONFIG_PATH>    Path to configuration [default: ./mima.toml]
+            -c, --config <CONFIG_PATH>    Path to configuration
             -h, --help                    Print help information
 
         SUBCOMMANDS:

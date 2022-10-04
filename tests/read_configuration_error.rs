@@ -1,21 +1,25 @@
 mod env;
 
+use assert_fs::prelude::*;
 use env::Env;
 
 #[test]
 fn error() {
     let env = Env::new();
 
-    let config = env.child("missing_config.toml");
-    let config_path = config.path().display();
+    let dir = env.child("dir");
+    let dir_path = dir.path().display();
+
+    let child = env.child("dir/foo");
+    child.touch().unwrap();
 
     command_macros::command!(
-        {env.bin()} -c ((config_path)) list-guests
+        {env.bin()} -c ((dir_path)) list-guests
     )
     .assert()
     .failure()
     .stdout("")
     .stderr(indoc::formatdoc! {"
-        error: Failed to read configuration from '{config_path}'
+        error: Failed to read configuration from '{dir_path}'
     "});
 }

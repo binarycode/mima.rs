@@ -4,6 +4,7 @@ use anyhow::Result;
 use clap::AppSettings::DeriveDisplayOrder;
 use clap::Parser;
 use colored::*;
+use mima::errors::MissingConfigurationError;
 use mima::App;
 use std::backtrace::BacktraceStatus::Captured as BacktraceCaptured;
 use std::path::PathBuf;
@@ -16,10 +17,9 @@ use std::path::PathBuf;
 #[clap(version)]
 struct Options {
     #[clap(help = "Path to configuration")]
-    #[clap(default_value = "./mima.toml")]
     #[clap(long = "config")]
     #[clap(short)]
-    config_path: PathBuf,
+    config_path: Option<PathBuf>,
 
     #[clap(subcommand)]
     command: Command,
@@ -200,7 +200,25 @@ fn main() {
 }
 
 fn run(options: Options) -> Result<()> {
-    let app = App::new(&options.config_path)?;
+    let local_config_path = PathBuf::from("./mima.toml");
+    let global_config_path = PathBuf::from("/etc/mima.toml");
+    let config_path = if let Some(path) = options.config_path {
+        if !path.exists() {
+            anyhow::bail!(MissingConfigurationError::new(&[path]));
+        }
+        path
+    } else if local_config_path.exists() {
+        local_config_path
+    } else if global_config_path.exists() {
+        global_config_path
+    } else {
+        anyhow::bail!(MissingConfigurationError::new(&[
+            local_config_path,
+            global_config_path
+        ]));
+    };
+
+    let app = App::new(config_path)?;
 
     match options.command {
         Command::ListGuests => app.list_guests()?,
