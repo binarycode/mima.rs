@@ -13,7 +13,7 @@ fn help() {
     .success()
     .stderr("")
     .stdout(indoc::indoc! {"
-        mima-create-snapshot 0.12.0
+        mima-create-snapshot 0.13.0
         Create new snapshot
 
         USAGE:
