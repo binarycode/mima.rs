@@ -40,6 +40,11 @@ in {
   config = {
     environment.systemPackages = [
       (import ./package.nix pkgs)
+      pkgs.iproute2
+      pkgs.qemu_kvm
+      pkgs.procps
+      pkgs.socat
+      pkgs.which
     ];
 
     nixpkgs.overlays = [ inputs.rust-overlay.overlay ];
