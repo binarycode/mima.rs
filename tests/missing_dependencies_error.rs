@@ -8,9 +8,9 @@ fn error() {
 
     env.create_binary("which", "exit 1");
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) list-guests
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) list-guests
+    }
     .assert()
     .failure()
     .stdout("")

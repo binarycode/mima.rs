@@ -7,10 +7,8 @@ impl App {
     where
         T: AsRef<str>,
     {
-        let guest = self.get_guest(guest_id)?;
-
         let delay = Duration::from_millis(1000);
-        while guest.is_booted()? {
+        while self.is_booted(&guest_id)? {
             std::thread::sleep(delay);
         }
 

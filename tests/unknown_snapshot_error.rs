@@ -8,9 +8,9 @@ fn error() {
 
     env.add_guest_config("zero");
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) apply-snapshot zero root
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) apply-snapshot zero root
+    }
     .assert()
     .failure()
     .stdout("")

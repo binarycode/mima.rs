@@ -11,9 +11,9 @@ fn error() {
     let config_path = config.path().display();
     config.write_str("invalid").unwrap();
 
-    command_macros::command!(
-        {env.bin()} -c ((config_path)) list-guests
-    )
+    command_macros::command! {
+        {env.bin()} --config ((config_path)) list-guests
+    }
     .assert()
     .failure()
     .stdout("")

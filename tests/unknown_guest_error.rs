@@ -6,9 +6,9 @@ use env::Env;
 fn error() {
     let env = Env::new();
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) show-guest-details zero
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) show-guest-details zero
+    }
     .assert()
     .failure()
     .stdout("")

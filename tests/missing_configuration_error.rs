@@ -9,9 +9,9 @@ fn error_when_config_path_is_specified() {
     let config = env.child("missing_config.toml");
     let config_path = config.path().display();
 
-    command_macros::command!(
-        {env.bin()} -c ((config_path)) list-guests
-    )
+    command_macros::command! {
+        {env.bin()} --config ((config_path)) list-guests
+    }
     .assert()
     .failure()
     .stdout("")
@@ -24,9 +24,9 @@ fn error_when_config_path_is_specified() {
 fn error_when_config_path_is_not_specified() {
     let env = Env::new();
 
-    command_macros::command!(
+    command_macros::command! {
         {env.bin()} list-guests
-    )
+    }
     .assert()
     .failure()
     .stdout("")

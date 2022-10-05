@@ -19,9 +19,9 @@ fn error() {
 
     env.stub_default("qemu-img", "echo 'foobar'");
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) apply-snapshot zero root
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) apply-snapshot zero root
+    }
     .assert()
     .failure()
     .stdout("")
@@ -51,9 +51,9 @@ fn error_without_stdout() {
 
     env.stub_default_ok("qemu-img");
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) apply-snapshot zero root
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) apply-snapshot zero root
+    }
     .assert()
     .failure()
     .stdout("")

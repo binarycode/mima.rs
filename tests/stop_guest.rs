@@ -7,9 +7,9 @@ use env::Env;
 fn help() {
     let env = Env::new();
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) help stop-guest
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) help stop-guest
+    }
     .assert()
     .success()
     .stderr("")
@@ -47,21 +47,67 @@ fn simple_happy_path_with_aliases() {
             pidfile_path = '{pidfile_path}'
     "});
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) stop-guest zero
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) stop-guest zero
+    }
     .assert()
     .success()
     .stderr("")
     .stdout("");
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) stop zero
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) stop zero
+    }
     .assert()
     .success()
     .stderr("")
     .stdout("");
+}
+
+#[test]
+fn remote_happy_case() {
+    let mut env = Env::new();
+
+    let monitor_socket = env.child("zero.socket");
+    let monitor_socket_path = monitor_socket.path().display();
+
+    let pidfile = env.child("zero.pid");
+    let pidfile_path = pidfile.path().display();
+
+    env.add_guest_config("zero");
+    env.append_config(indoc::formatdoc! {"
+        [guests.zero]
+            monitor_socket_path = '{monitor_socket_path}'
+            pidfile_path = '{pidfile_path}'
+    "});
+
+    env.stub_default_ok("ssh");
+
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) --host example.com stop-guest --wait 1 zero
+    }
+    .assert()
+    .success()
+    .stderr("")
+    .stdout("");
+
+    env.assert_history(indoc::formatdoc! {"
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com exit 0
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com which ip
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com which pgrep
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com which pkill
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com which qemu-img
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com which qemu-system-x86_64
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com which socat
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com test -e {pidfile_path}
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com test -e {monitor_socket_path}
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com pgrep --full --pidfile {pidfile_path} qemu
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com socat - UNIX-CONNECT:{monitor_socket_path}
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com test -e {pidfile_path}
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com test -e {monitor_socket_path}
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com pgrep --full --pidfile {pidfile_path} qemu
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com pkill --full --pidfile {pidfile_path} qemu
+    "});
 }
 
 #[test]
@@ -85,9 +131,9 @@ fn happy_path_when_the_guest_is_not_running() {
 
     env.stub_default("pgrep", "exit 1");
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) stop-guest zero
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) stop-guest zero
+    }
     .assert()
     .success()
     .stderr("")
@@ -120,9 +166,9 @@ fn happy_path_with_force_flag() {
     env.stub_default_ok("pgrep");
     env.stub_default_ok("pkill");
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) stop-guest --force zero
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) stop-guest --force zero
+    }
     .assert()
     .success()
     .stderr("")
@@ -165,9 +211,9 @@ fn happy_path_with_soft_shutdown() {
         format!("touch {flag_path}"),
     );
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) stop-guest zero
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) stop-guest zero
+    }
     .assert()
     .success()
     .stderr("")
@@ -203,9 +249,9 @@ fn happy_path_with_soft_shutdown_timeout() {
     env.stub_default_ok("pkill");
     env.stub_default_ok("socat");
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) stop-guest --wait 1 zero
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) stop-guest --wait 1 zero
+    }
     .assert()
     .success()
     .stderr("")
@@ -223,9 +269,9 @@ fn happy_path_with_soft_shutdown_timeout() {
 fn no_arguments() {
     let env = Env::new();
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) stop-guest
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) stop-guest
+    }
     .assert()
     .failure()
     .stdout("")
@@ -244,9 +290,9 @@ fn no_arguments() {
 fn more_than_one_argument() {
     let env = Env::new();
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) stop-guest one two
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) stop-guest one two
+    }
     .assert()
     .failure()
     .stdout("")
@@ -264,9 +310,9 @@ fn more_than_one_argument() {
 fn unknown_guest() {
     let env = Env::new();
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) stop-guest zero
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) stop-guest zero
+    }
     .assert()
     .failure()
     .stdout("")
@@ -304,9 +350,9 @@ fn pkill_failure() {
         "},
     );
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) stop-guest --force zero
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) stop-guest --force zero
+    }
     .assert()
     .failure()
     .stdout("")

@@ -15,6 +15,8 @@ impl App {
         T: AsRef<str>,
         U: AsRef<Path>,
     {
+        self.forbid_remote_execution()?;
+
         let path = path.as_ref();
 
         if !path.is_file() {

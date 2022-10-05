@@ -28,9 +28,9 @@ fn error() {
         "#},
     );
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) delete-snapshot zero root
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) delete-snapshot zero root
+    }
     .assert()
     .failure()
     .stdout("")
@@ -72,9 +72,9 @@ fn error_without_stdout() {
         "#},
     );
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) delete-snapshot zero root
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) delete-snapshot zero root
+    }
     .assert()
     .failure()
     .stdout("")
@@ -112,9 +112,9 @@ fn error_without_stderr() {
         "#},
     );
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) delete-snapshot zero root
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) delete-snapshot zero root
+    }
     .assert()
     .failure()
     .stdout("")
@@ -145,9 +145,9 @@ fn error_without_streams() {
 
     env.stub_default("qemu-img", "exit 1");
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) delete-snapshot zero root
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) delete-snapshot zero root
+    }
     .assert()
     .failure()
     .stdout("")

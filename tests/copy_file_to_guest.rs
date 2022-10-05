@@ -7,9 +7,9 @@ use env::Env;
 fn help() {
     let env = Env::new();
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) help copy-file-to-guest
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) help copy-file-to-guest
+    }
     .assert()
     .success()
     .stderr("")
@@ -47,9 +47,9 @@ fn happy_path_with_aliases() {
     env.stub_default_ok("scp");
     env.stub_default_ok("ssh");
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) copy-file-to-guest zero ((file_path))
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) copy-file-to-guest zero ((file_path))
+    }
     .assert()
     .success()
     .stderr("")
@@ -63,9 +63,9 @@ fn happy_path_with_aliases() {
 
     env.assert_history(&expected_history);
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) copy zero ((file_path))
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) copy zero ((file_path))
+    }
     .assert()
     .success()
     .stderr("")
@@ -73,9 +73,9 @@ fn happy_path_with_aliases() {
 
     env.assert_history(&expected_history);
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) upload zero ((file_path))
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) upload zero ((file_path))
+    }
     .assert()
     .success()
     .stderr("")
@@ -105,9 +105,9 @@ fn connection_is_established_from_second_attempt() {
         "exit 1",
     );
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) copy-file-to-guest zero ((file_path))
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) copy-file-to-guest zero ((file_path))
+    }
     .assert()
     .success()
     .stderr("")
@@ -118,6 +118,28 @@ fn connection_is_established_from_second_attempt() {
         ssh -o BatchMode=yes -o ConnectTimeout=2 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@1.1.1.1 exit 0
         ssh -o BatchMode=yes -o ConnectTimeout=2 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -A root@1.1.1.1 mkdir -p /root/mima
         scp -o BatchMode=yes -o ConnectTimeout=2 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null {file_path} root@1.1.1.1:/root/mima
+    "});
+}
+
+#[test]
+fn remote_failure() {
+    let mut env = Env::new();
+
+    let file = env.child("file");
+    let file_path = file.path().display();
+
+    env.add_guest_config("zero");
+
+    env.stub_default_ok("ssh");
+
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) --host example.com copy-file-to-guest zero ((file_path))
+    }
+    .assert()
+    .failure()
+    .stdout("")
+    .stderr(indoc::indoc! {"
+        error: argument '--host' is not allowed for this command
     "});
 }
 
@@ -148,9 +170,9 @@ fn failure_to_establish_connection() {
         "},
     );
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) copy-file-to-guest --timeout 3 zero ((file_path))
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) copy-file-to-guest --timeout 3 zero ((file_path))
+    }
     .assert()
     .failure()
     .stdout("")
@@ -177,9 +199,9 @@ fn failure_when_path_is_not_a_file() {
 
     env.add_guest_config("zero");
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) copy-file-to-guest zero ((file_path))
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) copy-file-to-guest zero ((file_path))
+    }
     .assert()
     .failure()
     .stdout("")
@@ -212,9 +234,9 @@ fn ssh_failure() {
         "},
     );
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) copy-file-to-guest zero ((file_path))
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) copy-file-to-guest zero ((file_path))
+    }
     .assert()
     .failure()
     .stdout("")
@@ -256,9 +278,9 @@ fn scp_failure() {
         "},
     );
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) copy-file-to-guest zero ((file_path))
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) copy-file-to-guest zero ((file_path))
+    }
     .assert()
     .failure()
     .stdout("")
@@ -281,9 +303,9 @@ fn scp_failure() {
 fn no_arguments() {
     let env = Env::new();
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) copy-file-to-guest
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) copy-file-to-guest
+    }
     .assert()
     .failure()
     .stdout("")
@@ -303,9 +325,9 @@ fn no_arguments() {
 fn one_argument() {
     let env = Env::new();
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) copy-file-to-guest one
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) copy-file-to-guest one
+    }
     .assert()
     .failure()
     .stdout("")
@@ -324,9 +346,9 @@ fn one_argument() {
 fn more_than_two_arguments() {
     let env = Env::new();
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) copy-file-to-guest one two three
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) copy-file-to-guest one two three
+    }
     .assert()
     .failure()
     .stdout("")
@@ -348,9 +370,9 @@ fn unknown_guest() {
     let file_path = file.path().display();
     file.touch().unwrap();
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) copy-file-to-guest zero ((file_path))
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) copy-file-to-guest zero ((file_path))
+    }
     .assert()
     .failure()
     .stdout("")

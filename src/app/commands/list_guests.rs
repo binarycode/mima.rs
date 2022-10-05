@@ -11,7 +11,7 @@ impl App {
             writeln!(
                 tw,
                 "{id}\t{booted}\t{spice_port}\t{description}",
-                booted = guest.is_booted()?,
+                booted = self.is_booted(id)?,
                 description = guest.description,
                 spice_port = guest.spice_port,
             )

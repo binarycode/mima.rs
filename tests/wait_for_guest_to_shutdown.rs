@@ -7,9 +7,9 @@ use env::Env;
 fn help() {
     let env = Env::new();
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) help "wait-for-guest-to-shutdown"
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) help "wait-for-guest-to-shutdown"
+    }
     .assert()
     .success()
     .stderr("")
@@ -34,6 +34,55 @@ fn simple_happy_path_with_alias() {
 
     let monitor_socket = env.child("zero.socket");
     let monitor_socket_path = monitor_socket.path().display();
+    monitor_socket.touch().unwrap();
+
+    let pidfile = env.child("zero.pid");
+    let pidfile_path = pidfile.path().display();
+    pidfile.touch().unwrap();
+
+    env.add_guest_config("zero");
+    env.append_config(indoc::formatdoc! {"
+        [guests.zero]
+            monitor_socket_path = '{monitor_socket_path}'
+            pidfile_path = '{pidfile_path}'
+    "});
+
+    env.stub(
+        format!("pgrep --full --pidfile {pidfile_path} qemu"),
+        "exit 1",
+    );
+
+    let expected_history = indoc::formatdoc! {"
+        pgrep --full --pidfile {pidfile_path} qemu
+    "};
+
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) "wait-for-guest-to-shutdown" zero
+    }
+    .assert()
+    .success()
+    .stderr("")
+    .stdout("");
+
+    env.assert_history(&expected_history);
+
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) wait zero
+    }
+    .assert()
+    .success()
+    .stderr("")
+    .stdout("");
+
+    env.assert_history(&expected_history);
+}
+
+#[test]
+fn remote_happy_path() {
+    let mut env = Env::new();
+
+    let monitor_socket = env.child("zero.socket");
+    let monitor_socket_path = monitor_socket.path().display();
 
     let pidfile = env.child("zero.pid");
     let pidfile_path = pidfile.path().display();
@@ -45,21 +94,32 @@ fn simple_happy_path_with_alias() {
             pidfile_path = '{pidfile_path}'
     "});
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) "wait-for-guest-to-shutdown" zero
-    )
+    env.stub_default_ok("ssh");
+    env.stub(
+        format!("ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com pgrep --full --pidfile {pidfile_path} qemu"),
+        "exit 1",
+    );
+
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) --host example.com "wait-for-guest-to-shutdown" zero
+    }
     .assert()
     .success()
     .stderr("")
     .stdout("");
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) wait zero
-    )
-    .assert()
-    .success()
-    .stderr("")
-    .stdout("");
+    env.assert_history(indoc::formatdoc! {"
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com exit 0
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com which ip
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com which pgrep
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com which pkill
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com which qemu-img
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com which qemu-system-x86_64
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com which socat
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com test -e {pidfile_path}
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com test -e {monitor_socket_path}
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com pgrep --full --pidfile {pidfile_path} qemu
+    "});
 }
 
 #[test]
@@ -92,9 +152,9 @@ fn happy_path_with_wait() {
         "},
     );
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) "wait-for-guest-to-shutdown" zero
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) "wait-for-guest-to-shutdown" zero
+    }
     .assert()
     .success()
     .stderr("")
@@ -110,9 +170,9 @@ fn happy_path_with_wait() {
 fn no_arguments() {
     let env = Env::new();
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) "wait-for-guest-to-shutdown"
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) "wait-for-guest-to-shutdown"
+    }
     .assert()
     .failure()
     .stdout("")
@@ -131,9 +191,9 @@ fn no_arguments() {
 fn more_than_one_argument() {
     let env = Env::new();
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) "wait-for-guest-to-shutdown" one two
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) "wait-for-guest-to-shutdown" one two
+    }
     .assert()
     .failure()
     .stdout("")
@@ -151,9 +211,9 @@ fn more_than_one_argument() {
 fn unknown_guest() {
     let env = Env::new();
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) "wait-for-guest-to-shutdown" zero
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) "wait-for-guest-to-shutdown" zero
+    }
     .assert()
     .failure()
     .stdout("")

@@ -7,9 +7,9 @@ use env::Env;
 fn help() {
     let env = Env::new();
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) help execute-file-on-guest
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) help execute-file-on-guest
+    }
     .assert()
     .success()
     .stderr("")
@@ -48,9 +48,9 @@ fn happy_path_with_aliases() {
     env.stub_default_ok("scp");
     env.stub_default_ok("ssh");
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) execute-file-on-guest zero ((script_path))
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) execute-file-on-guest zero ((script_path))
+    }
     .assert()
     .success()
     .stderr("")
@@ -66,9 +66,9 @@ fn happy_path_with_aliases() {
 
     env.assert_history(&expected_history);
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) execute-script-on-guest zero ((script_path))
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) execute-script-on-guest zero ((script_path))
+    }
     .assert()
     .success()
     .stderr("")
@@ -76,9 +76,9 @@ fn happy_path_with_aliases() {
 
     env.assert_history(&expected_history);
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) execute zero ((script_path))
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) execute zero ((script_path))
+    }
     .assert()
     .success()
     .stderr("")
@@ -86,9 +86,9 @@ fn happy_path_with_aliases() {
 
     env.assert_history(&expected_history);
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) run zero ((script_path))
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) run zero ((script_path))
+    }
     .assert()
     .success()
     .stderr("")
@@ -114,9 +114,9 @@ fn happy_path_with_extra_arguments() {
     env.stub_default_ok("scp");
     env.stub_default_ok("ssh");
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) execute-file-on-guest zero ((script_path)) -- foo bar
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) execute-file-on-guest zero ((script_path)) -- foo bar
+    }
     .assert()
     .success()
     .stderr("")
@@ -152,9 +152,9 @@ fn connection_is_established_from_second_attempt() {
         "exit 1",
     );
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) execute-file-on-guest zero ((script_path))
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) execute-file-on-guest zero ((script_path))
+    }
     .assert()
     .success()
     .stderr("")
@@ -167,6 +167,28 @@ fn connection_is_established_from_second_attempt() {
         scp -o BatchMode=yes -o ConnectTimeout=2 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null {script_path} root@1.1.1.1:/root/mima
         ssh -o BatchMode=yes -o ConnectTimeout=2 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -A root@1.1.1.1 chmod +x /root/mima/script
         ssh -o BatchMode=yes -o ConnectTimeout=2 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -A root@1.1.1.1 /root/mima/script
+    "});
+}
+
+#[test]
+fn remote_failure() {
+    let mut env = Env::new();
+
+    let script = env.child("script");
+    let script_path = script.path().display();
+
+    env.add_guest_config("zero");
+
+    env.stub_default_ok("ssh");
+
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) --host example.com execute-file-on-guest zero ((script_path))
+    }
+    .assert()
+    .failure()
+    .stdout("")
+    .stderr(indoc::indoc! {"
+        error: argument '--host' is not allowed for this command
     "});
 }
 
@@ -197,9 +219,9 @@ fn failure_to_establish_connection() {
         "},
     );
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) execute-file-on-guest --timeout 3 zero ((script_path))
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) execute-file-on-guest --timeout 3 zero ((script_path))
+    }
     .assert()
     .failure()
     .stdout("")
@@ -226,9 +248,9 @@ fn failure_when_path_is_not_a_file() {
 
     env.add_guest_config("zero");
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) execute-file-on-guest zero ((script_path))
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) execute-file-on-guest zero ((script_path))
+    }
     .assert()
     .failure()
     .stdout("")
@@ -261,9 +283,9 @@ fn first_ssh_failure() {
         "},
     );
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) execute-file-on-guest zero ((script_path))
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) execute-file-on-guest zero ((script_path))
+    }
     .assert()
     .failure()
     .stdout("")
@@ -305,9 +327,9 @@ fn scp_failure() {
         "},
     );
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) execute-file-on-guest zero ((script_path))
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) execute-file-on-guest zero ((script_path))
+    }
     .assert()
     .failure()
     .stdout("")
@@ -351,9 +373,9 @@ fn second_ssh_failure() {
         "},
     );
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) execute-file-on-guest zero ((script_path))
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) execute-file-on-guest zero ((script_path))
+    }
     .assert()
     .failure()
     .stdout("")
@@ -398,9 +420,9 @@ fn third_ssh_failure() {
         "},
     );
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) execute-file-on-guest zero ((script_path))
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) execute-file-on-guest zero ((script_path))
+    }
     .assert()
     .failure()
     .stdout("")
@@ -425,9 +447,9 @@ fn third_ssh_failure() {
 fn no_arguments() {
     let env = Env::new();
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) execute-file-on-guest
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) execute-file-on-guest
+    }
     .assert()
     .failure()
     .stdout("")
@@ -447,9 +469,9 @@ fn no_arguments() {
 fn one_argument() {
     let env = Env::new();
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) execute-file-on-guest one
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) execute-file-on-guest one
+    }
     .assert()
     .failure()
     .stdout("")
@@ -468,9 +490,9 @@ fn one_argument() {
 fn more_than_two_arguments() {
     let env = Env::new();
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) execute-file-on-guest one two three
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) execute-file-on-guest one two three
+    }
     .assert()
     .failure()
     .stdout("")
@@ -492,9 +514,9 @@ fn unknown_guest() {
     let script_path = script.path().display();
     script.touch().unwrap();
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) execute-file-on-guest zero ((script_path))
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) execute-file-on-guest zero ((script_path))
+    }
     .assert()
     .failure()
     .stdout("")

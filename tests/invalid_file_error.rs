@@ -9,9 +9,9 @@ fn error() {
     let file = env.child("file");
     let file_path = file.path().display();
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) copy-file-to-guest zero ((file_path))
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) copy-file-to-guest zero ((file_path))
+    }
     .assert()
     .failure()
     .stdout("")

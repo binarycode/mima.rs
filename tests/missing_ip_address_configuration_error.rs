@@ -13,9 +13,9 @@ fn error() {
 
     env.add_guest_config("zero");
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) execute-script-on-guest zero ((script_path))
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) execute-script-on-guest zero ((script_path))
+    }
     .assert()
     .failure()
     .stdout("")

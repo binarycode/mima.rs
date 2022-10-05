@@ -21,6 +21,10 @@ struct Options {
     #[clap(short)]
     config_path: Option<PathBuf>,
 
+    #[clap(help = "Host address")]
+    #[clap(long = "host")]
+    host: Option<String>,
+
     #[clap(subcommand)]
     command: Command,
 }
@@ -218,7 +222,7 @@ fn run(options: Options) -> Result<()> {
         ]));
     };
 
-    let app = App::new(config_path)?;
+    let app = App::new(config_path, options.host)?;
 
     match options.command {
         Command::ListGuests => app.list_guests()?,

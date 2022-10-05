@@ -6,9 +6,9 @@ use env::Env;
 fn help() {
     let env = Env::new();
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) help list-snapshots
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) help list-snapshots
+    }
     .assert()
     .success()
     .stderr("")
@@ -81,9 +81,9 @@ fn happy_path() {
         "#},
     );
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) list-snapshots zero
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) list-snapshots zero
+    }
     .assert()
     .success()
     .stderr("")
@@ -94,6 +94,84 @@ fn happy_path() {
 
     env.assert_history(indoc::formatdoc! {"
         qemu-img info --force-share --output=json {sda_path}
+    "});
+}
+
+#[test]
+fn remote_happy_path() {
+    let mut env = Env::new();
+
+    let sda = env.child("zero-sda.qcow2");
+    let sda_path = sda.path().display();
+
+    env.add_guest_config("zero");
+    env.append_config(indoc::formatdoc! {"
+        [guests.zero]
+            disks = [
+                {{ label = 'sda', path = '{sda_path}', size = 20 }},
+            ]
+    "});
+
+    env.stub_default_ok("ssh");
+    env.stub(
+        format!("ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com qemu-img info --force-share --output=json {sda_path}"),
+        indoc::indoc! {r#"
+            echo '
+                {
+                    "snapshots": [
+                        {
+                            "icount": 0,
+                            "vm-clock-nsec": 0,
+                            "name": "root",
+                            "date-sec": 1,
+                            "date-nsec": 0,
+                            "vm-clock-sec": 0,
+                            "id": "0",
+                            "vm-state-size": 0
+                        }
+                    ],
+                    "virtual-size": 21474836480,
+                    "filename": "zero-sda.qcow2",
+                    "cluster-size": 65536,
+                    "format": "qcow2",
+                    "actual-size": 0,
+                    "format-specific": {
+                        "type": "qcow2",
+                        "data": {
+                            "compat": "1.1",
+                            "compression-type": "zlib",
+                            "lazy-refcounts": false,
+                            "refcount-bits": 16,
+                            "corrupt": false,
+                            "extended-l2": false
+                        }
+                    },
+                    "dirty-flag": false
+                }
+            '
+        "#},
+    );
+
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) --host example.com list-snapshots zero
+    }
+    .assert()
+    .success()
+    .stderr("")
+    .stdout(indoc::indoc! {"
+        ID    TIMESTAMP
+        root  1970-01-01 00:00:01
+    "});
+
+    env.assert_history(indoc::formatdoc! {"
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com exit 0
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com which ip
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com which pgrep
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com which pkill
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com which qemu-img
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com which qemu-system-x86_64
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com which socat
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com qemu-img info --force-share --output=json {sda_path}
     "});
 }
 
@@ -139,9 +217,9 @@ fn no_snapshots() {
         "#},
     );
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) list-snapshots zero
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) list-snapshots zero
+    }
     .assert()
     .success()
     .stderr("")
@@ -218,9 +296,9 @@ fn multiple_snapshots() {
         "#},
     );
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) list-snapshots zero
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) list-snapshots zero
+    }
     .assert()
     .success()
     .stderr("")
@@ -381,9 +459,9 @@ fn common_snapshots_for_multiple_disks() {
         "#},
     );
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) list-snapshots zero
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) list-snapshots zero
+    }
     .assert()
     .success()
     .stderr("")
@@ -515,9 +593,9 @@ fn big_difference_in_snapshot_timestamp_for_multiple_disks() {
         "#},
     );
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) list-snapshots zero
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) list-snapshots zero
+    }
     .assert()
     .success()
     .stderr("")
@@ -536,9 +614,9 @@ fn big_difference_in_snapshot_timestamp_for_multiple_disks() {
 fn no_arguments() {
     let env = Env::new();
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) list-snapshots
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) list-snapshots
+    }
     .assert()
     .failure()
     .stdout("")
@@ -557,9 +635,9 @@ fn no_arguments() {
 fn more_than_one_argument() {
     let env = Env::new();
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) list-snapshots one two
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) list-snapshots one two
+    }
     .assert()
     .failure()
     .stdout("")
@@ -577,9 +655,9 @@ fn more_than_one_argument() {
 fn unknown_guest() {
     let env = Env::new();
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) list-snapshots zero
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) list-snapshots zero
+    }
     .assert()
     .failure()
     .stdout("")
@@ -611,9 +689,9 @@ fn list_snapshots_failure() {
         "#},
     );
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) list-snapshots zero
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) list-snapshots zero
+    }
     .assert()
     .failure()
     .stdout("")

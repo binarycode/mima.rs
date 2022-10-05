@@ -1,5 +1,4 @@
 use crate::command::Execute;
-use crate::errors::ParentFolderCreationError;
 use crate::App;
 use anyhow::Result;
 
@@ -14,31 +13,22 @@ impl App {
         for disk in disks {
             let path = &disk.path;
 
-            if path.exists() {
+            if self.exists(path) {
                 continue;
             }
 
-            if let Some(parent_path) = path.parent() {
-                std::fs::create_dir_all(parent_path)
-                    .map_err(|_| ParentFolderCreationError::new(path, parent_path))?;
-            }
+            self.create_parent_dir(path)?;
 
-            command_macros::command!(
-                qemu-img create
-                -q
-                -fqcow2
-                -olazy_refcounts=on
-                -opreallocation=metadata
-                (path)
-                ((disk.size))G
-            )
+            let qemu_img = self.prepare_host_command("qemu-img");
+            command_macros::command! {
+                {qemu_img} create -q -fqcow2 -olazy_refcounts=on -opreallocation=metadata (path) ((disk.size))G
+            }
             .execute()?;
 
-            command_macros::command!(
-                qemu-img snapshot
-                -croot
-                (path)
-            )
+            let qemu_img = self.prepare_host_command("qemu-img");
+            command_macros::command! {
+                {qemu_img} snapshot -croot (path)
+            }
             .execute()?;
         }
 

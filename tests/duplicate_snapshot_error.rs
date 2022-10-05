@@ -56,9 +56,9 @@ fn error() {
         "#},
     );
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) create-snapshot zero root
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) create-snapshot zero root
+    }
     .assert()
     .failure()
     .stdout("")

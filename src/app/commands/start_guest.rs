@@ -1,11 +1,6 @@
 use crate::command::Execute;
-use crate::errors::ParentFolderCreationError;
-use crate::errors::SetPermissionsError;
 use crate::App;
 use anyhow::Result;
-use std::fs::Permissions;
-use std::os::unix::fs::PermissionsExt;
-use std::path::Path;
 use std::path::PathBuf;
 
 impl App {
@@ -24,15 +19,16 @@ impl App {
 
         let guest = self.get_guest(guest_id)?;
 
-        if guest.is_booted()? {
+        if self.is_booted(guest_id)? {
             return Ok(());
         }
 
-        create_parent_dir(&guest.monitor_socket_path)?;
-        create_parent_dir(&guest.pidfile_path)?;
+        self.create_parent_dir(&guest.monitor_socket_path)?;
+        self.create_parent_dir(&guest.pidfile_path)?;
 
-        command_macros::command!(
-            qemu-system-x86_64
+        let qemu = self.prepare_host_command("qemu-system-x86_64");
+        command_macros::command! {
+            {qemu}
             -name (guest_id)
             -machine q35,accel=kvm
             -cpu host
@@ -69,43 +65,24 @@ impl App {
             if let Some(path) = floppy_path {
                 -drive "if"=floppy,id=drive.fd0,format=raw,file=fat:floppy:rw:(path)
             }
-        )
+        }
         .execute()?;
 
         for network_interface in &guest.network_interfaces {
             let network = self.get_network(&network_interface.network_id)?;
-            command_macros::command!(
-                ip link set (network_interface.tap_name) master (network.bridge_name) up
-            )
+            let ip = self.prepare_host_command("ip");
+            command_macros::command! {
+                {ip} link set (network_interface.tap_name) master (network.bridge_name) up
+            }
             .execute()?;
         }
 
-        if guest.pidfile_path.exists() {
-            let permissions = Permissions::from_mode(0o644);
-            std::fs::set_permissions(&guest.pidfile_path, permissions.clone())
-                .map_err(|_| SetPermissionsError::new(&guest.pidfile_path, permissions))?;
+        let chmod = self.prepare_host_command("chmod");
+        command_macros::command! {
+            {chmod} 644 (guest.pidfile_path)
         }
+        .execute()?;
 
         Ok(())
     }
-}
-
-fn create_parent_dir<T>(path: T) -> Result<()>
-where
-    T: AsRef<Path>,
-{
-    let path = path.as_ref();
-
-    if let Some(parent_path) = path.parent() {
-        if !parent_path.exists() {
-            std::fs::create_dir_all(parent_path)
-                .map_err(|_| ParentFolderCreationError::new(path, parent_path))?;
-
-            let permissions = Permissions::from_mode(0o755);
-            std::fs::set_permissions(parent_path, permissions.clone())
-                .map_err(|_| SetPermissionsError::new(parent_path, permissions))?;
-        }
-    }
-
-    Ok(())
 }

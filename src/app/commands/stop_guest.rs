@@ -16,16 +16,15 @@ impl App {
 
         let guest = self.get_guest(&guest_id)?;
 
-        if !guest.is_booted()? {
+        if !self.is_booted(guest_id)? {
             return Ok(());
         }
 
         if !force {
-            let mut command = command_macros::command!(
-                socat
-                -
-                UNIX-CONNECT:(guest.monitor_socket_path)
-            );
+            let socat = self.prepare_host_command("socat");
+            let mut command = command_macros::command! {
+                {socat} - UNIX-CONNECT:(guest.monitor_socket_path)
+            };
             let monitor = command
                 .stdin(Stdio::piped())
                 .stderr(Stdio::null())
@@ -42,18 +41,16 @@ impl App {
             for _ in 0..wait {
                 std::thread::sleep(delay);
 
-                if !guest.is_booted()? {
+                if !self.is_booted(guest_id)? {
                     return Ok(());
                 }
             }
         }
 
-        command_macros::command!(
-            pkill
-            --full
-            --pidfile (guest.pidfile_path)
-            qemu
-        )
+        let pkill = self.prepare_host_command("pkill");
+        command_macros::command! {
+            {pkill} --full --pidfile (guest.pidfile_path) qemu
+        }
         .execute()?;
 
         Ok(())

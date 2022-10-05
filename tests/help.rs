@@ -6,9 +6,9 @@ use env::Env;
 fn happy_path() {
     let env = Env::new();
 
-    command_macros::command!(
+    command_macros::command! {
         {env.bin()} help
-    )
+    }
     .assert()
     .success()
     .stderr("")
@@ -21,6 +21,7 @@ fn happy_path() {
 
         OPTIONS:
             -c, --config <CONFIG_PATH>    Path to configuration
+                --host <HOST>             Host address
             -h, --help                    Print help information
 
         SUBCOMMANDS:

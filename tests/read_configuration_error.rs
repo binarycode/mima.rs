@@ -13,9 +13,9 @@ fn error() {
     let child = env.child("dir/foo");
     child.touch().unwrap();
 
-    command_macros::command!(
-        {env.bin()} -c ((dir_path)) list-guests
-    )
+    command_macros::command! {
+        {env.bin()} --config ((dir_path)) list-guests
+    }
     .assert()
     .failure()
     .stdout("")

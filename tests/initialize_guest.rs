@@ -7,9 +7,9 @@ use env::Env;
 fn help() {
     let env = Env::new();
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) help initialize-guest
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) help initialize-guest
+    }
     .assert()
     .success()
     .stderr("")
@@ -45,9 +45,9 @@ fn happy_path_with_aliases() {
 
     env.stub_default_ok("qemu-img");
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) initialize-guest zero
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) initialize-guest zero
+    }
     .assert()
     .success()
     .stdout("")
@@ -60,9 +60,9 @@ fn happy_path_with_aliases() {
 
     env.assert_history(&expected_history);
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) init zero
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) init zero
+    }
     .assert()
     .success()
     .stdout("")
@@ -70,9 +70,9 @@ fn happy_path_with_aliases() {
 
     env.assert_history(&expected_history);
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) init-guest zero
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) init-guest zero
+    }
     .assert()
     .success()
     .stdout("")
@@ -102,9 +102,9 @@ fn happy_path_with_multiple_disks() {
 
     env.stub_default_ok("qemu-img");
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) initialize-guest zero
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) initialize-guest zero
+    }
     .assert()
     .success()
     .stdout("")
@@ -115,6 +115,53 @@ fn happy_path_with_multiple_disks() {
         qemu-img snapshot -croot {sda_path}
         qemu-img create -q -fqcow2 -olazy_refcounts=on -opreallocation=metadata {sdb_path} 100G
         qemu-img snapshot -croot {sdb_path}
+    "});
+}
+
+#[test]
+fn remote_happy_path() {
+    let mut env = Env::new();
+
+    let parent = env.child("parent");
+    let parent_path = parent.path().display();
+
+    let sda = env.child("parent/zero-sda.qcow2");
+    let sda_path = sda.path().display();
+
+    env.add_guest_config("zero");
+    env.append_config(indoc::formatdoc! {"
+        [guests.zero]
+            disks = [
+                {{ label = 'sda', path = '{sda_path}', size = 20 }},
+            ]
+    "});
+
+    env.stub_default_ok("ssh");
+    env.stub(
+        format!("ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com test -e {sda_path}"),
+        "exit 1",
+    );
+
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) --host example.com initialize-guest zero
+    }
+    .assert()
+    .success()
+    .stdout("")
+    .stderr("");
+
+    env.assert_history(indoc::formatdoc! {"
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com exit 0
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com which ip
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com which pgrep
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com which pkill
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com which qemu-img
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com which qemu-system-x86_64
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com which socat
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com test -e {sda_path}
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com mkdir --mode 0755 -p {parent_path}
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com qemu-img create -q -fqcow2 -olazy_refcounts=on -opreallocation=metadata {sda_path} 20G
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com qemu-img snapshot -croot {sda_path}
     "});
 }
 
@@ -134,9 +181,9 @@ fn noop_when_path_exists() {
             ]
     "});
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) initialize-guest zero
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) initialize-guest zero
+    }
     .assert()
     .success()
     .stdout("")
@@ -149,9 +196,9 @@ fn noop_when_path_exists() {
 fn no_arguments() {
     let env = Env::new();
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) initialize-guest
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) initialize-guest
+    }
     .assert()
     .failure()
     .stdout("")
@@ -170,9 +217,9 @@ fn no_arguments() {
 fn more_than_one_argument() {
     let env = Env::new();
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) initialize-guest one two
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) initialize-guest one two
+    }
     .assert()
     .failure()
     .stdout("")
@@ -190,9 +237,9 @@ fn more_than_one_argument() {
 fn unknown_guest() {
     let env = Env::new();
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) initialize-guest zero
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) initialize-guest zero
+    }
     .assert()
     .failure()
     .stdout("")
@@ -224,9 +271,9 @@ fn disk_creation_failure() {
         "#},
     );
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) initialize-guest zero
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) initialize-guest zero
+    }
     .assert()
     .failure()
     .stdout("")
@@ -268,9 +315,9 @@ fn snapshot_creation_failure() {
         "#},
     );
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) initialize-guest zero
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) initialize-guest zero
+    }
     .assert()
     .failure()
     .stdout("")

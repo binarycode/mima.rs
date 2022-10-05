@@ -6,9 +6,9 @@ use env::Env;
 fn help() {
     let env = Env::new();
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) help delete-snapshot
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) help delete-snapshot
+    }
     .assert()
     .success()
     .stderr("")
@@ -45,9 +45,9 @@ fn happy_path() {
 
     env.stub_default_ok("qemu-img");
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) delete-snapshot zero root
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) delete-snapshot zero root
+    }
     .assert()
     .success()
     .stdout("")
@@ -55,6 +55,43 @@ fn happy_path() {
 
     env.assert_history(indoc::formatdoc! {"
         qemu-img snapshot -droot {sda_path}
+    "});
+}
+
+#[test]
+fn remote_happy_path() {
+    let mut env = Env::new();
+
+    let sda = env.child("zero-sda.qcow2");
+    let sda_path = sda.path().display();
+
+    env.add_guest_config("zero");
+    env.append_config(indoc::formatdoc! {"
+        [guests.zero]
+            disks = [
+                {{ label = 'sda', path = '{sda_path}', size = 20 }},
+            ]
+    "});
+
+    env.stub_default_ok("ssh");
+
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) --host example.com delete-snapshot zero root
+    }
+    .assert()
+    .success()
+    .stdout("")
+    .stderr("");
+
+    env.assert_history(indoc::formatdoc! {"
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com exit 0
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com which ip
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com which pgrep
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com which pkill
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com which qemu-img
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com which qemu-system-x86_64
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com which socat
+        ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@example.com qemu-img snapshot -droot {sda_path}
     "});
 }
 
@@ -79,9 +116,9 @@ fn multiple_disks() {
 
     env.stub_default_ok("qemu-img");
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) delete-snapshot zero root
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) delete-snapshot zero root
+    }
     .assert()
     .success()
     .stdout("")
@@ -97,9 +134,9 @@ fn multiple_disks() {
 fn no_arguments() {
     let env = Env::new();
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) delete-snapshot
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) delete-snapshot
+    }
     .assert()
     .failure()
     .stdout("")
@@ -119,9 +156,9 @@ fn no_arguments() {
 fn one_argument() {
     let env = Env::new();
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) delete-snapshot one
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) delete-snapshot one
+    }
     .assert()
     .failure()
     .stdout("")
@@ -140,9 +177,9 @@ fn one_argument() {
 fn more_than_two_arguments() {
     let env = Env::new();
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) delete-snapshot one two three
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) delete-snapshot one two three
+    }
     .assert()
     .failure()
     .stdout("")
@@ -160,9 +197,9 @@ fn more_than_two_arguments() {
 fn unknown_guest() {
     let env = Env::new();
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) delete-snapshot zero root
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) delete-snapshot zero root
+    }
     .assert()
     .failure()
     .stdout("")
@@ -195,9 +232,9 @@ fn snapshot_removal_failure() {
         "#},
     );
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) delete-snapshot zero root
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) delete-snapshot zero root
+    }
     .assert()
     .failure()
     .stdout("")

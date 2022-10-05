@@ -16,9 +16,9 @@ fn error() {
 
     env.stub_default_ok("qemu-system-x86_64");
 
-    command_macros::command!(
-        {env.bin()} -c (env.config_path()) start-guest zero
-    )
+    command_macros::command! {
+        {env.bin()} --config (env.config_path()) start-guest zero
+    }
     .assert()
     .failure()
     .stdout("")
