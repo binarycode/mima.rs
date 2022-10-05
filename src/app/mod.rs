@@ -1,4 +1,11 @@
 mod commands;
+mod disk;
+mod guest;
+mod guest_connection;
+mod host_connection;
+mod network;
+mod network_interface;
+mod snapshot;
 
 use crate::command::Execute;
 use crate::errors::ForbiddenRemoteExecutionError;
@@ -10,16 +17,22 @@ use crate::errors::ReadConfigurationError;
 use crate::errors::UnknownGuestError;
 use crate::errors::UnknownNetworkError;
 use anyhow::Result;
+use disk::Disk;
+use guest::Guest;
+use guest_connection::GuestConnection;
+use host_connection::HostConnection;
+use network::Network;
 use serde::Deserialize;
+use snapshot::Snapshot;
 use std::collections::BTreeMap;
 use std::collections::HashMap;
 use std::path::Path;
-use std::path::PathBuf;
 use std::process::Command;
 use std::process::Stdio;
 use std::time::Duration;
 
 const GUEST_WORKSPACE_PATH: &str = "/root/mima";
+pub const SSH_CONNECTION_TIMEOUT: u64 = 100;
 
 #[derive(Deserialize)]
 pub struct App {
@@ -28,56 +41,6 @@ pub struct App {
 
     #[serde(skip_deserializing)]
     host_connection: Option<HostConnection>,
-}
-
-#[derive(Deserialize)]
-pub struct Disk {
-    pub label: String,
-    pub path: PathBuf,
-    pub size: i64,
-}
-
-#[derive(Deserialize)]
-pub struct Guest {
-    pub description: String,
-    pub ip_address: Option<String>,
-    pub memory: i64,
-    pub cores: i64,
-    pub spice_port: i64,
-    pub monitor_socket_path: PathBuf,
-    pub pidfile_path: PathBuf,
-    pub network_interfaces: Vec<NetworkInterface>,
-    pub disks: Vec<Disk>,
-}
-
-pub struct GuestConnection {
-    connection_timeout: u64,
-    ip_address: String,
-}
-
-struct HostConnection {
-    connection_timeout: u64,
-    host: String,
-}
-
-#[derive(Deserialize)]
-pub struct Network {
-    pub bridge_name: String,
-}
-
-#[derive(Deserialize)]
-pub struct NetworkInterface {
-    #[serde(rename = "network")]
-    pub network_id: String,
-    pub mac_address: String,
-    #[serde(default = "default_network_interface_model")]
-    pub model: String,
-    pub tap_name: String,
-}
-
-pub struct Snapshot {
-    pub id: String,
-    pub timestamp: Duration,
 }
 
 impl App {
@@ -340,152 +303,4 @@ impl App {
             Command::new(command)
         }
     }
-}
-
-impl GuestConnection {
-    pub fn new<T>(ip_address: T, max_connection_timeout: u64) -> Result<Self>
-    where
-        T: AsRef<str>,
-    {
-        let ip_address = ip_address.as_ref().to_owned();
-
-        let mut connection_timeout = 1;
-        loop {
-            let result = command_macros::command! {
-                ssh
-                -o BatchMode=yes
-                -o ConnectTimeout=((connection_timeout))
-                -o StrictHostKeyChecking=no
-                -o UserKnownHostsFile=/dev/null
-                root@(ip_address)
-                exit 0
-            }
-            .execute();
-
-            if result.is_ok() {
-                return Ok(Self {
-                    connection_timeout,
-                    ip_address,
-                });
-            }
-
-            connection_timeout *= 2;
-
-            if connection_timeout >= max_connection_timeout {
-                return Err(result.unwrap_err());
-            } else {
-                std::thread::sleep(Duration::from_secs(connection_timeout));
-            }
-        }
-    }
-
-    pub fn execute<T>(&self, command: T) -> Result<()>
-    where
-        T: AsRef<str>,
-    {
-        self.execute_with_args(command, Vec::new())
-    }
-
-    pub fn execute_with_args<T>(&self, command: T, args: Vec<String>) -> Result<()>
-    where
-        T: AsRef<str>,
-    {
-        let command = command.as_ref().split_whitespace();
-
-        command_macros::command! {
-            ssh
-            -o BatchMode=yes
-            -o ConnectTimeout=((self.connection_timeout))
-            -o StrictHostKeyChecking=no
-            -o UserKnownHostsFile=/dev/null
-            -A
-            root@(self.ip_address)
-            [command]
-            [args]
-        }
-        .execute()?;
-
-        Ok(())
-    }
-
-    pub fn upload<T, U>(&self, source_path: T, destination_path: U) -> Result<()>
-    where
-        T: AsRef<Path>,
-        U: AsRef<Path>,
-    {
-        let source_path = source_path.as_ref();
-        let destination_path = destination_path.as_ref();
-
-        command_macros::command! {
-            scp
-            -o BatchMode=yes
-            -o ConnectTimeout=((self.connection_timeout))
-            -o StrictHostKeyChecking=no
-            -o UserKnownHostsFile=/dev/null
-            (source_path)
-            root@(self.ip_address):(destination_path)
-        }
-        .execute()?;
-
-        Ok(())
-    }
-}
-
-impl HostConnection {
-    pub fn new<T>(host: T) -> Result<Self>
-    where
-        T: AsRef<str>,
-    {
-        let host = host.as_ref().to_owned();
-
-        let mut connection_timeout = 1;
-        loop {
-            let result = command_macros::command! {
-                ssh
-                -o BatchMode=yes
-                -o ConnectTimeout=((connection_timeout))
-                -o StrictHostKeyChecking=no
-                -o UserKnownHostsFile=/dev/null
-                root@(host)
-                exit 0
-            }
-            .execute();
-
-            if result.is_ok() {
-                return Ok(Self {
-                    connection_timeout,
-                    host,
-                });
-            }
-
-            connection_timeout *= 2;
-
-            if connection_timeout >= 60 {
-                return Err(result.unwrap_err());
-            } else {
-                std::thread::sleep(Duration::from_secs(connection_timeout));
-            }
-        }
-    }
-
-    fn prepare<T>(&self, command: T) -> Command
-    where
-        T: AsRef<str>,
-    {
-        let command = command.as_ref().split_whitespace();
-
-        command_macros::command! {
-            ssh
-            -o BatchMode=yes
-            -o ConnectTimeout=((self.connection_timeout))
-            -o StrictHostKeyChecking=no
-            -o UserKnownHostsFile=/dev/null
-            root@((self.host))
-            [command]
-        }
-    }
-}
-
-fn default_network_interface_model() -> String {
-    "virtio-net-pci-non-transitional".to_string()
 }

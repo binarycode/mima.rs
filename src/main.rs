@@ -6,6 +6,7 @@ use clap::Parser;
 use colored::*;
 use mima::errors::MissingConfigurationError;
 use mima::App;
+use mima::SSH_CONNECTION_TIMEOUT;
 use std::backtrace::BacktraceStatus::Captured as BacktraceCaptured;
 use std::path::PathBuf;
 
@@ -111,8 +112,8 @@ enum Command {
         #[clap(help = "File path")]
         path: PathBuf,
 
-        #[clap(help = "Maximum SSH connection timeout")]
-        #[clap(default_value = "100")]
+        #[clap(help = "SSH connection timeout")]
+        #[clap(default_value_t = SSH_CONNECTION_TIMEOUT)]
         #[clap(long = "timeout")]
         max_connection_timeout: u64,
     },
@@ -128,8 +129,8 @@ enum Command {
         #[clap(help = "File path")]
         path: PathBuf,
 
-        #[clap(help = "Maximum SSH connection timeout")]
-        #[clap(default_value = "100")]
+        #[clap(help = "SSH connection timeout")]
+        #[clap(default_value_t = SSH_CONNECTION_TIMEOUT)]
         #[clap(long = "timeout")]
         max_connection_timeout: u64,
 

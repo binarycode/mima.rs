@@ -25,7 +25,7 @@ fn help() {
             <PATH>        File path
 
         OPTIONS:
-                --timeout <MAX_CONNECTION_TIMEOUT>    Maximum SSH connection timeout [default: 100]
+                --timeout <MAX_CONNECTION_TIMEOUT>    SSH connection timeout [default: 100]
             -h, --help                                Print help information
     "});
 }
