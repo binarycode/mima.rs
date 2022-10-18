@@ -25,7 +25,6 @@ in pkgs.rustPlatform.buildRustPackage {
   checkPhase = ''
     ${rust}/bin/cargo clippy -- -D warnings
     ${rust}/bin/cargo fmt -- --check
-    ${rust}/bin/cargo test
   '';
 
   meta = {
