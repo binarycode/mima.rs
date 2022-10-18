@@ -1,0 +1,7 @@
+error: The following required arguments were not provided:
+    <GUEST_ID>
+
+USAGE:
+    mima wait-for-guest-to-shutdown <GUEST_ID>
+
+For more information try --help

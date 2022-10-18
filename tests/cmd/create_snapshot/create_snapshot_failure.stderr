@@ -1,0 +1,6 @@
+error: Failed to run 'ssh -o BatchMode=yes -o ConnectTimeout=1 -o ForwardAgent=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@10.210.0.13 qemu-img snapshot -cdev /mima/zero-sda.qcow2'
+
+stdout:
+qemu-img: could not open '/mima/zero-sda.qcow2': failed to get "write" lock
+is another process using the image [/mima/zero-sda.qcow2]?
+

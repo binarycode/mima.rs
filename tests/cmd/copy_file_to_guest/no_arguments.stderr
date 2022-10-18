@@ -1,0 +1,8 @@
+error: The following required arguments were not provided:
+    <GUEST_ID>
+    <PATH>
+
+USAGE:
+    mima copy-file-to-guest [OPTIONS] <GUEST_ID> <PATH>
+
+For more information try --help

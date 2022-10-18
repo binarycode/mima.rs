@@ -1,0 +1,2 @@
+args = 'create-snapshot zero centos7'
+status.code = 1

@@ -1,0 +1,89 @@
+#! /usr/bin/env bash
+
+readonly SSH="-o BatchMode=yes -o ConnectTimeout=1 -o ForwardAgent=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@10.210.0.13"
+
+if [[ "$*" == "$SSH exit 0" ]]; then
+    exit 0
+elif [[ "$*" == "$SSH qemu-img info --force-share --output=json /mima/zero-sda.qcow2" ]]; then
+    echo '
+        {
+            "snapshots": [
+                {
+                    "icount": 0,
+                    "vm-clock-nsec": 0,
+                    "name": "root",
+                    "date-sec": 1,
+                    "date-nsec": 0,
+                    "vm-clock-sec": 0,
+                    "id": "0",
+                    "vm-state-size": 0
+                }
+            ],
+            "virtual-size": 21474836480,
+            "filename": "zero-sda.qcow2",
+            "cluster-size": 65536,
+            "format": "qcow2",
+            "actual-size": 0,
+            "format-specific": {
+                "type": "qcow2",
+                "data": {
+                    "compat": "1.1",
+                    "compression-type": "zlib",
+                    "lazy-refcounts": false,
+                    "refcount-bits": 16,
+                    "corrupt": false,
+                    "extended-l2": false
+                }
+            },
+            "dirty-flag": false
+        }
+    '
+    exit 0
+elif [[ "$*" == "$SSH qemu-img info --force-share --output=json /mima/zero-sdb.qcow2" ]]; then
+    echo '
+        {
+            "snapshots": [
+                {
+                    "icount": 0,
+                    "vm-clock-nsec": 0,
+                    "name": "root",
+                    "date-sec": 1,
+                    "date-nsec": 0,
+                    "vm-clock-sec": 0,
+                    "id": "0",
+                    "vm-state-size": 0
+                },
+                {
+                    "icount": 0,
+                    "vm-clock-nsec": 0,
+                    "name": "centos7",
+                    "date-sec": 2,
+                    "date-nsec": 0,
+                    "vm-clock-sec": 0,
+                    "id": "1",
+                    "vm-state-size": 0
+                }
+            ],
+            "virtual-size": 107374182400,
+            "filename": "zero-sdb.qcow2",
+            "cluster-size": 65536,
+            "format": "qcow2",
+            "actual-size": 0,
+            "format-specific": {
+                "type": "qcow2",
+                "data": {
+                    "compat": "1.1",
+                    "compression-type": "zlib",
+                    "lazy-refcounts": false,
+                    "refcount-bits": 16,
+                    "corrupt": false,
+                    "extended-l2": false
+                }
+            },
+            "dirty-flag": false
+        }
+    '
+    exit 0
+else
+    exit 1
+fi

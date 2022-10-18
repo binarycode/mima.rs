@@ -1,0 +1,32 @@
+#! /usr/bin/env bash
+
+readonly SSH="-o BatchMode=yes -o ConnectTimeout=1 -o ForwardAgent=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@10.210.0.13"
+
+if [[ "$*" == "$SSH exit 0" ]]; then
+    exit 0
+elif [[ "$*" == "$SSH qemu-img info --force-share --output=json /mima/zero-sda.qcow2" ]]; then
+    echo '
+        {
+            "virtual-size": 21474836480,
+            "filename": "zero-sda.qcow2",
+            "cluster-size": 65536,
+            "format": "qcow2",
+            "actual-size": 0,
+            "format-specific": {
+                "type": "qcow2",
+                "data": {
+                    "compat": "1.1",
+                    "compression-type": "zlib",
+                    "lazy-refcounts": false,
+                    "refcount-bits": 16,
+                    "corrupt": false,
+                    "extended-l2": false
+                }
+            },
+            "dirty-flag": false
+        }
+    '
+    exit 0
+else
+    exit 1
+fi

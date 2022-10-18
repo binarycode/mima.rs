@@ -1,3 +1,4 @@
+use crate::app::QEMU_IMG_COMMAND;
 use crate::command::Execute;
 use crate::App;
 use anyhow::Result;
@@ -13,19 +14,21 @@ impl App {
         for disk in disks {
             let path = &disk.path;
 
-            if self.exists(path) {
+            if self.exists(path)? {
                 continue;
             }
 
             self.create_parent_dir(path)?;
 
-            let qemu_img = self.prepare_host_command("qemu-img");
+            let connection = self.get_host_ssh_connection()?;
+
+            let qemu_img = connection.command(QEMU_IMG_COMMAND);
             command_macros::command! {
                 {qemu_img} create -q -fqcow2 -olazy_refcounts=on -opreallocation=metadata (path) ((disk.size))G
             }
             .execute()?;
 
-            let qemu_img = self.prepare_host_command("qemu-img");
+            let qemu_img = connection.command(QEMU_IMG_COMMAND);
             command_macros::command! {
                 {qemu_img} snapshot -croot (path)
             }

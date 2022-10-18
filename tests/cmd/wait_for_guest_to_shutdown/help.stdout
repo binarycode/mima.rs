@@ -1,0 +1,11 @@
+mima-wait-for-guest-to-shutdown [VERSION]
+Wait until the guest shuts down
+
+USAGE:
+    mima wait-for-guest-to-shutdown <GUEST_ID>
+
+ARGS:
+    <GUEST_ID>    Guest ID
+
+OPTIONS:
+    -h, --help    Print help information

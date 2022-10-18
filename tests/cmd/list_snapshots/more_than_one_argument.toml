@@ -1,0 +1,2 @@
+args = 'list-snapshots one two'
+status.code = 2

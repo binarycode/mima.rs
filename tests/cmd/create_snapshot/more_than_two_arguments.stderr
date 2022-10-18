@@ -1,0 +1,6 @@
+error: Found argument 'three' which wasn't expected, or isn't valid in this context
+
+USAGE:
+    mima create-snapshot <GUEST_ID> <SNAPSHOT_ID>
+
+For more information try --help

@@ -1,0 +1,12 @@
+mima-check-snapshot [VERSION]
+Check if snapshot exists
+
+USAGE:
+    mima check-snapshot <GUEST_ID> <SNAPSHOT_ID>
+
+ARGS:
+    <GUEST_ID>       Guest ID
+    <SNAPSHOT_ID>    Snapshot ID
+
+OPTIONS:
+    -h, --help    Print help information

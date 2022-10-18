@@ -1,0 +1,7 @@
+error: The following required arguments were not provided:
+    <SNAPSHOT_ID>
+
+USAGE:
+    mima create-snapshot <GUEST_ID> <SNAPSHOT_ID>
+
+For more information try --help

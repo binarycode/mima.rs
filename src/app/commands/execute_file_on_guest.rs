@@ -1,4 +1,7 @@
+use crate::app::CHMOD_COMMAND;
 use crate::app::GUEST_WORKSPACE_PATH;
+use crate::app::MKDIR_COMMAND;
+use crate::command::Execute;
 use crate::errors::InvalidFileError;
 use crate::App;
 use anyhow::Result;
@@ -9,29 +12,43 @@ impl App {
         &self,
         guest_id: T,
         path: U,
-        max_connection_timeout: u64,
+        timeout: u64,
         args: Vec<String>,
     ) -> Result<()>
     where
         T: AsRef<str>,
         U: AsRef<Path>,
     {
-        self.forbid_remote_execution()?;
-
         let path = path.as_ref();
 
         if !path.is_file() {
             anyhow::bail!(InvalidFileError::new(path));
         }
 
-        let guest_connection = self.get_guest_connection(guest_id, max_connection_timeout)?;
-        guest_connection.execute(format!("mkdir -p {GUEST_WORKSPACE_PATH}"))?;
-        guest_connection.upload(path, GUEST_WORKSPACE_PATH)?;
+        let connection = self.get_guest_ssh_connection(guest_id, timeout)?;
+
+        let mkdir = connection.command(MKDIR_COMMAND);
+        command_macros::command! {
+            {mkdir} -p (GUEST_WORKSPACE_PATH)
+        }
+        .execute()?;
+
+        connection.upload(path, GUEST_WORKSPACE_PATH)?;
 
         let file_name = path.file_name().unwrap();
         let guest_path = Path::new(GUEST_WORKSPACE_PATH).join(file_name);
-        guest_connection.execute(format!("chmod +x {}", guest_path.display()))?;
-        guest_connection.execute_with_args(guest_path.to_string_lossy(), args)?;
+
+        let chmod = connection.command(CHMOD_COMMAND);
+        command_macros::command! {
+            {chmod} +x (guest_path)
+        }
+        .execute()?;
+
+        let file = connection.command(guest_path.display().to_string());
+        command_macros::command! {
+            {file} [args]
+        }
+        .execute()?;
 
         Ok(())
     }

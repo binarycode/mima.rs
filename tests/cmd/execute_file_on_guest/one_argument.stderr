@@ -1,0 +1,7 @@
+error: The following required arguments were not provided:
+    <PATH>
+
+USAGE:
+    mima execute-file-on-guest <GUEST_ID> <PATH>
+
+For more information try --help

@@ -1,0 +1,6 @@
+ssh -o BatchMode=yes -o ConnectTimeout=1 -o ForwardAgent=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@10.210.0.13 exit 0
+ssh -o BatchMode=yes -o ConnectTimeout=1 -o ForwardAgent=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@10.210.0.13 test -e /mima/zero-sda.qcow2
+ssh -o BatchMode=yes -o ConnectTimeout=1 -o ForwardAgent=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@10.210.0.13 exit 0
+ssh -o BatchMode=yes -o ConnectTimeout=1 -o ForwardAgent=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@10.210.0.13 mkdir --mode 0755 -p /mima
+ssh -o BatchMode=yes -o ConnectTimeout=1 -o ForwardAgent=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@10.210.0.13 exit 0
+ssh -o BatchMode=yes -o ConnectTimeout=1 -o ForwardAgent=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@10.210.0.13 qemu-img create -q -fqcow2 -olazy_refcounts=on -opreallocation=metadata /mima/zero-sda.qcow2 20G

@@ -1,0 +1,11 @@
+mima-list-snapshots [VERSION]
+List snapshots
+
+USAGE:
+    mima list-snapshots <GUEST_ID>
+
+ARGS:
+    <GUEST_ID>    Guest ID
+
+OPTIONS:
+    -h, --help    Print help information

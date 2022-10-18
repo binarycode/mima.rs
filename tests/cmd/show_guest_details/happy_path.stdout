@@ -1,0 +1,10 @@
+GUEST  ID    BOOTED  SPICE  MEMORY  CORES  DESCRIPTION
+       zero  true    5901   8192    4      Test Virtual Machine
+
+DISKS  LABEL  SIZE  PATH
+       sda    20    /mnt/mima/zero/sda.qcow2
+       sdb    100   /mnt/mima/zero/sdb.qcow2
+
+NETWORK INTERFACES  NETWORK  MODEL                            MAC                TAP
+                    pub      virtio-net-pci-non-transitional  52:54:00:00:00:10  mima-pub-zero
+                    mgt      e1000e                           52:54:00:00:09:10  mima-mgt-zero

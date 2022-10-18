@@ -1,16 +1,12 @@
 mod commands;
 mod disk;
 mod guest;
-mod guest_connection;
-mod host_connection;
 mod network;
 mod network_interface;
 mod snapshot;
+mod ssh_connection;
 
 use crate::command::Execute;
-use crate::errors::ForbiddenRemoteExecutionError;
-use crate::errors::MissingDependenciesError;
-use crate::errors::MissingIPAddressConfigurationError;
 use crate::errors::ParseConfigurationError;
 use crate::errors::ProcessExecutionError;
 use crate::errors::ReadConfigurationError;
@@ -19,32 +15,40 @@ use crate::errors::UnknownNetworkError;
 use anyhow::Result;
 use disk::Disk;
 use guest::Guest;
-use guest_connection::GuestConnection;
-use host_connection::HostConnection;
 use network::Network;
 use serde::Deserialize;
 use snapshot::Snapshot;
+use ssh_connection::SshConnection;
 use std::collections::BTreeMap;
 use std::collections::HashMap;
 use std::path::Path;
-use std::process::Command;
 use std::process::Stdio;
 use std::time::Duration;
 
-const GUEST_WORKSPACE_PATH: &str = "/root/mima";
 pub const SSH_CONNECTION_TIMEOUT: u64 = 100;
+
+const GUEST_WORKSPACE_PATH: &str = "/root/mima";
+
+const CHMOD_COMMAND: &str = "chmod";
+const IP_COMMAND: &str = "ip";
+const MKDIR_COMMAND: &str = "mkdir";
+const PGREP_COMMMAND: &str = "pgrep";
+const PKILL_COMMAND: &str = "pkill";
+const PROBE_COMMAND: &str = "exit 0";
+const SOCAT_COMMAND: &str = "socat";
+const TEST_COMMAND: &str = "test";
+const QEMU_COMMAND: &str = "qemu-system-x86_64";
+const QEMU_IMG_COMMAND: &str = "qemu-img";
 
 #[derive(Deserialize)]
 pub struct App {
+    pub host: String,
     pub guests: BTreeMap<String, Guest>,
     pub networks: BTreeMap<String, Network>,
-
-    #[serde(skip_deserializing)]
-    host_connection: Option<HostConnection>,
 }
 
 impl App {
-    pub fn new<T>(path: T, host: Option<String>) -> Result<Self>
+    pub fn new<T>(path: T) -> Result<Self>
     where
         T: AsRef<Path>,
     {
@@ -53,39 +57,8 @@ impl App {
         let config =
             std::fs::read_to_string(path).map_err(|_| ReadConfigurationError::new(path))?;
 
-        let mut app =
+        let app =
             toml::from_str::<Self>(&config).map_err(|_| ParseConfigurationError::new(path))?;
-        if let Some(host) = host {
-            app.host_connection = Some(HostConnection::new(host)?);
-        }
-        let app = app;
-
-        let mut binaries = vec![
-            "ip",
-            "pgrep",
-            "pkill",
-            "qemu-img",
-            "qemu-system-x86_64",
-            "socat",
-        ];
-        binaries.retain(|binary| {
-            let which = app.prepare_host_command("which");
-            let status = command_macros::command! {
-                { which } (binary)
-            }
-            .stdout(Stdio::null())
-            .stderr(Stdio::null())
-            .status();
-
-            if let Ok(status) = status {
-                !status.success()
-            } else {
-                true
-            }
-        });
-        if !binaries.is_empty() {
-            anyhow::bail!(MissingDependenciesError::new(binaries));
-        }
 
         Ok(app)
     }
@@ -116,7 +89,9 @@ impl App {
             timestamp_nsec: u32,
         }
 
-        let qemu_img = self.prepare_host_command("qemu-img");
+        let connection = self.get_host_ssh_connection()?;
+
+        let qemu_img = connection.command(QEMU_IMG_COMMAND);
         let snapshots = command_macros::command! {
             {qemu_img} info --force-share --output=json (disk.path)
         }
@@ -147,24 +122,6 @@ impl App {
         match self.guests.get(guest_id) {
             Some(guest) => Ok(guest),
             None => anyhow::bail!(UnknownGuestError::new(guest_id)),
-        }
-    }
-
-    pub fn get_guest_connection<T>(
-        &self,
-        guest_id: T,
-        max_connection_timeout: u64,
-    ) -> Result<GuestConnection>
-    where
-        T: AsRef<str>,
-    {
-        let guest_id = guest_id.as_ref();
-
-        let guest = self.get_guest(guest_id)?;
-
-        match &guest.ip_address {
-            Some(ip_address) => GuestConnection::new(ip_address, max_connection_timeout),
-            None => anyhow::bail!(MissingIPAddressConfigurationError::new(guest_id)),
         }
     }
 
@@ -212,6 +169,22 @@ impl App {
         Ok(snapshots)
     }
 
+    pub fn get_guest_ssh_connection<T>(&self, guest_id: T, timeout: u64) -> Result<SshConnection>
+    where
+        T: AsRef<str>,
+    {
+        let guest_id = guest_id.as_ref();
+
+        let guest = self.get_guest(guest_id)?;
+
+        SshConnection::new(&guest.ip_address, timeout)
+    }
+
+    // TODO: memoize?
+    pub fn get_host_ssh_connection(&self) -> Result<SshConnection> {
+        SshConnection::new(&self.host, SSH_CONNECTION_TIMEOUT)
+    }
+
     pub fn get_network<T>(&self, network_id: T) -> Result<&Network>
     where
         T: AsRef<str>,
@@ -224,31 +197,25 @@ impl App {
         }
     }
 
-    fn exists<T>(&self, path: T) -> bool
+    fn exists<T>(&self, path: T) -> Result<bool>
     where
         T: AsRef<Path>,
     {
         let path = path.as_ref();
 
-        let test = self.prepare_host_command("test");
+        let connection = self.get_host_ssh_connection()?;
+
+        let test = connection.command(TEST_COMMAND);
         let status = command_macros::command! {
-            { test } -e (path)
+            {test} -e (path)
         }
         .status();
 
         if let Ok(status) = status {
-            status.success()
+            Ok(status.success())
         } else {
-            false
+            Ok(false)
         }
-    }
-
-    fn forbid_remote_execution(&self) -> Result<()> {
-        if self.host_connection.is_some() {
-            anyhow::bail!(ForbiddenRemoteExecutionError::new());
-        }
-
-        Ok(())
     }
 
     fn is_booted<T>(&self, guest_id: T) -> Result<bool>
@@ -257,11 +224,13 @@ impl App {
     {
         let guest = self.get_guest(guest_id)?;
 
-        if !self.exists(&guest.pidfile_path) || !self.exists(&guest.monitor_socket_path) {
+        if !self.exists(&guest.pidfile_path)? || !self.exists(&guest.monitor_socket_path)? {
             return Ok(false);
         }
 
-        let pgrep = self.prepare_host_command("pgrep");
+        let connection = self.get_host_ssh_connection()?;
+
+        let pgrep = connection.command(PGREP_COMMMAND);
         let mut command = command_macros::command! {
             {pgrep} --full --pidfile (guest.pidfile_path) qemu
         };
@@ -281,7 +250,9 @@ impl App {
         let path = path.as_ref();
 
         if let Some(parent_path) = path.parent() {
-            let mkdir = self.prepare_host_command("mkdir");
+            let connection = self.get_host_ssh_connection()?;
+
+            let mkdir = connection.command(MKDIR_COMMAND);
             command_macros::command! {
                 {mkdir} --mode 0755 -p (parent_path)
             }
@@ -289,18 +260,5 @@ impl App {
         }
 
         Ok(())
-    }
-
-    fn prepare_host_command<T>(&self, command: T) -> Command
-    where
-        T: AsRef<str>,
-    {
-        let command = command.as_ref();
-
-        if let Some(host_connection) = &self.host_connection {
-            host_connection.prepare(command)
-        } else {
-            Command::new(command)
-        }
     }
 }

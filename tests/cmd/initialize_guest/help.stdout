@@ -1,0 +1,11 @@
+mima-initialize-guest [VERSION]
+Initialize guest
+
+USAGE:
+    mima initialize-guest <GUEST_ID>
+
+ARGS:
+    <GUEST_ID>    Guest ID
+
+OPTIONS:
+    -h, --help    Print help information

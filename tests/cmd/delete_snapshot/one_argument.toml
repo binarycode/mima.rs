@@ -1,0 +1,2 @@
+args = 'delete-snapshot one'
+status.code = 2

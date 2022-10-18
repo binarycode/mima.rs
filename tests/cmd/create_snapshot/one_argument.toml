@@ -1,0 +1,2 @@
+args = 'create-snapshot one'
+status.code = 2

@@ -1,0 +1,12 @@
+mima-create-snapshot [VERSION]
+Create new snapshot
+
+USAGE:
+    mima create-snapshot <GUEST_ID> <SNAPSHOT_ID>
+
+ARGS:
+    <GUEST_ID>       Guest ID
+    <SNAPSHOT_ID>    Snapshot ID
+
+OPTIONS:
+    -h, --help    Print help information

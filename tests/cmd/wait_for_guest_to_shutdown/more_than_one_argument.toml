@@ -1,0 +1,2 @@
+args = 'wait-for-guest-to-shutdown one two'
+status.code = 2

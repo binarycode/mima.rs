@@ -1,0 +1,3 @@
+args = '-c dir list-guests'
+status.code = 1
+fs.sandbox = true

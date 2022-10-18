@@ -1,0 +1,2 @@
+args = 'initialize-guest zero'
+status.code = 0

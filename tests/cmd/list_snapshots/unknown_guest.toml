@@ -1,0 +1,3 @@
+args = 'list-snapshots zero'
+status.code = 1
+fs.sandbox = true

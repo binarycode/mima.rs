@@ -1,0 +1,6 @@
+error: Found argument 'two' which wasn't expected, or isn't valid in this context
+
+USAGE:
+    mima start-guest [OPTIONS] <GUEST_ID>
+
+For more information try --help

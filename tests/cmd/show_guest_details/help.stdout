@@ -1,0 +1,11 @@
+mima-show-guest-details [VERSION]
+Show guest details
+
+USAGE:
+    mima show-guest-details <GUEST_ID>
+
+ARGS:
+    <GUEST_ID>    Guest ID
+
+OPTIONS:
+    -h, --help    Print help information

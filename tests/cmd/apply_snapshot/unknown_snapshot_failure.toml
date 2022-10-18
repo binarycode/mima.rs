@@ -1,0 +1,2 @@
+args = 'apply-snapshot zero dev'
+status.code = 1

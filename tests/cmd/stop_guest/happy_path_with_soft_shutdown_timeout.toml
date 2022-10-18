@@ -1,0 +1,2 @@
+args = 'stop-guest --wait 1 zero'
+status.code = 0

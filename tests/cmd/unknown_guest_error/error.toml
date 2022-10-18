@@ -1,0 +1,3 @@
+args = 'show-guest-details zero'
+status.code = 1
+fs.sandbox = true

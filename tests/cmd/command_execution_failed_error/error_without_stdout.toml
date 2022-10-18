@@ -1,0 +1,2 @@
+args = 'delete-snapshot zero root'
+status.code = 1

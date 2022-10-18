@@ -1,0 +1,14 @@
+#! /usr/bin/env bash
+
+readonly SSH="-o BatchMode=yes -o ConnectTimeout=1 -o ForwardAgent=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@192.168.9.42"
+
+if [[ "$*" == "$SSH exit 0" ]]; then
+    exit 0
+elif [[ "$*" == "$SSH mkdir -p /root/mima" ]]; then
+    exit 0
+elif [[ "$*" == "$SSH chmod +x /root/mima/foo" ]]; then
+    echo 'foobar'
+    exit 1
+else
+    exit 1
+fi

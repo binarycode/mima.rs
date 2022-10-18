@@ -1,3 +1,6 @@
+use crate::app::CHMOD_COMMAND;
+use crate::app::IP_COMMAND;
+use crate::app::QEMU_COMMAND;
 use crate::command::Execute;
 use crate::App;
 use anyhow::Result;
@@ -26,7 +29,9 @@ impl App {
         self.create_parent_dir(&guest.monitor_socket_path)?;
         self.create_parent_dir(&guest.pidfile_path)?;
 
-        let qemu = self.prepare_host_command("qemu-system-x86_64");
+        let connection = self.get_host_ssh_connection()?;
+
+        let qemu = connection.command(QEMU_COMMAND);
         command_macros::command! {
             {qemu}
             -name (guest_id)
@@ -70,14 +75,14 @@ impl App {
 
         for network_interface in &guest.network_interfaces {
             let network = self.get_network(&network_interface.network_id)?;
-            let ip = self.prepare_host_command("ip");
+            let ip = connection.command(IP_COMMAND);
             command_macros::command! {
                 {ip} link set (network_interface.tap_name) master (network.bridge_name) up
             }
             .execute()?;
         }
 
-        let chmod = self.prepare_host_command("chmod");
+        let chmod = connection.command(CHMOD_COMMAND);
         command_macros::command! {
             {chmod} 644 (guest.pidfile_path)
         }

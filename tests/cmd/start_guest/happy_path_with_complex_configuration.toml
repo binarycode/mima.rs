@@ -1,0 +1,2 @@
+args = 'start-guest zero --cdrom /mima/centos7.iso --floppy /mima/zero.ks'
+status.code = 0

@@ -1,0 +1,3 @@
+args = 'stop-guest zero'
+status.code = 1
+fs.sandbox = true

@@ -1,0 +1,2 @@
+args = 'stop-guest'
+status.code = 2

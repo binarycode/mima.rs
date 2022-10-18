@@ -1,3 +1,4 @@
+use crate::app::QEMU_IMG_COMMAND;
 use crate::command::Execute;
 use crate::errors::DuplicateSnapshotError;
 use crate::App;
@@ -24,8 +25,10 @@ impl App {
             }
         }
 
+        let connection = self.get_host_ssh_connection()?;
+
         for disk in disks {
-            let qemu_img = self.prepare_host_command("qemu-img");
+            let qemu_img = connection.command(QEMU_IMG_COMMAND);
             command_macros::command! {
                 {qemu_img} snapshot -c(snapshot_id) (disk.path)
             }

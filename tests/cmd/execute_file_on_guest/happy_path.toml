@@ -1,0 +1,2 @@
+args = 'execute-file-on-guest zero foo'
+status.code = 0

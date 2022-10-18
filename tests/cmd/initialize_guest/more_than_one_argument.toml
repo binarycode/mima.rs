@@ -1,0 +1,2 @@
+args = 'initialize-guest one two three'
+status.code = 2

@@ -1,0 +1,5 @@
+error: Failed to run 'ssh -o BatchMode=yes -o ConnectTimeout=1 -o ForwardAgent=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@192.168.9.42 /root/mima/foo'
+
+stdout:
+foobar
+

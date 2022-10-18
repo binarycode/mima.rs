@@ -6,7 +6,7 @@ use std::path::PathBuf;
 #[derive(Deserialize)]
 pub struct Guest {
     pub description: String,
-    pub ip_address: Option<String>,
+    pub ip_address: String,
     pub memory: i64,
     pub cores: i64,
     pub spice_port: i64,

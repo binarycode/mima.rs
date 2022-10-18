@@ -1,0 +1,8 @@
+error: The following required arguments were not provided:
+    <GUEST_ID>
+    <SNAPSHOT_ID>
+
+USAGE:
+    mima check-snapshot <GUEST_ID> <SNAPSHOT_ID>
+
+For more information try --help

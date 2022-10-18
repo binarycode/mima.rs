@@ -1,0 +1,13 @@
+#! /usr/bin/env bash
+
+readonly SSH="-o BatchMode=yes -o ConnectTimeout=1 -o ForwardAgent=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@10.210.0.13"
+
+if [[ "$*" == "$SSH exit 0" ]]; then
+    exit 0
+elif [[ "$*" == "$SSH qemu-img snapshot -droot /mima/zero-sda.qcow2" ]]; then
+    echo "qemu-img: Could not open '/mima/zero-sda.qcow2': Failed to get \"write\" lock"
+    echo "Is another process using the image [/mima/zero-sda.qcow2]?"
+    exit 1
+else
+    exit 1
+fi

@@ -1,0 +1,2 @@
+args = 'check-snapshot one'
+status.code = 2

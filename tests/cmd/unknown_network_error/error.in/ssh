@@ -1,0 +1,13 @@
+#! /usr/bin/env bash
+
+readonly SSH="-o BatchMode=yes -o ConnectTimeout=1 -o ForwardAgent=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@10.210.0.13"
+
+if [[ "$*" == "$SSH exit 0" ]]; then
+    exit 0
+elif [[ "$*" == "$SSH mkdir --mode 0755 -p /tmp" ]]; then
+    exit 0
+elif [[ "$*" == "$SSH qemu-system-x86_64 -name zero -machine q35,accel=kvm -cpu host -m 8192M -smp 4 -no-user-config -nodefaults -daemonize -runas nobody -monitor unix:/tmp/zero.socket,server,nowait -pidfile /tmp/zero.pid -vga std -spice port=5901,disable-ticketing=on -object iothread,id=iothread1 -device virtio-scsi-pci-non-transitional,iothread=iothread1 -device virtio-net-pci-non-transitional,netdev=network.mima-pub-zero,mac=52:54:00:00:00:10 -netdev tap,id=network.mima-pub-zero,ifname=mima-pub-zero,script=no,downscript=no" ]]; then
+    exit 0
+else
+    exit 1
+fi

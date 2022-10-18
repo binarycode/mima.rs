@@ -1,0 +1,2 @@
+args = 'copy-file-to-guest one'
+status.code = 2

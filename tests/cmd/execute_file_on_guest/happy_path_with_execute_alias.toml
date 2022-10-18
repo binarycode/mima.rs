@@ -1,0 +1,2 @@
+args = 'execute zero foo'
+status.code = 0

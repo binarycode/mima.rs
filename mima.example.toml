@@ -1,3 +1,4 @@
+host = 'example.com'
 [networks]
     pub.bridge_name = 'mima-pub'
     mgt.bridge_name = 'mima-mgt'

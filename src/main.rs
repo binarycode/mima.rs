@@ -115,7 +115,7 @@ enum Command {
         #[clap(help = "SSH connection timeout")]
         #[clap(default_value_t = SSH_CONNECTION_TIMEOUT)]
         #[clap(long = "timeout")]
-        max_connection_timeout: u64,
+        timeout: u64,
     },
 
     #[clap(about = "Execute file on guest")]
@@ -132,7 +132,7 @@ enum Command {
         #[clap(help = "SSH connection timeout")]
         #[clap(default_value_t = SSH_CONNECTION_TIMEOUT)]
         #[clap(long = "timeout")]
-        max_connection_timeout: u64,
+        timeout: u64,
 
         #[clap(help = "Arguments to pass to the file")]
         #[clap(last = true)]
@@ -223,7 +223,7 @@ fn run(options: Options) -> Result<()> {
         ]));
     };
 
-    let app = App::new(config_path, options.host)?;
+    let app = App::new(config_path)?;
 
     match options.command {
         Command::ListGuests => app.list_guests()?,
@@ -251,14 +251,14 @@ fn run(options: Options) -> Result<()> {
         Command::CopyFileToGuest {
             guest_id,
             path,
-            max_connection_timeout,
-        } => app.copy_file_to_guest(guest_id, path, max_connection_timeout)?,
+            timeout,
+        } => app.copy_file_to_guest(guest_id, path, timeout)?,
         Command::ExecuteFileOnGuest {
             guest_id,
             path,
-            max_connection_timeout,
+            timeout,
             args,
-        } => app.execute_file_on_guest(guest_id, path, max_connection_timeout, args)?,
+        } => app.execute_file_on_guest(guest_id, path, timeout, args)?,
         Command::ListSnapshots { guest_id } => app.list_snapshots(guest_id)?,
         Command::CreateSnapshot {
             guest_id,

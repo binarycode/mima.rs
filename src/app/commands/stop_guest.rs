@@ -1,3 +1,5 @@
+use crate::app::PKILL_COMMAND;
+use crate::app::SOCAT_COMMAND;
 use crate::command::Execute;
 use crate::errors::MonitorCommandError;
 use crate::errors::ProcessExecutionError;
@@ -20,8 +22,10 @@ impl App {
             return Ok(());
         }
 
+        let connection = self.get_host_ssh_connection()?;
+
         if !force {
-            let socat = self.prepare_host_command("socat");
+            let socat = connection.command(SOCAT_COMMAND);
             let mut command = command_macros::command! {
                 {socat} - UNIX-CONNECT:(guest.monitor_socket_path)
             };
@@ -47,7 +51,7 @@ impl App {
             }
         }
 
-        let pkill = self.prepare_host_command("pkill");
+        let pkill = connection.command(PKILL_COMMAND);
         command_macros::command! {
             {pkill} --full --pidfile (guest.pidfile_path) qemu
         }

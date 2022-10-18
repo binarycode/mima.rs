@@ -1,0 +1,2 @@
+error: Failed to run 'scp -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null foo root@192.168.9.42:/root/mima'
+

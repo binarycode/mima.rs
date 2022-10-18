@@ -1,3 +1,4 @@
+use crate::app::QEMU_IMG_COMMAND;
 use crate::command::Execute;
 use crate::errors::UnknownSnapshotError;
 use crate::App;
@@ -17,9 +18,11 @@ impl App {
             anyhow::bail!(UnknownSnapshotError::new(guest_id, snapshot_id));
         }
 
+        let connection = self.get_host_ssh_connection()?;
+
         let disks = self.get_guest_disks(guest_id)?;
         for disk in disks {
-            let qemu_img = self.prepare_host_command("qemu-img");
+            let qemu_img = connection.command(QEMU_IMG_COMMAND);
             command_macros::command! {
                 {qemu_img} snapshot -a(snapshot_id) (disk.path)
             }

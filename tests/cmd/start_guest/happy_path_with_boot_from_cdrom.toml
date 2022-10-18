@@ -1,0 +1,2 @@
+args = 'start-guest zero --boot-from-cdrom --cdrom /mima/centos7.iso'
+status.code = 0

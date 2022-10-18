@@ -1,0 +1,9 @@
+#! /usr/bin/env bash
+
+readonly SCP2="-o BatchMode=yes -o ConnectTimeout=2 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+
+if [[ "$*" == "$SCP2 foo root@192.168.9.42:/root/mima" ]]; then
+    exit 0
+else
+    exit 1
+fi
