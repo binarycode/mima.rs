@@ -42,9 +42,9 @@ const QEMU_IMG_COMMAND: &str = "qemu-img";
 
 #[derive(Deserialize)]
 pub struct App {
-    pub host: String,
-    pub guests: BTreeMap<String, Guest>,
-    pub networks: BTreeMap<String, Network>,
+    host: String,
+    guests: BTreeMap<String, Guest>,
+    networks: BTreeMap<String, Network>,
 }
 
 impl App {
@@ -63,7 +63,7 @@ impl App {
         Ok(app)
     }
 
-    pub fn get_disk_snapshots<T>(
+    fn get_disk_snapshots<T>(
         &self,
         connection: &SshConnection,
         guest_id: T,
@@ -112,7 +112,7 @@ impl App {
         Ok(snapshots)
     }
 
-    pub fn get_guest<T>(&self, guest_id: T) -> Result<&Guest>
+    fn get_guest<T>(&self, guest_id: T) -> Result<&Guest>
     where
         T: AsRef<str>,
     {
@@ -124,7 +124,7 @@ impl App {
         }
     }
 
-    pub fn get_guest_disks<T>(&self, guest_id: T) -> Result<&Vec<Disk>>
+    fn get_guest_disks<T>(&self, guest_id: T) -> Result<&Vec<Disk>>
     where
         T: AsRef<str>,
     {
@@ -133,7 +133,7 @@ impl App {
         Ok(&guest.disks)
     }
 
-    pub fn get_guest_snapshots<T>(
+    fn get_guest_snapshots<T>(
         &self,
         connection: &SshConnection,
         guest_id: T,
@@ -172,7 +172,7 @@ impl App {
         Ok(snapshots)
     }
 
-    pub fn get_guest_ssh_connection<T>(&self, guest_id: T, timeout: u64) -> Result<SshConnection>
+    fn get_guest_ssh_connection<T>(&self, guest_id: T, timeout: u64) -> Result<SshConnection>
     where
         T: AsRef<str>,
     {
@@ -183,11 +183,11 @@ impl App {
         SshConnection::new(&guest.ip_address, timeout)
     }
 
-    pub fn get_host_ssh_connection(&self) -> Result<SshConnection> {
+    fn get_host_ssh_connection(&self) -> Result<SshConnection> {
         SshConnection::new(&self.host, SSH_CONNECTION_TIMEOUT)
     }
 
-    pub fn get_network<T>(&self, network_id: T) -> Result<&Network>
+    fn get_network<T>(&self, network_id: T) -> Result<&Network>
     where
         T: AsRef<str>,
     {
