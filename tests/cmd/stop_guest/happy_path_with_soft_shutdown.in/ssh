@@ -4,10 +4,6 @@ readonly SSH="-o BatchMode=yes -o ConnectTimeout=1 -o ForwardAgent=yes -o Strict
 
 if [[ "$*" == "$SSH exit 0" ]]; then
     exit 0
-elif [[ "$*" == "$SSH test -e /tmp/zero.pid" ]]; then
-    exit 0
-elif [[ "$*" == "$SSH test -e /tmp/zero.socket" ]]; then
-    exit 0
 elif [[ "$*" == "$SSH pgrep --full --pidfile /tmp/zero.pid qemu" ]]; then
     [ -e flag ] && exit 1
     exit 0

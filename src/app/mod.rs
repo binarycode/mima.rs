@@ -226,12 +226,6 @@ impl App {
     {
         let guest = self.get_guest(guest_id)?;
 
-        if !self.exists(connection, &guest.pidfile_path)?
-            || !self.exists(connection, &guest.monitor_socket_path)?
-        {
-            return Ok(false);
-        }
-
         let pgrep = connection.command(PGREP_COMMMAND);
         let mut command = command_macros::command! {
             {pgrep} --full --pidfile (guest.pidfile_path) qemu
