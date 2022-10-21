@@ -10,15 +10,15 @@ impl App {
         T: AsRef<str>,
         U: AsRef<str>,
     {
+        let connection = self.get_host_ssh_connection()?;
+
         let guest_id = guest_id.as_ref();
         let snapshot_id = snapshot_id.as_ref();
 
-        let snapshots = self.get_guest_snapshots(guest_id)?;
+        let snapshots = self.get_guest_snapshots(&connection, guest_id)?;
         if !snapshots.contains_key(snapshot_id) {
             anyhow::bail!(UnknownSnapshotError::new(guest_id, snapshot_id));
         }
-
-        let connection = self.get_host_ssh_connection()?;
 
         let disks = self.get_guest_disks(guest_id)?;
         for disk in disks {

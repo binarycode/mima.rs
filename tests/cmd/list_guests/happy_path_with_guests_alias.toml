@@ -1,2 +1,3 @@
 args = 'guests'
 status.code = 0
+fs.sandbox = true

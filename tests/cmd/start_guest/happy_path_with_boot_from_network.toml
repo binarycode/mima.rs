@@ -1,2 +1,3 @@
 args = 'start-guest zero --boot-from-network'
 status.code = 0
+fs.sandbox = true

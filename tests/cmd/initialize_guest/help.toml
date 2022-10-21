@@ -1,2 +1,3 @@
 args = 'help initialize-guest'
 status.code = 0
+fs.sandbox = true

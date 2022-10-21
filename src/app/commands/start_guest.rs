@@ -18,18 +18,18 @@ impl App {
     where
         T: AsRef<str>,
     {
+        let connection = self.get_host_ssh_connection()?;
+
         let guest_id = guest_id.as_ref();
 
         let guest = self.get_guest(guest_id)?;
 
-        if self.is_booted(guest_id)? {
+        if self.is_booted(&connection, guest_id)? {
             return Ok(());
         }
 
-        self.create_parent_dir(&guest.monitor_socket_path)?;
-        self.create_parent_dir(&guest.pidfile_path)?;
-
-        let connection = self.get_host_ssh_connection()?;
+        self.create_parent_dir(&connection, &guest.monitor_socket_path)?;
+        self.create_parent_dir(&connection, &guest.pidfile_path)?;
 
         let qemu = connection.command(QEMU_COMMAND);
         command_macros::command! {

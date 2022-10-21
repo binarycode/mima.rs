@@ -8,19 +8,19 @@ impl App {
     where
         T: AsRef<str>,
     {
+        let connection = self.get_host_ssh_connection()?;
+
         let guest_id = guest_id.as_ref();
 
         let disks = self.get_guest_disks(guest_id)?;
         for disk in disks {
             let path = &disk.path;
 
-            if self.exists(path)? {
+            if self.exists(&connection, path)? {
                 continue;
             }
 
-            self.create_parent_dir(path)?;
-
-            let connection = self.get_host_ssh_connection()?;
+            self.create_parent_dir(&connection, path)?;
 
             let qemu_img = connection.command(QEMU_IMG_COMMAND);
             command_macros::command! {

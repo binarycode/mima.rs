@@ -1,2 +1,3 @@
 args = 'help execute-file-on-guest'
 status.code = 0
+fs.sandbox = true

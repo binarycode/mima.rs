@@ -1,2 +1,3 @@
 args = 'help create-snapshot'
 status.code = 0
+fs.sandbox = true

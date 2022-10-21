@@ -1,2 +1,3 @@
 args = 'help wait-for-guest-to-shutdown'
 status.code = 0
+fs.sandbox = true

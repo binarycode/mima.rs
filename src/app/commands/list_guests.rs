@@ -5,13 +5,15 @@ use tabwriter::TabWriter;
 
 impl App {
     pub fn list_guests(&self) -> Result<()> {
+        let connection = self.get_host_ssh_connection()?;
+
         let mut tw = TabWriter::new(std::io::stdout());
         writeln!(tw, "ID\tBOOTED\tSPICE\tDESCRIPTION").unwrap();
         for (id, guest) in &self.guests {
             writeln!(
                 tw,
                 "{id}\t{booted}\t{spice_port}\t{description}",
-                booted = self.is_booted(id)?,
+                booted = self.is_booted(&connection, id)?,
                 description = guest.description,
                 spice_port = guest.spice_port,
             )

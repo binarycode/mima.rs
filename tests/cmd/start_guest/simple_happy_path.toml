@@ -1,2 +1,3 @@
 args = 'start-guest zero'
 status.code = 0
+fs.sandbox = true

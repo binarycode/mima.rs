@@ -14,15 +14,15 @@ impl App {
     where
         T: AsRef<str>,
     {
+        let connection = self.get_host_ssh_connection()?;
+
         let guest_id = guest_id.as_ref();
 
         let guest = self.get_guest(&guest_id)?;
 
-        if !self.is_booted(guest_id)? {
+        if !self.is_booted(&connection, guest_id)? {
             return Ok(());
         }
-
-        let connection = self.get_host_ssh_connection()?;
 
         if !force {
             let socat = connection.command(SOCAT_COMMAND);
@@ -45,7 +45,7 @@ impl App {
             for _ in 0..wait {
                 std::thread::sleep(delay);
 
-                if !self.is_booted(guest_id)? {
+                if !self.is_booted(&connection, guest_id)? {
                     return Ok(());
                 }
             }

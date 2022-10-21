@@ -1,2 +1,3 @@
 args = 'check-snapshot zero centos7'
 status.code = 1
+fs.sandbox = true

@@ -9,11 +9,12 @@ impl App {
         T: AsRef<str>,
         U: AsRef<str>,
     {
+        let connection = self.get_host_ssh_connection()?;
+
         let guest_id = guest_id.as_ref();
         let snapshot_id = snapshot_id.as_ref();
 
         let disks = self.get_guest_disks(guest_id)?;
-        let connection = self.get_host_ssh_connection()?;
         for disk in disks {
             let qemu_img = connection.command(QEMU_IMG_COMMAND);
             command_macros::command! {

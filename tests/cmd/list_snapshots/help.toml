@@ -1,2 +1,3 @@
 args = 'help list-snapshots'
 status.code = 0
+fs.sandbox = true

@@ -1,2 +1,3 @@
 args = 'run zero foo'
 status.code = 0
+fs.sandbox = true

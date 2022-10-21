@@ -1,2 +1,3 @@
 args = 'stop-guest --force zero'
 status.code = 1
+fs.sandbox = true

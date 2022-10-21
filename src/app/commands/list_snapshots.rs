@@ -9,7 +9,12 @@ impl App {
     where
         T: AsRef<str>,
     {
-        let mut snapshots: Vec<_> = self.get_guest_snapshots(guest_id)?.into_values().collect();
+        let connection = self.get_host_ssh_connection()?;
+
+        let mut snapshots: Vec<_> = self
+            .get_guest_snapshots(&connection, guest_id)?
+            .into_values()
+            .collect();
         snapshots.sort_by_key(|snapshot| snapshot.timestamp);
         let snapshots = snapshots;
 

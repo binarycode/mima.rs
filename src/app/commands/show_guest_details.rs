@@ -8,6 +8,8 @@ impl App {
     where
         T: AsRef<str>,
     {
+        let connection = self.get_host_ssh_connection()?;
+
         let guest_id = guest_id.as_ref();
 
         let guest = self.get_guest(guest_id)?;
@@ -18,7 +20,7 @@ impl App {
         writeln!(
             tw,
             "\t{guest_id}\t{booted}\t{spice_port}\t{memory}\t{cores}\t{description}",
-            booted = self.is_booted(guest_id)?,
+            booted = self.is_booted(&connection, guest_id)?,
             cores = guest.cores,
             description = guest.description,
             memory = guest.memory,

@@ -7,8 +7,10 @@ impl App {
     where
         T: AsRef<str>,
     {
+        let connection = self.get_host_ssh_connection()?;
+
         let delay = Duration::from_millis(1000);
-        while self.is_booted(&guest_id)? {
+        while self.is_booted(&connection, &guest_id)? {
             std::thread::sleep(delay);
         }
 

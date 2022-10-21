@@ -1,2 +1,3 @@
 args = 'start-guest zero --cdrom /mima/centos7.iso --cdrom /mima/zero-ks.iso'
 status.code = 0
+fs.sandbox = true

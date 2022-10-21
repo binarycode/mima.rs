@@ -1,2 +1,3 @@
 args = 'check-snapshot zero root'
 status.code = 1
+fs.sandbox = true

@@ -1,2 +1,3 @@
 args = 'help delete-snapshot'
 status.code = 0
+fs.sandbox = true

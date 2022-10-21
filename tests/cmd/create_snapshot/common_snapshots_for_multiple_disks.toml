@@ -1,2 +1,3 @@
 args = 'create-snapshot zero dev'
 status.code = 0
+fs.sandbox = true

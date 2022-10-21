@@ -1,2 +1,3 @@
 args = 'stop-guest'
 status.code = 2
+fs.sandbox = true

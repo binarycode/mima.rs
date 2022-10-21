@@ -1,2 +1,3 @@
 args = 'help'
 status.code = 0
+fs.sandbox = true

@@ -10,12 +10,14 @@ impl App {
         T: AsRef<str>,
         U: AsRef<str>,
     {
+        let connection = self.get_host_ssh_connection()?;
+
         let guest_id = guest_id.as_ref();
         let snapshot_id = snapshot_id.as_ref();
 
         let disks = self.get_guest_disks(guest_id)?;
         for (disk_id, disk) in disks.iter().enumerate() {
-            let snapshots = self.get_disk_snapshots(guest_id, disk_id)?;
+            let snapshots = self.get_disk_snapshots(&connection, guest_id, disk_id)?;
             if snapshots.contains_key(snapshot_id) {
                 anyhow::bail!(DuplicateSnapshotError::new(
                     guest_id,
@@ -24,8 +26,6 @@ impl App {
                 ));
             }
         }
-
-        let connection = self.get_host_ssh_connection()?;
 
         for disk in disks {
             let qemu_img = connection.command(QEMU_IMG_COMMAND);

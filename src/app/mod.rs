@@ -65,6 +65,7 @@ impl App {
 
     pub fn get_disk_snapshots<T>(
         &self,
+        connection: &SshConnection,
         guest_id: T,
         disk_id: usize,
     ) -> Result<HashMap<String, Snapshot>>
@@ -88,8 +89,6 @@ impl App {
             #[serde(rename = "date-nsec")]
             timestamp_nsec: u32,
         }
-
-        let connection = self.get_host_ssh_connection()?;
 
         let qemu_img = connection.command(QEMU_IMG_COMMAND);
         let snapshots = command_macros::command! {
@@ -134,7 +133,11 @@ impl App {
         Ok(&guest.disks)
     }
 
-    pub fn get_guest_snapshots<T>(&self, guest_id: T) -> Result<HashMap<String, Snapshot>>
+    pub fn get_guest_snapshots<T>(
+        &self,
+        connection: &SshConnection,
+        guest_id: T,
+    ) -> Result<HashMap<String, Snapshot>>
     where
         T: AsRef<str>,
     {
@@ -145,7 +148,7 @@ impl App {
 
         let disks = self.get_guest_disks(guest_id)?;
         for disk_id in 0..disks.len() {
-            let disk_snapshots = self.get_disk_snapshots(guest_id, disk_id)?;
+            let disk_snapshots = self.get_disk_snapshots(connection, guest_id, disk_id)?;
 
             if first_disk {
                 first_disk = false;
@@ -180,7 +183,6 @@ impl App {
         SshConnection::new(&guest.ip_address, timeout)
     }
 
-    // TODO: memoize?
     pub fn get_host_ssh_connection(&self) -> Result<SshConnection> {
         SshConnection::new(&self.host, SSH_CONNECTION_TIMEOUT)
     }
@@ -197,18 +199,18 @@ impl App {
         }
     }
 
-    fn exists<T>(&self, path: T) -> Result<bool>
+    fn exists<T>(&self, connection: &SshConnection, path: T) -> Result<bool>
     where
         T: AsRef<Path>,
     {
         let path = path.as_ref();
 
-        let connection = self.get_host_ssh_connection()?;
-
         let test = connection.command(TEST_COMMAND);
         let status = command_macros::command! {
             {test} -e (path)
         }
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
         .status();
 
         if let Ok(status) = status {
@@ -218,17 +220,17 @@ impl App {
         }
     }
 
-    fn is_booted<T>(&self, guest_id: T) -> Result<bool>
+    fn is_booted<T>(&self, connection: &SshConnection, guest_id: T) -> Result<bool>
     where
         T: AsRef<str>,
     {
         let guest = self.get_guest(guest_id)?;
 
-        if !self.exists(&guest.pidfile_path)? || !self.exists(&guest.monitor_socket_path)? {
+        if !self.exists(connection, &guest.pidfile_path)?
+            || !self.exists(connection, &guest.monitor_socket_path)?
+        {
             return Ok(false);
         }
-
-        let connection = self.get_host_ssh_connection()?;
 
         let pgrep = connection.command(PGREP_COMMMAND);
         let mut command = command_macros::command! {
@@ -243,15 +245,13 @@ impl App {
         Ok(status.success())
     }
 
-    fn create_parent_dir<T>(&self, path: T) -> Result<()>
+    fn create_parent_dir<T>(&self, connection: &SshConnection, path: T) -> Result<()>
     where
         T: AsRef<Path>,
     {
         let path = path.as_ref();
 
         if let Some(parent_path) = path.parent() {
-            let connection = self.get_host_ssh_connection()?;
-
             let mkdir = connection.command(MKDIR_COMMAND);
             command_macros::command! {
                 {mkdir} --mode 0755 -p (parent_path)
