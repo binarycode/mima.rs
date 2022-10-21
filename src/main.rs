@@ -22,10 +22,6 @@ struct Options {
     #[clap(short)]
     config_path: Option<PathBuf>,
 
-    #[clap(help = "Host address")]
-    #[clap(long = "host")]
-    host: Option<String>,
-
     #[clap(subcommand)]
     command: Command,
 }

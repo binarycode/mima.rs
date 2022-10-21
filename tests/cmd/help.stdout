@@ -6,7 +6,6 @@ USAGE:
 
 OPTIONS:
     -c, --config <CONFIG_PATH>    Path to configuration
-        --host <HOST>             Host address
     -h, --help                    Print help information
 
 SUBCOMMANDS:
