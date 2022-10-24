@@ -1,11 +1,9 @@
 {
-  description = "Virtual environments manager";
-
   inputs = {
-    flake-utils.url = "github:numtide/flake-utils";
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    flake-utils.url = github:numtide/flake-utils;
+    nixpkgs.url = github:nixos/nixpkgs/nixos-unstable;
     rust-overlay = {
-      url = "github:oxalica/rust-overlay";
+      url = github:oxalica/rust-overlay;
       inputs = {
         flake-utils.follows = "flake-utils";
         nixpkgs.follows = "nixpkgs";
@@ -21,14 +19,15 @@
       overlays = [ inputs.rust-overlay.overlay ];
     };
 
-    rust = import ./rust.nix pkgs;
+    rust = import ./nix/rust.nix pkgs;
   in {
     devShells.default = pkgs.mkShell {
       name = cargoTOML.package.name;
       buildInputs = [ rust ];
     };
-    packages.default = import ./package.nix pkgs;
+    packages.default = import ./nix/package.nix pkgs;
   }) // {
-    nixosModules.default = import ./module.nix inputs;
+    darwinModules.default = import ./nix/darwin-module.nix inputs;
+    nixosModules.default = import ./nix/nixos-module.nix inputs;
   };
 }

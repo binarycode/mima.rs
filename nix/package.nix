@@ -1,13 +1,13 @@
 pkgs: let
-  cargoTOML = builtins.fromTOML (builtins.readFile ./Cargo.toml);
+  cargoTOML = builtins.fromTOML (builtins.readFile ../Cargo.toml);
   rust = import ./rust.nix pkgs;
 in pkgs.rustPlatform.buildRustPackage {
   pname = cargoTOML.package.name;
   version = cargoTOML.package.version;
 
-  src = pkgs.nix-gitignore.gitignoreSource [] ./.;
+  src = pkgs.nix-gitignore.gitignoreSource [] ../.;
 
-  cargoLock.lockFile = ./Cargo.lock;
+  cargoLock.lockFile = ../Cargo.lock;
 
   buildInputs = [
     pkgs.which
