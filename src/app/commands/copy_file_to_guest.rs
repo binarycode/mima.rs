@@ -12,7 +12,6 @@ impl App {
         guest_id: T,
         path: U,
         file_name: Option<V>,
-        timeout: u64,
     ) -> Result<()>
     where
         T: AsRef<str>,
@@ -25,7 +24,7 @@ impl App {
             anyhow::bail!(InvalidFileError::new(path));
         }
 
-        let connection = self.get_guest_ssh_connection(&guest_id, timeout)?;
+        let connection = self.get_guest_ssh_connection(&guest_id)?;
 
         let mkdir = connection.command(MKDIR_COMMAND);
         command_macros::command! {

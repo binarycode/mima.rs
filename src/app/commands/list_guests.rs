@@ -5,7 +5,7 @@ use tabwriter::TabWriter;
 
 impl App {
     pub fn list_guests(&self) -> Result<()> {
-        let connection = self.get_host_ssh_connection()?;
+        let connection = self.get_host_ssh_connection();
 
         let mut tw = TabWriter::new(std::io::stdout());
         writeln!(tw, "ID\tBOOTED\tSPICE\tDESCRIPTION").unwrap();

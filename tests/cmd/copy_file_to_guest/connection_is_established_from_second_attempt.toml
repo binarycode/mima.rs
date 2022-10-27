@@ -1,3 +1,0 @@
-args = 'copy-file-to-guest zero foo'
-status.code = 0
-fs.sandbox = true

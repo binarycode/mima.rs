@@ -1,6 +1,6 @@
 error: Found argument 'four' which wasn't expected, or isn't valid in this context
 
 USAGE:
-    mima copy-file-to-guest [OPTIONS] <GUEST_ID> <PATH> [FILE_NAME]
+    mima copy-file-to-guest <GUEST_ID> <PATH> [FILE_NAME]
 
 For more information try --help

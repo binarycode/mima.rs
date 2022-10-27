@@ -9,7 +9,7 @@ impl App {
     where
         T: AsRef<str>,
     {
-        let connection = self.get_host_ssh_connection()?;
+        let connection = self.get_host_ssh_connection();
 
         let mut snapshots: Vec<_> = self
             .get_guest_snapshots(&connection, guest_id)?

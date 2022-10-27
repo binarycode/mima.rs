@@ -2,7 +2,7 @@ mima-execute-file-on-guest [VERSION]
 Execute file on guest
 
 USAGE:
-    mima execute-file-on-guest [OPTIONS] <GUEST_ID> <PATH> [-- <ARGS>...]
+    mima execute-file-on-guest <GUEST_ID> <PATH> [-- <ARGS>...]
 
 ARGS:
     <GUEST_ID>    Guest ID
@@ -10,5 +10,4 @@ ARGS:
     <ARGS>...     Arguments to pass to the file
 
 OPTIONS:
-        --timeout <TIMEOUT>    SSH connection timeout [default: 100]
-    -h, --help                 Print help information
+    -h, --help    Print help information

@@ -1,41 +1,22 @@
-use super::PROBE_COMMAND;
 use crate::command::Execute;
 use anyhow::Result;
 use std::path::Path;
 use std::process::Command;
-use std::time::Duration;
 
 const ROOT_USER: &str = "root";
+const CONNECTION_TIMEOUT: u64 = 10;
 
 pub struct SshConnection {
-    connection_timeout: u64,
     destination: String,
 }
 
 impl SshConnection {
-    pub fn new<T>(destination: T, max_connection_timeout: u64) -> Result<Self>
+    pub fn new<T>(destination: T) -> Self
     where
         T: AsRef<str>,
     {
-        let mut app = Self {
-            connection_timeout: 1,
+        Self {
             destination: destination.as_ref().to_owned(),
-        };
-
-        loop {
-            let result = app.command(PROBE_COMMAND).execute();
-
-            if result.is_ok() {
-                return Ok(app);
-            }
-
-            app.connection_timeout *= 2;
-
-            if app.connection_timeout >= max_connection_timeout {
-                return Err(result.unwrap_err());
-            } else {
-                std::thread::sleep(Duration::from_secs(app.connection_timeout));
-            }
         }
     }
 
@@ -48,7 +29,7 @@ impl SshConnection {
         command_macros::command! {
             ssh
             -o BatchMode=yes
-            -o ConnectTimeout=((self.connection_timeout))
+            -o ConnectTimeout=((CONNECTION_TIMEOUT))
             -o ForwardAgent=yes
             -o StrictHostKeyChecking=no
             -o UserKnownHostsFile=/dev/null
@@ -68,7 +49,7 @@ impl SshConnection {
         command_macros::command! {
             scp
             -o BatchMode=yes
-            -o ConnectTimeout=((self.connection_timeout))
+            -o ConnectTimeout=((CONNECTION_TIMEOUT))
             -o StrictHostKeyChecking=no
             -o UserKnownHostsFile=/dev/null
             (source_path)

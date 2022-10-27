@@ -25,8 +25,6 @@ use std::path::Path;
 use std::process::Stdio;
 use std::time::Duration;
 
-pub const SSH_CONNECTION_TIMEOUT: u64 = 100;
-
 const GUEST_WORKSPACE_PATH: &str = "/root/mima";
 
 const CHMOD_COMMAND: &str = "chmod";
@@ -34,7 +32,6 @@ const IP_COMMAND: &str = "ip";
 const MKDIR_COMMAND: &str = "mkdir";
 const PGREP_COMMMAND: &str = "pgrep";
 const PKILL_COMMAND: &str = "pkill";
-const PROBE_COMMAND: &str = "exit 0";
 const SOCAT_COMMAND: &str = "socat";
 const TEST_COMMAND: &str = "test";
 const QEMU_COMMAND: &str = "qemu-system-x86_64";
@@ -172,7 +169,7 @@ impl App {
         Ok(snapshots)
     }
 
-    fn get_guest_ssh_connection<T>(&self, guest_id: T, timeout: u64) -> Result<SshConnection>
+    fn get_guest_ssh_connection<T>(&self, guest_id: T) -> Result<SshConnection>
     where
         T: AsRef<str>,
     {
@@ -180,11 +177,11 @@ impl App {
 
         let guest = self.get_guest(guest_id)?;
 
-        SshConnection::new(&guest.ip_address, timeout)
+        Ok(SshConnection::new(&guest.ip_address))
     }
 
-    fn get_host_ssh_connection(&self) -> Result<SshConnection> {
-        SshConnection::new(&self.host, SSH_CONNECTION_TIMEOUT)
+    fn get_host_ssh_connection(&self) -> SshConnection {
+        SshConnection::new(&self.host)
     }
 
     fn get_network<T>(&self, network_id: T) -> Result<&Network>

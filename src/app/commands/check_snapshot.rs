@@ -7,7 +7,7 @@ impl App {
         T: AsRef<str>,
         U: AsRef<str>,
     {
-        let connection = self.get_host_ssh_connection()?;
+        let connection = self.get_host_ssh_connection();
 
         let snapshot_id = snapshot_id.as_ref();
 

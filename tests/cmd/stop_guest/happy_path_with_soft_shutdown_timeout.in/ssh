@@ -1,10 +1,8 @@
 #! /usr/bin/env bash
 
-readonly SSH="-o BatchMode=yes -o ConnectTimeout=1 -o ForwardAgent=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@10.210.0.13"
+readonly SSH="-o BatchMode=yes -o ConnectTimeout=10 -o ForwardAgent=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@10.210.0.13"
 
-if [[ "$*" == "$SSH exit 0" ]]; then
-    exit 0
-elif [[ "$*" == "$SSH pgrep --full --pidfile /tmp/zero.pid qemu" ]]; then
+if [[ "$*" == "$SSH pgrep --full --pidfile /tmp/zero.pid qemu" ]]; then
     exit 0
 elif [[ "$*" == "$SSH socat - UNIX-CONNECT:/tmp/zero.socket" ]]; then
     exit 0

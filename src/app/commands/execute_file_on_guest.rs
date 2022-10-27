@@ -8,13 +8,7 @@ use anyhow::Result;
 use std::path::Path;
 
 impl App {
-    pub fn execute_file_on_guest<T, U>(
-        &self,
-        guest_id: T,
-        path: U,
-        timeout: u64,
-        args: Vec<String>,
-    ) -> Result<()>
+    pub fn execute_file_on_guest<T, U>(&self, guest_id: T, path: U, args: Vec<String>) -> Result<()>
     where
         T: AsRef<str>,
         U: AsRef<Path>,
@@ -25,7 +19,7 @@ impl App {
             anyhow::bail!(InvalidFileError::new(path));
         }
 
-        let connection = self.get_guest_ssh_connection(guest_id, timeout)?;
+        let connection = self.get_guest_ssh_connection(guest_id)?;
 
         let mkdir = connection.command(MKDIR_COMMAND);
         command_macros::command! {

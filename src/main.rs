@@ -6,7 +6,6 @@ use clap::Parser;
 use colored::*;
 use mima::errors::MissingConfigurationError;
 use mima::App;
-use mima::SSH_CONNECTION_TIMEOUT;
 use std::backtrace::BacktraceStatus::Captured as BacktraceCaptured;
 use std::path::PathBuf;
 
@@ -110,11 +109,6 @@ enum Command {
 
         #[clap(help = "Destination file name")]
         file_name: Option<String>,
-
-        #[clap(help = "SSH connection timeout")]
-        #[clap(default_value_t = SSH_CONNECTION_TIMEOUT)]
-        #[clap(long = "timeout")]
-        timeout: u64,
     },
 
     #[clap(about = "Execute file on guest")]
@@ -127,11 +121,6 @@ enum Command {
 
         #[clap(help = "File path")]
         path: PathBuf,
-
-        #[clap(help = "SSH connection timeout")]
-        #[clap(default_value_t = SSH_CONNECTION_TIMEOUT)]
-        #[clap(long = "timeout")]
-        timeout: u64,
 
         #[clap(help = "Arguments to pass to the file")]
         #[clap(last = true)]
@@ -251,14 +240,12 @@ fn run(options: Options) -> Result<()> {
             guest_id,
             path,
             file_name,
-            timeout,
-        } => app.copy_file_to_guest(guest_id, path, file_name, timeout)?,
+        } => app.copy_file_to_guest(guest_id, path, file_name)?,
         Command::ExecuteFileOnGuest {
             guest_id,
             path,
-            timeout,
             args,
-        } => app.execute_file_on_guest(guest_id, path, timeout, args)?,
+        } => app.execute_file_on_guest(guest_id, path, args)?,
         Command::ListSnapshots { guest_id } => app.list_snapshots(guest_id)?,
         Command::CreateSnapshot {
             guest_id,

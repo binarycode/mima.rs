@@ -47,8 +47,6 @@ fn cli_tests() {
     t.case("tests/cmd/command_execution_failed_error/error_without_stdout.toml");
     t.case("tests/cmd/command_execution_failed_error/error_without_streams.toml");
 
-    t.case("tests/cmd/copy_file_to_guest/connection_is_established_from_second_attempt.toml");
-    t.case("tests/cmd/copy_file_to_guest/failure_to_establish_connection.toml");
     t.case("tests/cmd/copy_file_to_guest/failure_when_path_is_not_a_file.toml");
     t.case("tests/cmd/copy_file_to_guest/happy_path.toml");
     t.case("tests/cmd/copy_file_to_guest/happy_path_when_file_name_is_specified.toml");
@@ -85,8 +83,6 @@ fn cli_tests() {
 
     t.case("tests/cmd/dublicate_snapshot_error/error.toml");
 
-    t.case("tests/cmd/execute_file_on_guest/connection_is_established_from_second_attempt.toml");
-    t.case("tests/cmd/execute_file_on_guest/failure_to_establish_connection.toml");
     t.case("tests/cmd/execute_file_on_guest/failure_when_path_is_not_a_file.toml");
     t.case("tests/cmd/execute_file_on_guest/first_ssh_failure.toml");
     t.case("tests/cmd/execute_file_on_guest/happy_path.toml");

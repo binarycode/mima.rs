@@ -1,10 +1,8 @@
 #! /usr/bin/env bash
 
-readonly SSH="-o BatchMode=yes -o ConnectTimeout=1 -o ForwardAgent=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@192.168.9.42"
+readonly SSH="-o BatchMode=yes -o ConnectTimeout=10 -o ForwardAgent=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@192.168.9.42"
 
-if [[ "$*" == "$SSH exit 0" ]]; then
-    exit 0
-elif [[ "$*" == "$SSH mkdir -p /root/mima" ]]; then
+if [[ "$*" == "$SSH mkdir -p /root/mima" ]]; then
     exit 0
 else
     exit 1
