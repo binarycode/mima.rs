@@ -108,6 +108,9 @@ enum Command {
         #[clap(help = "File path")]
         path: PathBuf,
 
+        #[clap(help = "Destination file name")]
+        file_name: Option<String>,
+
         #[clap(help = "SSH connection timeout")]
         #[clap(default_value_t = SSH_CONNECTION_TIMEOUT)]
         #[clap(long = "timeout")]
@@ -247,8 +250,9 @@ fn run(options: Options) -> Result<()> {
         Command::CopyFileToGuest {
             guest_id,
             path,
+            file_name,
             timeout,
-        } => app.copy_file_to_guest(guest_id, path, timeout)?,
+        } => app.copy_file_to_guest(guest_id, path, file_name, timeout)?,
         Command::ExecuteFileOnGuest {
             guest_id,
             path,

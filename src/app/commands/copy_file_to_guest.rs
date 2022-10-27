@@ -7,10 +7,17 @@ use anyhow::Result;
 use std::path::Path;
 
 impl App {
-    pub fn copy_file_to_guest<T, U>(&self, guest_id: T, path: U, timeout: u64) -> Result<()>
+    pub fn copy_file_to_guest<T, U, V>(
+        &self,
+        guest_id: T,
+        path: U,
+        file_name: Option<V>,
+        timeout: u64,
+    ) -> Result<()>
     where
         T: AsRef<str>,
         U: AsRef<Path>,
+        V: AsRef<str>,
     {
         let path = path.as_ref();
 
@@ -26,7 +33,17 @@ impl App {
         }
         .execute()?;
 
-        connection.upload(path, GUEST_WORKSPACE_PATH)?;
+        let mut destination_path = GUEST_WORKSPACE_PATH.to_owned();
+        if let Some(file_name) = file_name {
+            let file_name = file_name.as_ref();
+            destination_path = Path::new(&destination_path)
+                .join(file_name)
+                .to_string_lossy()
+                .into_owned()
+        }
+        let destination_path = destination_path;
+
+        connection.upload(path, destination_path)?;
 
         Ok(())
     }

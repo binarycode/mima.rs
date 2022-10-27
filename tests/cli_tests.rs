@@ -51,10 +51,11 @@ fn cli_tests() {
     t.case("tests/cmd/copy_file_to_guest/failure_to_establish_connection.toml");
     t.case("tests/cmd/copy_file_to_guest/failure_when_path_is_not_a_file.toml");
     t.case("tests/cmd/copy_file_to_guest/happy_path.toml");
+    t.case("tests/cmd/copy_file_to_guest/happy_path_when_file_name_is_specified.toml");
     t.case("tests/cmd/copy_file_to_guest/happy_path_with_copy_alias.toml");
     t.case("tests/cmd/copy_file_to_guest/happy_path_with_upload_alias.toml");
     t.case("tests/cmd/copy_file_to_guest/help.toml");
-    t.case("tests/cmd/copy_file_to_guest/more_than_two_arguments.toml");
+    t.case("tests/cmd/copy_file_to_guest/more_than_three_arguments.toml");
     t.case("tests/cmd/copy_file_to_guest/no_arguments.toml");
     t.case("tests/cmd/copy_file_to_guest/one_argument.toml");
     t.case("tests/cmd/copy_file_to_guest/scp_failure.toml");

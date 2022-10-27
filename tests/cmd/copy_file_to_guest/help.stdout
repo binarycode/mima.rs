@@ -2,11 +2,12 @@ mima-copy-file-to-guest [VERSION]
 Copy file to guest
 
 USAGE:
-    mima copy-file-to-guest [OPTIONS] <GUEST_ID> <PATH>
+    mima copy-file-to-guest [OPTIONS] <GUEST_ID> <PATH> [FILE_NAME]
 
 ARGS:
-    <GUEST_ID>    Guest ID
-    <PATH>        File path
+    <GUEST_ID>     Guest ID
+    <PATH>         File path
+    <FILE_NAME>    Destination file name
 
 OPTIONS:
         --timeout <TIMEOUT>    SSH connection timeout [default: 100]

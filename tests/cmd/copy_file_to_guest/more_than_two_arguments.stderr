@@ -1,6 +1,0 @@
-error: Found argument 'three' which wasn't expected, or isn't valid in this context
-
-USAGE:
-    mima copy-file-to-guest [OPTIONS] <GUEST_ID> <PATH>
-
-For more information try --help
