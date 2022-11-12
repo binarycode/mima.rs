@@ -4,7 +4,7 @@ readonly SSH="-o BatchMode=yes -o ConnectTimeout=10 -o ForwardAgent=yes -o Stric
 
 if [[ "$*" == "$SSH exit 0" ]]; then
     exit 0
-elif [[ "$*" == "$SSH mkdir -p /root/mima" ]]; then
+elif [[ "$*" == "$SSH mkdir -p /tmp" ]]; then
     exit 0
 else
     exit 1

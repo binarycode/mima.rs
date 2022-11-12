@@ -25,7 +25,7 @@ use std::path::Path;
 use std::process::Stdio;
 use std::time::Duration;
 
-const GUEST_WORKSPACE_PATH: &str = "/root/mima";
+const GUEST_WORKSPACE_PATH: &str = "/tmp";
 
 const CHMOD_COMMAND: &str = "chmod";
 const IP_COMMAND: &str = "ip";

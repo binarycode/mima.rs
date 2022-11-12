@@ -2,9 +2,9 @@
 
 readonly SSH="-o BatchMode=yes -o ConnectTimeout=10 -o ForwardAgent=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@192.168.9.42"
 
-if [[ "$*" == "$SSH mkdir -p /root/mima" ]]; then
+if [[ "$*" == "$SSH mkdir -p /tmp" ]]; then
     exit 0
-elif [[ "$*" == "$SSH chmod +x /root/mima/foo" ]]; then
+elif [[ "$*" == "$SSH chmod +x /tmp/foo" ]]; then
     echo 'foobar'
     exit 1
 else
