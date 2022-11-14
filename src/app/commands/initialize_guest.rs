@@ -31,7 +31,6 @@ impl App {
                 {qemu_img} create -q -fqcow2 -olazy_refcounts=on -opreallocation=metadata (path) ((disk.size))G
             }
             .execute()?;
-
         }
 
         for disk in &missing_disks {
