@@ -106,6 +106,7 @@ fn cli_tests() {
     t.case("tests/cmd/initialize_guest/happy_path_with_init_alias.toml");
     t.case("tests/cmd/initialize_guest/happy_path_with_init_guest_alias.toml");
     t.case("tests/cmd/initialize_guest/happy_path_with_multiple_disks.toml");
+    t.case("tests/cmd/initialize_guest/happy_path_with_multiple_disks_when_some_are_skipped.toml");
     t.case("tests/cmd/initialize_guest/help.toml");
     t.case("tests/cmd/initialize_guest/more_than_one_argument.toml");
     t.case("tests/cmd/initialize_guest/no_arguments.toml");
