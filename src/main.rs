@@ -174,6 +174,9 @@ enum Command {
         #[clap(help = "Snapshot ID")]
         snapshot_id: String,
     },
+
+    #[clap(about = "Print version information")]
+    Version,
 }
 
 fn main() {
@@ -193,6 +196,12 @@ fn main() {
 }
 
 fn run(options: Options) -> Result<()> {
+    if matches!(options.command, Command::Version) {
+        let version = env!("CARGO_PKG_VERSION");
+        println!("{version}");
+        return Ok(());
+    }
+
     let local_config_path = PathBuf::from("./mima.toml");
     let global_config_path = PathBuf::from("/etc/mima.toml");
     let config_path = if let Some(path) = options.config_path {
@@ -263,6 +272,7 @@ fn run(options: Options) -> Result<()> {
             guest_id,
             snapshot_id,
         } => app.check_snapshot(guest_id, snapshot_id)?,
+        Command::Version => unreachable!(),
     }
 
     Ok(())

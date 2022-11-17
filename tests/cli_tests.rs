@@ -141,6 +141,8 @@ fn cli_tests() {
 
     t.case("tests/cmd/parse_configuration_error/error.toml");
 
+    t.case("tests/cmd/print_version.toml");
+
     t.case("tests/cmd/read_configuration_error/error.toml");
 
     t.case("tests/cmd/show_guest_details/happy_path.toml");
