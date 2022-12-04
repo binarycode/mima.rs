@@ -1,0 +1,12 @@
+host = '10.210.0.13'
+[networks]
+[guests.zero]
+    description = 'zero'
+    ip_address = '192.168.9.42'
+    memory = 8192
+    cores = 2
+    spice_port = 5901
+    monitor_socket_path = '/tmp/zero.socket'
+    pidfile_path = '/tmp/zero.pid'
+    network_interfaces = []
+    disks = []

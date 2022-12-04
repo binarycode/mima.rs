@@ -1,0 +1,25 @@
+host = '10.210.0.13'
+[networks.pub]
+    bridge_name = 'mima-pub'
+[networks.mgt]
+    bridge_name = 'mima-mgt'
+[networks.san]
+    bridge_name = 'mima-san'
+[guests.zero]
+    description = 'zero'
+    ip_address = '192.168.9.42'
+    memory = 8192
+    cores = 4
+    spice_port = 5901
+    monitor_socket_path = '/tmp/zero.socket'
+    pidfile_path = '/tmp/zero.pid'
+    network_interfaces = [
+        { network = 'pub', mac_address = '52:54:00:00:00:10', tap_name = 'mima-pub-zero' },
+        { network = 'mgt', mac_address = '52:54:00:00:09:10', tap_name = 'mima-mgt-zero' },
+        { network = 'san', mac_address = '52:54:00:00:0A:10', tap_name = 'mima-san0-zero', model = 'e1000e' },
+        { network = 'san', mac_address = '52:54:00:01:0A:10', tap_name = 'mima-san1-zero', model = 'e1000e' },
+    ]
+    disks = [
+        { label = 'sda', path = '/mima/zero-sda.qcow2', size = 20 },
+        { label = 'sdb', path = '/mima/zero-sdb.qcow2', size = 100 },
+    ]
