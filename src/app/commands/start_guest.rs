@@ -54,7 +54,7 @@ impl App {
                 -netdev tap,id=network.(network_interface.tap_name),ifname=(network_interface.tap_name),script=no,downscript=no
             }
             for disk in &guest.disks {
-                -device scsi-hd,drive=drive.(disk.label)
+                -device (disk.model),drive=drive.(disk.label)
                 -drive "if"=none,id=drive.(disk.label),format=qcow2,file=(disk.path)
             }
             if boot_from_cdrom {
