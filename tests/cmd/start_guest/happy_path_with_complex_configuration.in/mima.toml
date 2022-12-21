@@ -13,6 +13,7 @@ host = '10.210.0.13'
     spice_port = 5901
     monitor_socket_path = '/tmp/zero.socket'
     pidfile_path = '/tmp/zero.pid'
+    host = 'Broadwell'
     network_interfaces = [
         { network = 'pub', mac_address = '52:54:00:00:00:10', tap_name = 'mima-pub-zero' },
         { network = 'mgt', mac_address = '52:54:00:00:09:10', tap_name = 'mima-mgt-zero' },

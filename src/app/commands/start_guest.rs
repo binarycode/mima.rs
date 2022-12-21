@@ -36,7 +36,7 @@ impl App {
             {qemu}
             -name (guest_id)
             -machine q35,accel=kvm
-            -cpu host
+            -cpu (guest.host)
             -m ((guest.memory))M
             -smp ((guest.cores))
             -no-user-config
