@@ -1,4 +1,4 @@
-inputs: { config, lib, pkgs, ... }: let
+{ config, lib, pkgs, ... }: let
   networks = config.mima.networks;
 in {
   options.mima = let
@@ -46,8 +46,6 @@ in {
       pkgs.socat
       pkgs.which
     ];
-
-    nixpkgs.overlays = [ inputs.rust-overlay.overlay ];
 
     systemd = {
       network = let
