@@ -18,7 +18,7 @@ impl App {
 
         let guest_id = guest_id.as_ref();
 
-        let guest = self.get_guest(&guest_id)?;
+        let guest = self.get_guest(guest_id)?;
 
         if !self.is_booted(&connection, guest_id)? {
             return Ok(());

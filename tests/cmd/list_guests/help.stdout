@@ -1,8 +1,6 @@
-mima-list-guests [VERSION]
 List all guests
 
-USAGE:
-    mima list-guests
+Usage: mima list-guests
 
-OPTIONS:
-    -h, --help    Print help information
+Options:
+  -h, --help  Print help

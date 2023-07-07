@@ -1,6 +1,5 @@
-error: Found argument 'one' which wasn't expected, or isn't valid in this context
+error: unexpected argument 'one' found
 
-USAGE:
-    mima list-guests
+Usage: mima list-guests
 
-For more information try --help
+For more information, try '--help'.

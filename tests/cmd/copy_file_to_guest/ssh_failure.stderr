@@ -1,2 +1,2 @@
-error: Failed to run 'ssh -o BatchMode=yes -o ConnectTimeout=10 -o ForwardAgent=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@192.168.9.42 mkdir -p /tmp'
+error: failed to run 'ssh -o BatchMode=yes -o ConnectTimeout=10 -o ForwardAgent=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@192.168.9.42 mkdir -p /tmp'
 

@@ -24,7 +24,7 @@ impl Display for UnknownGuestError {
     fn fmt(&self, f: &mut Formatter) -> Result {
         let guest_id = self.guest_id.yellow();
 
-        write!(f, "Unknown guest '{guest_id}'")
+        write!(f, "unknown guest '{guest_id}'")
     }
 }
 

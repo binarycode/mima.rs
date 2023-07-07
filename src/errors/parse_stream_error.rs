@@ -24,7 +24,7 @@ impl Display for ParseStreamError {
     fn fmt(&self, f: &mut Formatter) -> Result {
         let stream = self.stream.yellow();
 
-        write!(f, "Failed to parse '{stream}' stream")
+        write!(f, "failed to parse '{stream}' stream")
     }
 }
 

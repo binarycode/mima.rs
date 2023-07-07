@@ -24,7 +24,7 @@ impl Display for UnknownNetworkError {
     fn fmt(&self, f: &mut Formatter) -> Result {
         let network_id = self.network_id.yellow();
 
-        write!(f, "Unknown network '{network_id}'")
+        write!(f, "unknown network '{network_id}'")
     }
 }
 

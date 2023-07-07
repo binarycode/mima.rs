@@ -25,7 +25,7 @@ impl Display for ParseConfigurationError {
     fn fmt(&self, f: &mut Formatter) -> Result {
         let path = self.path.yellow();
 
-        write!(f, "Failed to parse configuration in '{path}'")
+        write!(f, "failed to parse configuration in '{path}'")
     }
 }
 

@@ -1,13 +1,11 @@
-mima-stop-guest [VERSION]
 Stop guest
 
-USAGE:
-    mima stop-guest [OPTIONS] <GUEST_ID>
+Usage: mima stop-guest [OPTIONS] <GUEST_ID>
 
-ARGS:
-    <GUEST_ID>    Guest ID
+Arguments:
+  <GUEST_ID>  Guest ID
 
-OPTIONS:
-        --wait <WAIT>    Seconds to wait for soft shutdown [default: 60]
-        --force          Kill the guest immediately
-    -h, --help           Print help information
+Options:
+      --wait <WAIT>  Seconds to wait for soft shutdown [default: 60]
+      --force        Kill the guest immediately
+  -h, --help         Print help

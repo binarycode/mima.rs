@@ -25,7 +25,7 @@ impl Display for ReadConfigurationError {
     fn fmt(&self, f: &mut Formatter) -> Result {
         let path = self.path.yellow();
 
-        write!(f, "Failed to read configuration from '{path}'")
+        write!(f, "failed to read configuration from '{path}'")
     }
 }
 

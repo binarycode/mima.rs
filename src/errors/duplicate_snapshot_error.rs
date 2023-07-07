@@ -38,7 +38,7 @@ impl Display for DuplicateSnapshotError {
 
         write!(
             f,
-            "Disk '{disk_id}' of guest '{guest_id}' already contains snapshot '{snapshot_id}'"
+            "disk '{disk_id}' of guest '{guest_id}' already contains snapshot '{snapshot_id}'"
         )
     }
 }

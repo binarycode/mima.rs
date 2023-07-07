@@ -1,8 +1,7 @@
-error: The following required arguments were not provided:
-    <GUEST_ID>
-    <SNAPSHOT_ID>
+error: the following required arguments were not provided:
+  <GUEST_ID>
+  <SNAPSHOT_ID>
 
-USAGE:
-    mima apply-snapshot <GUEST_ID> <SNAPSHOT_ID>
+Usage: mima apply-snapshot <GUEST_ID> <SNAPSHOT_ID>
 
-For more information try --help
+For more information, try '--help'.

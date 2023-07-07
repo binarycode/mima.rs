@@ -33,7 +33,7 @@ impl Display for MissingConfigurationError {
             .collect::<Vec<String>>()
             .join(", ");
 
-        write!(f, "Missing configuration at {paths}")
+        write!(f, "missing configuration at {paths}")
     }
 }
 

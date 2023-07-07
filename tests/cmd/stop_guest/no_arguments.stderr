@@ -1,7 +1,6 @@
-error: The following required arguments were not provided:
-    <GUEST_ID>
+error: the following required arguments were not provided:
+  <GUEST_ID>
 
-USAGE:
-    mima stop-guest [OPTIONS] <GUEST_ID>
+Usage: mima stop-guest <GUEST_ID>
 
-For more information try --help
+For more information, try '--help'.

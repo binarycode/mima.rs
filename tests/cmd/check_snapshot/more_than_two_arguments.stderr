@@ -1,6 +1,5 @@
-error: Found argument 'three' which wasn't expected, or isn't valid in this context
+error: unexpected argument 'three' found
 
-USAGE:
-    mima check-snapshot <GUEST_ID> <SNAPSHOT_ID>
+Usage: mima check-snapshot <GUEST_ID> <SNAPSHOT_ID>
 
-For more information try --help
+For more information, try '--help'.

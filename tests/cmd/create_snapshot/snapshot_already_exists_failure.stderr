@@ -1,1 +1,1 @@
-error: Disk 'sdb' of guest 'zero' already contains snapshot 'centos7'
+error: disk 'sdb' of guest 'zero' already contains snapshot 'centos7'

@@ -1,7 +1,4 @@
-#![feature(backtrace)]
-
 use anyhow::Result;
-use clap::AppSettings::DeriveDisplayOrder;
 use clap::Parser;
 use colored::*;
 use mima::errors::MissingConfigurationError;
@@ -11,7 +8,6 @@ use std::path::PathBuf;
 
 #[derive(Parser)]
 #[clap(author)]
-#[clap(global_setting = DeriveDisplayOrder)]
 #[clap(disable_version_flag = true)]
 #[clap(propagate_version = true)]
 #[clap(version)]
@@ -124,7 +120,7 @@ enum Command {
 
         #[clap(help = "Arguments to pass to the file")]
         #[clap(last = true)]
-        #[clap(multiple_values = true)]
+        #[clap(num_args = 0..)]
         args: Vec<String>,
     },
 
@@ -187,8 +183,8 @@ fn main() {
 
         let backtrace = error.backtrace();
         if backtrace.status() == BacktraceCaptured {
-            let backtrace = format!("{}", backtrace).red();
-            eprintln!("\n{}", backtrace);
+            let backtrace = backtrace.to_string().red();
+            eprintln!("\n{backtrace}");
         }
 
         std::process::exit(1);

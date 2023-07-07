@@ -1,13 +1,11 @@
-mima-copy-file-to-guest [VERSION]
 Copy file to guest
 
-USAGE:
-    mima copy-file-to-guest <GUEST_ID> <PATH> [FILE_NAME]
+Usage: mima copy-file-to-guest <GUEST_ID> <PATH> [FILE_NAME]
 
-ARGS:
-    <GUEST_ID>     Guest ID
-    <PATH>         File path
-    <FILE_NAME>    Destination file name
+Arguments:
+  <GUEST_ID>   Guest ID
+  <PATH>       File path
+  [FILE_NAME]  Destination file name
 
-OPTIONS:
-    -h, --help    Print help information
+Options:
+  -h, --help  Print help

@@ -24,7 +24,7 @@ impl ProcessExecutionError {
 
 impl Display for ProcessExecutionError {
     fn fmt(&self, f: &mut Formatter) -> Result {
-        write!(f, "Failed to run '{}'", self.command.yellow())
+        write!(f, "failed to run '{}'", self.command.yellow())
     }
 }
 

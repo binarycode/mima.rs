@@ -1,4 +1,4 @@
-error: Failed to run 'scp -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null foo root@192.168.9.42:/tmp'
+error: failed to run 'scp -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null foo root@192.168.9.42:/tmp'
 
 stdout:
 foobar

@@ -1,7 +1,6 @@
-error: The following required arguments were not provided:
-    <PATH>
+error: the following required arguments were not provided:
+  <PATH>
 
-USAGE:
-    mima copy-file-to-guest <GUEST_ID> <PATH>
+Usage: mima copy-file-to-guest <GUEST_ID> <PATH> [FILE_NAME]
 
-For more information try --help
+For more information, try '--help'.

@@ -1,15 +1,13 @@
-mima-start-guest [VERSION]
 Start guest
 
-USAGE:
-    mima start-guest [OPTIONS] <GUEST_ID>
+Usage: mima start-guest [OPTIONS] <GUEST_ID>
 
-ARGS:
-    <GUEST_ID>    Guest ID
+Arguments:
+  <GUEST_ID>  Guest ID
 
-OPTIONS:
-        --boot-from-cdrom         Boot from CD-ROM
-        --boot-from-network       Boot from network
-        --cdrom <CDROM_PATH>      Insert CD-ROM image from specified path
-        --floppy <FLOPPY_PATH>    Insert floppy image from specified path
-    -h, --help                    Print help information
+Options:
+      --boot-from-cdrom       Boot from CD-ROM
+      --boot-from-network     Boot from network
+      --cdrom <CDROM_PATH>    Insert CD-ROM image from specified path
+      --floppy <FLOPPY_PATH>  Insert floppy image from specified path
+  -h, --help                  Print help

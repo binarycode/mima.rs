@@ -1,1 +1,1 @@
-error: Missing configuration at './mima.toml', '/etc/mima.toml'
+error: missing configuration at './mima.toml', '/etc/mima.toml'
