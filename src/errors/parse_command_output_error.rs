@@ -29,7 +29,7 @@ impl ParseCommandOutputError {
 
 impl Display for ParseCommandOutputError {
     fn fmt(&self, f: &mut Formatter) -> Result {
-        writeln!(f, "Failed to parse output of '{}'", self.command.yellow())?;
+        writeln!(f, "failed to parse output of '{}'", self.command.yellow())?;
 
         if !self.stdout.is_empty() {
             write!(f, "\nstdout:\n{}", self.stdout)?;

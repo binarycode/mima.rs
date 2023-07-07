@@ -1,1 +1,1 @@
-error: Disk 'sda' of guest 'zero' already contains snapshot 'root'
+error: disk 'sda' of guest 'zero' already contains snapshot 'root'

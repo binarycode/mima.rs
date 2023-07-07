@@ -1,13 +1,11 @@
-mima-execute-file-on-guest [VERSION]
 Execute file on guest
 
-USAGE:
-    mima execute-file-on-guest <GUEST_ID> <PATH> [-- <ARGS>...]
+Usage: mima execute-file-on-guest <GUEST_ID> <PATH> [-- [ARGS]...]
 
-ARGS:
-    <GUEST_ID>    Guest ID
-    <PATH>        File path
-    <ARGS>...     Arguments to pass to the file
+Arguments:
+  <GUEST_ID>  Guest ID
+  <PATH>      File path
+  [ARGS]...   Arguments to pass to the file
 
-OPTIONS:
-    -h, --help    Print help information
+Options:
+  -h, --help  Print help

@@ -34,7 +34,7 @@ impl Display for MonitorCommandError {
 
         write!(
             f,
-            "Failed to issue command '{command}' to monitor socket '{monitor_socket_path}'"
+            "failed to issue command '{command}' to monitor socket '{monitor_socket_path}'"
         )
     }
 }

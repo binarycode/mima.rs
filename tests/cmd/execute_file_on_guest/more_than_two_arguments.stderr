@@ -1,6 +1,5 @@
-error: Found argument 'three' which wasn't expected, or isn't valid in this context
+error: unexpected argument 'three' found
 
-USAGE:
-    mima execute-file-on-guest <GUEST_ID> <PATH> [-- <ARGS>...]
+Usage: mima execute-file-on-guest <GUEST_ID> <PATH> [-- [ARGS]...]
 
-For more information try --help
+For more information, try '--help'.

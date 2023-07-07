@@ -36,7 +36,7 @@ impl CommandExecutionFailedError {
 
 impl Display for CommandExecutionFailedError {
     fn fmt(&self, f: &mut Formatter) -> Result {
-        writeln!(f, "Failed to run '{}'", self.command.yellow())?;
+        writeln!(f, "failed to run '{}'", self.command.yellow())?;
 
         if !self.stdout.is_empty() {
             write!(f, "\nstdout:\n{}", self.stdout)?;

@@ -1,4 +1,4 @@
-error: Failed to run 'ssh -o BatchMode=yes -o ConnectTimeout=10 -o ForwardAgent=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@10.210.0.13 qemu-img snapshot -aroot /mima/zero-sda.qcow2'
+error: failed to run 'ssh -o BatchMode=yes -o ConnectTimeout=10 -o ForwardAgent=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@10.210.0.13 qemu-img snapshot -aroot /mima/zero-sda.qcow2'
 
 stdout:
 qemu-img: Could not open /mima/zero-sda.qcow2: Could not open '/mima/zero-sda.qcow2': No such file or directory

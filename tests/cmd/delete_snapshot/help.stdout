@@ -1,12 +1,10 @@
-mima-delete-snapshot [VERSION]
 Delete snapshot
 
-USAGE:
-    mima delete-snapshot <GUEST_ID> <SNAPSHOT_ID>
+Usage: mima delete-snapshot <GUEST_ID> <SNAPSHOT_ID>
 
-ARGS:
-    <GUEST_ID>       Guest ID
-    <SNAPSHOT_ID>    Snapshot ID
+Arguments:
+  <GUEST_ID>     Guest ID
+  <SNAPSHOT_ID>  Snapshot ID
 
-OPTIONS:
-    -h, --help    Print help information
+Options:
+  -h, --help  Print help

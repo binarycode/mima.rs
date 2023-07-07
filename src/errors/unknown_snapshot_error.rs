@@ -31,7 +31,7 @@ impl Display for UnknownSnapshotError {
         let guest_id = self.guest_id.yellow();
         let snapshot_id = self.snapshot_id.to_string().yellow();
 
-        write!(f, "Unknown snapshot '{snapshot_id}' for guest '{guest_id}'")
+        write!(f, "unknown snapshot '{snapshot_id}' for guest '{guest_id}'")
     }
 }
 

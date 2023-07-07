@@ -1,6 +1,5 @@
-error: Found argument 'four' which wasn't expected, or isn't valid in this context
+error: unexpected argument 'four' found
 
-USAGE:
-    mima copy-file-to-guest <GUEST_ID> <PATH> [FILE_NAME]
+Usage: mima copy-file-to-guest <GUEST_ID> <PATH> [FILE_NAME]
 
-For more information try --help
+For more information, try '--help'.
