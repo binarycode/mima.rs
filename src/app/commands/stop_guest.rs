@@ -57,6 +57,17 @@ impl App {
         }
         .execute()?;
 
+        let delay = Duration::from_millis(1000);
+        std::thread::sleep(delay);
+
+        if self.is_booted(&connection, guest_id)? {
+            let pkill = connection.command(PKILL_COMMAND);
+            command_macros::command! {
+                {pkill} -9 --full --pidfile (guest.pidfile_path) qemu
+            }
+            .execute()?;
+        }
+
         Ok(())
     }
 }
