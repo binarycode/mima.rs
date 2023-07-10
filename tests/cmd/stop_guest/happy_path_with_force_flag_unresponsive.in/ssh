@@ -5,9 +5,9 @@ readonly SSH="-o BatchMode=yes -o ConnectTimeout=10 -o ForwardAgent=yes -o Stric
 if [[ "$*" == "$SSH pgrep --full --pidfile /tmp/zero.pid qemu" ]]; then
     [ -e flag ] && exit 1
     exit 0
-elif [[ "$*" == "$SSH socat - UNIX-CONNECT:/tmp/zero.socket" ]]; then
-    exit 0
 elif [[ "$*" == "$SSH pkill --full --pidfile /tmp/zero.pid qemu" ]]; then
+    exit 0
+elif [[ "$*" == "$SSH pkill -9 --full --pidfile /tmp/zero.pid qemu" ]]; then
     touch flag
     exit 0
 else

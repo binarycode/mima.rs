@@ -3,8 +3,10 @@
 readonly SSH="-o BatchMode=yes -o ConnectTimeout=10 -o ForwardAgent=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@10.210.0.13"
 
 if [[ "$*" == "$SSH pgrep --full --pidfile /tmp/zero.pid qemu" ]]; then
+    [ -e flag ] && exit 1
     exit 0
 elif [[ "$*" == "$SSH pkill --full --pidfile /tmp/zero.pid qemu" ]]; then
+    touch flag
     exit 0
 else
     exit 1

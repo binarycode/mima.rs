@@ -168,14 +168,17 @@ fn cli_tests() {
     t.case("tests/cmd/start_guest/simple_happy_path_with_start_alias.toml");
     t.case("tests/cmd/start_guest/unknown_guest.toml");
 
+    t.case("tests/cmd/stop_guest/first_pkill_failure.toml");
     t.case("tests/cmd/stop_guest/happy_path_when_the_guest_is_not_running.toml");
     t.case("tests/cmd/stop_guest/happy_path_with_force_flag.toml");
+    t.case("tests/cmd/stop_guest/happy_path_with_force_flag_unresponsive.toml");
     t.case("tests/cmd/stop_guest/happy_path_with_soft_shutdown.toml");
     t.case("tests/cmd/stop_guest/happy_path_with_soft_shutdown_timeout.toml");
+    t.case("tests/cmd/stop_guest/happy_path_with_soft_shutdown_timeout_and_unresponsive.toml");
     t.case("tests/cmd/stop_guest/help.toml");
     t.case("tests/cmd/stop_guest/more_than_one_argument.toml");
     t.case("tests/cmd/stop_guest/no_arguments.toml");
-    t.case("tests/cmd/stop_guest/pkill_failure.toml");
+    t.case("tests/cmd/stop_guest/second_pkill_failure.toml");
     t.case("tests/cmd/stop_guest/simple_happy_path.toml");
     t.case("tests/cmd/stop_guest/simple_happy_path_with_stop_alias.toml");
     t.case("tests/cmd/stop_guest/unknown_guest.toml");

@@ -1,0 +1,5 @@
+error: failed to run 'ssh -o BatchMode=yes -o ConnectTimeout=10 -o ForwardAgent=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@10.210.0.13 pkill -9 --full --pidfile /tmp/zero.pid qemu'
+
+stdout:
+foobar
+
