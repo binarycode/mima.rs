@@ -22,5 +22,6 @@ host = '10.210.0.13'
     ]
     disks = [
         { label = 'sda', path = '/mima/zero-sda.qcow2', size = 20 },
-        { label = 'sdb', path = '/mima/zero-sdb.qcow2', size = 100, model = 'ide-hd' },
+        { label = 'sdb', path = '/mima/zero-sdb.qcow2', size = 20 },
+        { label = 'sdc', path = '/mima/zero-sdc.qcow2', size = 100, model = 'ide-hd' },
     ]

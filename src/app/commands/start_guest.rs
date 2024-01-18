@@ -53,8 +53,12 @@ impl App {
                 -device (network_interface.model),netdev=network.(network_interface.tap_name),mac=(network_interface.mac_address)
                 -netdev tap,id=network.(network_interface.tap_name),ifname=(network_interface.tap_name),script=no,downscript=no
             }
-            for disk in &guest.disks {
-                -device (disk.model),drive=drive.(disk.label)
+            for (i, disk) in (&guest.disks).iter().enumerate() {
+                if disk.model == "scsi-hd" {
+                    -device (disk.model),drive=drive.(disk.label),unit=((i))
+                } else {
+                    -device (disk.model),drive=drive.(disk.label)
+                }
                 -drive "if"=none,id=drive.(disk.label),format=qcow2,file=(disk.path)
             }
             if boot_from_cdrom {
