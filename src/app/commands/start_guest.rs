@@ -54,12 +54,12 @@ impl App {
                 -netdev tap,id=network.(network_interface.tap_name),ifname=(network_interface.tap_name),script=no,downscript=no
             }
             for (i, disk) in guest.disks.iter().enumerate() {
+                -device (disk.model),drive=drive.(disk.label)
                 if disk.model == "scsi-hd" {
-                    -device (disk.model),drive=drive.(disk.label),unit=((i))
+                    -drive "if"=none,id=drive.(disk.label),format=qcow2,file=(disk.path),index=((i))
                 } else {
-                    -device (disk.model),drive=drive.(disk.label)
+                    -drive "if"=none,id=drive.(disk.label),format=qcow2,file=(disk.path)
                 }
-                -drive "if"=none,id=drive.(disk.label),format=qcow2,file=(disk.path)
             }
             if boot_from_cdrom {
                 -boot d
