@@ -1,20 +1,10 @@
 {
   inputs = {
-    flake-utils.url = github:numtide/flake-utils;
-    nixpkgs.url = github:nixos/nixpkgs/nixos-23.05;
-    nixpkgs-darwin.url = github:nixos/nixpkgs/nixpkgs-23.05-darwin;
+    nixpkgs.url = github:nixos/nixpkgs/nixos-24.05;
     rust-overlay = {
       url = github:oxalica/rust-overlay;
       inputs = {
-        flake-utils.follows = "flake-utils";
         nixpkgs.follows = "nixpkgs";
-      };
-    };
-    rust-overlay-darwin = {
-      url = github:oxalica/rust-overlay;
-      inputs = {
-        flake-utils.follows = "flake-utils";
-        nixpkgs.follows = "nixpkgs-darwin";
       };
     };
   };
@@ -26,13 +16,9 @@
       system = "x86_64-linux";
       overlays = [ inputs.rust-overlay.overlays.default ];
     };
-    pkgs-x86_64-darwin = import inputs.nixpkgs-darwin {
-      system = "x86_64-darwin";
-      overlays = [ inputs.rust-overlay-darwin.overlays.default ];
-    };
-    pkgs-aarch64-darwin = import inputs.nixpkgs-darwin {
+    pkgs-aarch64-darwin = import inputs.nixpkgs {
       system = "aarch64-darwin";
-      overlays = [ inputs.rust-overlay-darwin.overlays.default ];
+      overlays = [ inputs.rust-overlay.overlays.default ];
     };
 
     rust = import ./nix/rust.nix pkgs;
@@ -57,10 +43,6 @@
       default = mima;
       mima = import ./nix/package.nix pkgs;
     };
-    packages.x86_64-darwin = rec {
-      default = mima;
-      mima = import ./nix/package.nix pkgs-x86_64-darwin;
-    };
     packages.aarch64-darwin = rec {
       default = mima;
       mima = import ./nix/package.nix pkgs-aarch64-darwin;
@@ -68,11 +50,11 @@
 
     darwinModules = rec {
       default = mima;
-      mima = import ./nix/darwin-module.nix;
+      mima = import ./nix/darwin-module.nix inputs;
     };
     nixosModules = rec {
       default = mima;
-      mima = import ./nix/nixos-module.nix;
+      mima = import ./nix/nixos-module.nix inputs;
     };
   };
 }
