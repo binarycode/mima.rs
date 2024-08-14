@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }: let
+inputs: { config, lib, pkgs, ... }: let
   networks = config.mima.networks;
 in {
   options.mima = let
@@ -38,6 +38,8 @@ in {
   };
 
   config = {
+    nixpkgs.overlays = [ inputs.rust-overlay.overlays.default ];
+
     environment.systemPackages = [
       (import ./package.nix pkgs)
       pkgs.iproute2

@@ -1,1 +1,1 @@
-pkgs: pkgs.rust-bin.nightly."2023-01-01".default
+pkgs: pkgs.rust-bin.nightly."2023-06-01".default

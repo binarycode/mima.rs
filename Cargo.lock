@@ -489,9 +489,9 @@ checksum = "13e3bf6590cbc649f4d1a3eefc9d5d6eb746f5200ffb04e5e142700b8faa56e7"
 
 [[package]]
 name = "linked-hash-map"
-version = "0.5.4"
+version = "0.5.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7fb9b38af92608140b86b693604b9ffcc5824240a484d1ecd4795bacb2fe88f3"
+checksum = "0717cef1bc8b636c6e1c1bbdefc09e6322da8a9321966e8928ef80d20f7f770f"
 
 [[package]]
 name = "linux-raw-sys"
@@ -525,9 +525,9 @@ dependencies = [
 
 [[package]]
 name = "merge-yaml-hash"
-version = "0.3.0"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3847a5f7319270d7cb73f92f57970bfa34d8394261d5bc54c68b9a24aa3592dd"
+checksum = "e6ed0c3e478ff48c7c01f6f059aa7ecdbd48001d700e05689b382dc5d3ab7f9e"
 dependencies = [
  "linked-hash-map",
  "yaml-rust",
