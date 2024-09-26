@@ -1,6 +1,6 @@
 Execute file on guest
 
-Usage: mima execute-file-on-guest <GUEST_ID> <PATH> [-- [ARGS]...]
+Usage: mima execute-file-on-guest [OPTIONS] <GUEST_ID> <PATH> [-- [ARGS]...]
 
 Arguments:
   <GUEST_ID>  Guest ID
@@ -8,4 +8,5 @@ Arguments:
   [ARGS]...   Arguments to pass to the file
 
 Options:
-  -h, --help  Print help
+      --show-stdout  Display script STDOUT
+  -h, --help         Print help

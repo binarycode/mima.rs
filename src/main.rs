@@ -115,6 +115,10 @@ enum Command {
         #[clap(help = "Guest ID")]
         guest_id: String,
 
+        #[clap(help = "Display script STDOUT")]
+        #[clap(long)]
+        show_stdout: bool,
+
         #[clap(help = "File path")]
         path: PathBuf,
 
@@ -248,9 +252,10 @@ fn run(options: Options) -> Result<()> {
         } => app.copy_file_to_guest(guest_id, path, file_name)?,
         Command::ExecuteFileOnGuest {
             guest_id,
+            show_stdout,
             path,
             args,
-        } => app.execute_file_on_guest(guest_id, path, args)?,
+        } => app.execute_file_on_guest(guest_id, show_stdout, path, args)?,
         Command::ListSnapshots { guest_id } => app.list_snapshots(guest_id)?,
         Command::CreateSnapshot {
             guest_id,
