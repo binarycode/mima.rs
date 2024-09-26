@@ -8,7 +8,13 @@ use anyhow::Result;
 use std::path::Path;
 
 impl App {
-    pub fn execute_file_on_guest<T, U>(&self, guest_id: T, path: U, args: Vec<String>) -> Result<()>
+    pub fn execute_file_on_guest<T, U>(
+        &self,
+        guest_id: T,
+        show_stdout: bool,
+        path: U,
+        args: Vec<String>,
+    ) -> Result<()>
     where
         T: AsRef<str>,
         U: AsRef<Path>,
@@ -39,10 +45,14 @@ impl App {
         .execute()?;
 
         let file = connection.command(guest_path.display().to_string());
-        command_macros::command! {
+        let stdout = command_macros::command! {
             {file} [args]
         }
         .execute()?;
+
+        if show_stdout {
+            print!("{stdout}");
+        }
 
         Ok(())
     }

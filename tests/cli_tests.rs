@@ -96,6 +96,7 @@ fn cli_tests() {
     t.case("tests/cmd/execute_file_on_guest/one_argument.toml");
     t.case("tests/cmd/execute_file_on_guest/scp_failure.toml");
     t.case("tests/cmd/execute_file_on_guest/second_ssh_failure.toml");
+    t.case("tests/cmd/execute_file_on_guest/show_stdout.toml");
     t.case("tests/cmd/execute_file_on_guest/third_ssh_failure.toml");
     t.case("tests/cmd/execute_file_on_guest/unknown_guest.toml");
 
