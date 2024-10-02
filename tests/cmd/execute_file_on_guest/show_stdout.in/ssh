@@ -6,6 +6,8 @@ if [[ "$*" == "$SSH mkdir -p /tmp" ]]; then
     exit 0
 elif [[ "$*" == "$SSH chmod +x /tmp/foo" ]]; then
     exit 0
+elif [[ "$*" == "$SSH rm -rf /tmp/foo" ]]; then
+    exit 0
 elif [[ "$*" == "$SSH /tmp/foo" ]]; then
     echo 'result'
     exit 0

@@ -32,6 +32,7 @@ const IP_COMMAND: &str = "ip";
 const MKDIR_COMMAND: &str = "mkdir";
 const PGREP_COMMMAND: &str = "pgrep";
 const PKILL_COMMAND: &str = "pkill";
+const RM_COMMAND: &str = "rm";
 const SOCAT_COMMAND: &str = "socat";
 const TEST_COMMAND: &str = "test";
 const QEMU_COMMAND: &str = "qemu-system-x86_64";

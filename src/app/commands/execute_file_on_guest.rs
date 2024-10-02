@@ -1,6 +1,7 @@
 use crate::app::CHMOD_COMMAND;
 use crate::app::GUEST_WORKSPACE_PATH;
 use crate::app::MKDIR_COMMAND;
+use crate::app::RM_COMMAND;
 use crate::command::Execute;
 use crate::errors::InvalidFileError;
 use crate::App;
@@ -53,6 +54,12 @@ impl App {
         if show_stdout {
             print!("{stdout}");
         }
+
+        let rm = connection.command(RM_COMMAND);
+        command_macros::command! {
+            {rm} -rf (guest_path)
+        }
+        .execute()?;
 
         Ok(())
     }
