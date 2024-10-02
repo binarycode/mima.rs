@@ -107,7 +107,7 @@ enum Command {
         file_name: Option<String>,
     },
 
-    #[clap(about = "Execute file on guest")]
+    #[clap(about = "Execute script on guest")]
     #[clap(alias = "execute-script-on-guest")]
     #[clap(alias = "execute")]
     #[clap(alias = "run")]
@@ -115,12 +115,8 @@ enum Command {
         #[clap(help = "Guest ID")]
         guest_id: String,
 
-        #[clap(help = "Display script STDOUT")]
-        #[clap(long)]
-        show_stdout: bool,
-
         #[clap(help = "File path")]
-        path: PathBuf,
+        path: Option<PathBuf>,
 
         #[clap(help = "Arguments to pass to the file")]
         #[clap(last = true)]
@@ -252,10 +248,9 @@ fn run(options: Options) -> Result<()> {
         } => app.copy_file_to_guest(guest_id, path, file_name)?,
         Command::ExecuteFileOnGuest {
             guest_id,
-            show_stdout,
             path,
             args,
-        } => app.execute_file_on_guest(guest_id, show_stdout, path, args)?,
+        } => app.execute_script_on_guest(guest_id, path, args)?,
         Command::ListSnapshots { guest_id } => app.list_snapshots(guest_id)?,
         Command::CreateSnapshot {
             guest_id,

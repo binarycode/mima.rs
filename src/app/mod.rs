@@ -27,6 +27,7 @@ use std::time::Duration;
 
 const GUEST_WORKSPACE_PATH: &str = "/tmp";
 
+const BASH_COMMAND: &str = "bash";
 const CHMOD_COMMAND: &str = "chmod";
 const IP_COMMAND: &str = "ip";
 const MKDIR_COMMAND: &str = "mkdir";

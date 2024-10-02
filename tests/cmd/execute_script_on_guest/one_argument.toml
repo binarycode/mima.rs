@@ -1,0 +1,3 @@
+args = 'execute-script-on-guest one'
+status.code = 2
+fs.sandbox = true

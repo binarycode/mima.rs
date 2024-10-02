@@ -1,3 +1,0 @@
-args = 'execute-file-on-guest zero foo'
-status.code = 1
-fs.sandbox = true

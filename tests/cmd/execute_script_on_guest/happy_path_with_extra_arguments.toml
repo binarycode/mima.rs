@@ -1,0 +1,3 @@
+args = 'execute-script-on-guest zero foo -- lol wut'
+status.code = 0
+fs.sandbox = true
