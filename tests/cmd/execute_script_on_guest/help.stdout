@@ -1,12 +1,11 @@
-Execute file on guest
+Execute script on guest
 
-Usage: mima execute-script-on-guest [OPTIONS] <GUEST_ID> [<PATH>] [-- [ARGS]...]
+Usage: mima execute-script-on-guest <GUEST_ID> [PATH] [-- [ARGS]...]
 
 Arguments:
   <GUEST_ID>  Guest ID
-  [<PATH>]    File path
+  [PATH]      File path
   [ARGS]...   Arguments to pass to the file
 
 Options:
-      --show-stdout  Display script STDOUT
-  -h, --help         Print help
+  -h, --help  Print help

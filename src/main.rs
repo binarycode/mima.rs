@@ -108,10 +108,9 @@ enum Command {
     },
 
     #[clap(about = "Execute script on guest")]
-    #[clap(alias = "execute-script-on-guest")]
     #[clap(alias = "execute")]
     #[clap(alias = "run")]
-    ExecuteFileOnGuest {
+    ExecuteScriptOnGuest {
         #[clap(help = "Guest ID")]
         guest_id: String,
 
@@ -246,7 +245,7 @@ fn run(options: Options) -> Result<()> {
             path,
             file_name,
         } => app.copy_file_to_guest(guest_id, path, file_name)?,
-        Command::ExecuteFileOnGuest {
+        Command::ExecuteScriptOnGuest {
             guest_id,
             path,
             args,

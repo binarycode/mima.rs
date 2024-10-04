@@ -1,7 +1,6 @@
 error: the following required arguments were not provided:
   <GUEST_ID>
-  <PATH>
 
-Usage: mima execute-script-on-guest <GUEST_ID> <PATH> [-- [ARGS]...]
+Usage: mima execute-script-on-guest <GUEST_ID> [PATH] [-- [ARGS]...]
 
 For more information, try '--help'.
