@@ -100,11 +100,11 @@ enum Command {
         #[clap(help = "Guest ID")]
         guest_id: String,
 
-        #[clap(help = "File path")]
-        path: PathBuf,
+        #[clap(help = "Target file path")]
+        target_path: String,
 
-        #[clap(help = "Destination file name")]
-        file_name: Option<String>,
+        #[clap(help = "Source file path")]
+        source_path: Option<PathBuf>,
     },
 
     #[clap(about = "Execute script on guest")]
@@ -242,9 +242,9 @@ fn run(options: Options) -> Result<()> {
         Command::WaitForGuestToShutdown { guest_id } => app.wait_for_guest_to_shutdown(guest_id)?,
         Command::CopyFileToGuest {
             guest_id,
-            path,
-            file_name,
-        } => app.copy_file_to_guest(guest_id, path, file_name)?,
+            target_path,
+            source_path,
+        } => app.copy_file_to_guest(guest_id, target_path, source_path)?,
         Command::ExecuteScriptOnGuest {
             guest_id,
             path,

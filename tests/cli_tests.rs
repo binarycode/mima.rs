@@ -49,15 +49,15 @@ fn cli_tests() {
 
     t.case("tests/cmd/copy_file_to_guest/failure_when_path_is_not_a_file.toml");
     t.case("tests/cmd/copy_file_to_guest/happy_path.toml");
-    t.case("tests/cmd/copy_file_to_guest/happy_path_when_file_name_is_specified.toml");
     t.case("tests/cmd/copy_file_to_guest/happy_path_with_copy_alias.toml");
+    t.case("tests/cmd/copy_file_to_guest/happy_path_with_stdin_input.toml");
     t.case("tests/cmd/copy_file_to_guest/happy_path_with_upload_alias.toml");
     t.case("tests/cmd/copy_file_to_guest/help.toml");
+    t.case("tests/cmd/copy_file_to_guest/mkdir_failure.toml");
     t.case("tests/cmd/copy_file_to_guest/more_than_three_arguments.toml");
     t.case("tests/cmd/copy_file_to_guest/no_arguments.toml");
     t.case("tests/cmd/copy_file_to_guest/one_argument.toml");
-    t.case("tests/cmd/copy_file_to_guest/scp_failure.toml");
-    t.case("tests/cmd/copy_file_to_guest/ssh_failure.toml");
+    t.case("tests/cmd/copy_file_to_guest/tee_failure.toml");
     t.case("tests/cmd/copy_file_to_guest/unknown_guest.toml");
 
     t.case("tests/cmd/create_snapshot/common_snapshots_for_multiple_disks.toml");
@@ -83,20 +83,16 @@ fn cli_tests() {
 
     t.case("tests/cmd/duplicate_snapshot_error/error.toml");
 
+    t.case("tests/cmd/execute_script_on_guest/bash_failure.toml");
     t.case("tests/cmd/execute_script_on_guest/failure_when_path_is_not_a_file.toml");
-    t.case("tests/cmd/execute_script_on_guest/first_ssh_failure.toml");
     t.case("tests/cmd/execute_script_on_guest/happy_path.toml");
     t.case("tests/cmd/execute_script_on_guest/happy_path_with_execute_alias.toml");
-    t.case("tests/cmd/execute_script_on_guest/happy_path_with_execute_script_on_guest_alias.toml");
     t.case("tests/cmd/execute_script_on_guest/happy_path_with_extra_arguments.toml");
     t.case("tests/cmd/execute_script_on_guest/happy_path_with_run_alias.toml");
     t.case("tests/cmd/execute_script_on_guest/happy_path_with_stdin_input.toml");
     t.case("tests/cmd/execute_script_on_guest/help.toml");
     t.case("tests/cmd/execute_script_on_guest/more_than_two_arguments.toml");
     t.case("tests/cmd/execute_script_on_guest/no_arguments.toml");
-    t.case("tests/cmd/execute_script_on_guest/scp_failure.toml");
-    t.case("tests/cmd/execute_script_on_guest/second_ssh_failure.toml");
-    t.case("tests/cmd/execute_script_on_guest/third_ssh_failure.toml");
     t.case("tests/cmd/execute_script_on_guest/unknown_guest.toml");
 
     t.case("tests/cmd/help.toml");

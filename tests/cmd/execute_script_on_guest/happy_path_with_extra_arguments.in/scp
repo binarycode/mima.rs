@@ -1,9 +1,0 @@
-#! /usr/bin/env bash
-
-readonly SCP="-o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-
-if [[ "$*" == "$SCP foo root@192.168.9.42:/tmp" ]]; then
-    exit 0
-else
-    exit 1
-fi

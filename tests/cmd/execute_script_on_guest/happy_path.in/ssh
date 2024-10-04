@@ -2,13 +2,7 @@
 
 readonly SSH="-o BatchMode=yes -o ConnectTimeout=10 -o ForwardAgent=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@192.168.9.42"
 
-if [[ "$*" == "$SSH mkdir -p /tmp" ]]; then
-    exit 0
-elif [[ "$*" == "$SSH chmod +x /tmp/foo" ]]; then
-    exit 0
-elif [[ "$*" == "$SSH rm -rf /tmp/foo" ]]; then
-    exit 0
-elif [[ "$*" == "$SSH /tmp/foo" ]]; then
+if [[ "$*" == "$SSH bash -s -" ]] && [[ $(cat) == "test" ]]; then
     echo 'result'
     exit 0
 else

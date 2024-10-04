@@ -25,16 +25,14 @@ use std::path::Path;
 use std::process::Stdio;
 use std::time::Duration;
 
-const GUEST_WORKSPACE_PATH: &str = "/tmp";
-
 const BASH_COMMAND: &str = "bash";
 const CHMOD_COMMAND: &str = "chmod";
 const IP_COMMAND: &str = "ip";
 const MKDIR_COMMAND: &str = "mkdir";
 const PGREP_COMMMAND: &str = "pgrep";
 const PKILL_COMMAND: &str = "pkill";
-const RM_COMMAND: &str = "rm";
 const SOCAT_COMMAND: &str = "socat";
+const TEE_COMMAND: &str = "tee";
 const TEST_COMMAND: &str = "test";
 const QEMU_COMMAND: &str = "qemu-system-x86_64";
 const QEMU_IMG_COMMAND: &str = "qemu-img";

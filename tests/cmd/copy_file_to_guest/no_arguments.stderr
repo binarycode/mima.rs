@@ -1,7 +1,7 @@
 error: the following required arguments were not provided:
   <GUEST_ID>
-  <PATH>
+  <TARGET_PATH>
 
-Usage: mima copy-file-to-guest <GUEST_ID> <PATH> [FILE_NAME]
+Usage: mima copy-file-to-guest <GUEST_ID> <TARGET_PATH> [SOURCE_PATH]
 
 For more information, try '--help'.

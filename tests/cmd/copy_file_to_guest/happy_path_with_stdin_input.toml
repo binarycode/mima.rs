@@ -1,0 +1,3 @@
+args = 'copy-file-to-guest zero /root/foo'
+status.code = 0
+fs.sandbox = true

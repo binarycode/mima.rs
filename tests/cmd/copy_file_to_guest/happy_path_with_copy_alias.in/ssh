@@ -4,7 +4,9 @@ readonly SSH="-o BatchMode=yes -o ConnectTimeout=10 -o ForwardAgent=yes -o Stric
 
 if [[ "$*" == "$SSH exit 0" ]]; then
     exit 0
-elif [[ "$*" == "$SSH mkdir -p /tmp" ]]; then
+elif [[ "$*" == "$SSH mkdir --parents \$(dirname /root/foo)" ]]; then
+    exit 0
+elif [[ "$*" == "$SSH tee /root/foo" ]] && [[ $(cat) == "test" ]]; then
     exit 0
 else
     exit 1

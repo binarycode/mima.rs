@@ -1,3 +1,3 @@
-args = 'copy zero foo'
+args = 'copy zero /root/foo foo'
 status.code = 0
 fs.sandbox = true
