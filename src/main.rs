@@ -93,31 +93,13 @@ enum Command {
         guest_id: String,
     },
 
-    #[clap(about = "Copy file to guest")]
-    #[clap(alias = "copy")]
-    #[clap(alias = "upload")]
-    CopyFileToGuest {
+    #[clap(about = "Establish SSH connection to guest")]
+    #[clap(alias = "ssh")]
+    ConnectToGuest {
         #[clap(help = "Guest ID")]
         guest_id: String,
 
-        #[clap(help = "Target file path")]
-        target_path: String,
-
-        #[clap(help = "Source file path")]
-        source_path: Option<PathBuf>,
-    },
-
-    #[clap(about = "Execute script on guest")]
-    #[clap(alias = "execute")]
-    #[clap(alias = "run")]
-    ExecuteScriptOnGuest {
-        #[clap(help = "Guest ID")]
-        guest_id: String,
-
-        #[clap(help = "File path")]
-        path: Option<PathBuf>,
-
-        #[clap(help = "Arguments to pass to the file")]
+        #[clap(help = "Arguments to pass to SSH")]
         #[clap(last = true)]
         #[clap(num_args = 0..)]
         args: Vec<String>,
@@ -240,16 +222,7 @@ fn run(options: Options) -> Result<()> {
             force,
         } => app.stop_guest(guest_id, wait, force)?,
         Command::WaitForGuestToShutdown { guest_id } => app.wait_for_guest_to_shutdown(guest_id)?,
-        Command::CopyFileToGuest {
-            guest_id,
-            target_path,
-            source_path,
-        } => app.copy_file_to_guest(guest_id, target_path, source_path)?,
-        Command::ExecuteScriptOnGuest {
-            guest_id,
-            path,
-            args,
-        } => app.execute_script_on_guest(guest_id, path, args)?,
+        Command::ConnectToGuest { guest_id, args } => app.connect_to_guest(guest_id, args)?,
         Command::ListSnapshots { guest_id } => app.list_snapshots(guest_id)?,
         Command::CreateSnapshot {
             guest_id,

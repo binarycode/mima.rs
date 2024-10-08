@@ -1,9 +1,8 @@
 pub mod apply_snapshot;
 pub mod check_snapshot;
-pub mod copy_file_to_guest;
+pub mod connect_to_guest;
 pub mod create_snapshot;
 pub mod delete_snapshot;
-pub mod execute_script_on_guest;
 pub mod initialize_guest;
 pub mod list_guests;
 pub mod list_snapshots;

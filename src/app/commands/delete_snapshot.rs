@@ -16,9 +16,8 @@ impl App {
 
         let disks = self.get_guest_disks(guest_id)?;
         for disk in disks {
-            let qemu_img = connection.command(QEMU_IMG_COMMAND);
             command_macros::command! {
-                {qemu_img} snapshot -d(snapshot_id) (disk.path)
+                {connection.execute(QEMU_IMG_COMMAND)} snapshot -d(snapshot_id) (disk.path)
             }
             .execute()?;
         }

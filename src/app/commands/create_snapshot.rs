@@ -28,9 +28,8 @@ impl App {
         }
 
         for disk in disks {
-            let qemu_img = connection.command(QEMU_IMG_COMMAND);
             command_macros::command! {
-                {qemu_img} snapshot -c(snapshot_id) (disk.path)
+                {connection.execute(QEMU_IMG_COMMAND)} snapshot -c(snapshot_id) (disk.path)
             }
             .execute()?;
         }

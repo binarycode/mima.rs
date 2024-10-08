@@ -1,3 +1,0 @@
-args = 'help execute-script-on-guest'
-status.code = 0
-fs.sandbox = true

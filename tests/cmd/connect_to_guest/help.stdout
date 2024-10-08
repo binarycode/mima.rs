@@ -1,0 +1,10 @@
+Establish SSH connection to guest
+
+Usage: mima connect-to-guest <GUEST_ID> [-- [ARGS]...]
+
+Arguments:
+  <GUEST_ID>  Guest ID
+  [ARGS]...   Arguments to pass to SSH
+
+Options:
+  -h, --help  Print help

@@ -1,0 +1,6 @@
+error: the following required arguments were not provided:
+  <GUEST_ID>
+
+Usage: mima connect-to-guest <GUEST_ID> [-- [ARGS]...]
+
+For more information, try '--help'.

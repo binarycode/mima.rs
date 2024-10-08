@@ -1,3 +1,0 @@
-args = 'help copy-file-to-guest'
-status.code = 0
-fs.sandbox = true

@@ -31,9 +31,8 @@ impl App {
         self.create_parent_dir(&connection, &guest.monitor_socket_path)?;
         self.create_parent_dir(&connection, &guest.pidfile_path)?;
 
-        let qemu = connection.command(QEMU_COMMAND);
         command_macros::command! {
-            {qemu}
+            {connection.execute(QEMU_COMMAND)}
             -name (guest_id)
             -machine q35,accel=kvm
             -cpu (guest.host)
@@ -79,16 +78,14 @@ impl App {
 
         for network_interface in &guest.network_interfaces {
             let network = self.get_network(&network_interface.network_id)?;
-            let ip = connection.command(IP_COMMAND);
             command_macros::command! {
-                {ip} link set (network_interface.tap_name) master (network.bridge_name) up
+                {connection.execute(IP_COMMAND)} link set (network_interface.tap_name) master (network.bridge_name) up
             }
             .execute()?;
         }
 
-        let chmod = connection.command(CHMOD_COMMAND);
         command_macros::command! {
-            {chmod} 644 (guest.pidfile_path)
+            {connection.execute(CHMOD_COMMAND)} 644 (guest.pidfile_path)
         }
         .execute()?;
 

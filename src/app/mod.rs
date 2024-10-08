@@ -25,14 +25,12 @@ use std::path::Path;
 use std::process::Stdio;
 use std::time::Duration;
 
-const BASH_COMMAND: &str = "bash";
 const CHMOD_COMMAND: &str = "chmod";
 const IP_COMMAND: &str = "ip";
 const MKDIR_COMMAND: &str = "mkdir";
 const PGREP_COMMMAND: &str = "pgrep";
 const PKILL_COMMAND: &str = "pkill";
 const SOCAT_COMMAND: &str = "socat";
-const TEE_COMMAND: &str = "tee";
 const TEST_COMMAND: &str = "test";
 const QEMU_COMMAND: &str = "qemu-system-x86_64";
 const QEMU_IMG_COMMAND: &str = "qemu-img";
@@ -87,9 +85,8 @@ impl App {
             timestamp_nsec: u32,
         }
 
-        let qemu_img = connection.command(QEMU_IMG_COMMAND);
         let snapshots = command_macros::command! {
-            {qemu_img} info --force-share --output=json (disk.path)
+            {connection.execute(QEMU_IMG_COMMAND)} info --force-share --output=json (disk.path)
         }
         .execute_and_parse_json_output::<QemuImgInfo>()?
         .snapshots
@@ -202,9 +199,8 @@ impl App {
     {
         let path = path.as_ref();
 
-        let test = connection.command(TEST_COMMAND);
         let status = command_macros::command! {
-            {test} -e (path)
+            {connection.execute(TEST_COMMAND)} -e (path)
         }
         .stdout(Stdio::null())
         .stderr(Stdio::null())
@@ -223,9 +219,8 @@ impl App {
     {
         let guest = self.get_guest(guest_id)?;
 
-        let pgrep = connection.command(PGREP_COMMMAND);
         let mut command = command_macros::command! {
-            {pgrep} --full --pidfile (guest.pidfile_path) qemu
+            {connection.execute(PGREP_COMMMAND)} --full --pidfile (guest.pidfile_path) qemu
         };
         let status = command
             .stdout(Stdio::null())
@@ -243,9 +238,8 @@ impl App {
         let path = path.as_ref();
 
         if let Some(parent_path) = path.parent() {
-            let mkdir = connection.command(MKDIR_COMMAND);
             command_macros::command! {
-                {mkdir} --mode 0755 -p (parent_path)
+                {connection.execute(MKDIR_COMMAND)} --mode 0755 -p (parent_path)
             }
             .execute()?;
         }

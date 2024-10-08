@@ -1,0 +1,3 @@
+args = 'connect-to-guest zero -- /root/foo bar'
+status.code = 0
+fs.sandbox = true

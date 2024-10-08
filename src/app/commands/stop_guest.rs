@@ -25,9 +25,8 @@ impl App {
         }
 
         if !force {
-            let socat = connection.command(SOCAT_COMMAND);
             let mut command = command_macros::command! {
-                {socat} - UNIX-CONNECT:(guest.monitor_socket_path)
+                {connection.execute(SOCAT_COMMAND)} - UNIX-CONNECT:(guest.monitor_socket_path)
             };
             let monitor = command
                 .stdin(Stdio::piped())
@@ -51,9 +50,8 @@ impl App {
             }
         }
 
-        let pkill = connection.command(PKILL_COMMAND);
         command_macros::command! {
-            {pkill} --full --pidfile (guest.pidfile_path) qemu
+            {connection.execute(PKILL_COMMAND)} --full --pidfile (guest.pidfile_path) qemu
         }
         .execute()?;
 
@@ -61,9 +59,8 @@ impl App {
         std::thread::sleep(delay);
 
         if self.is_booted(&connection, guest_id)? {
-            let pkill = connection.command(PKILL_COMMAND);
             command_macros::command! {
-                {pkill} -9 --full --pidfile (guest.pidfile_path) qemu
+                {connection.execute(PKILL_COMMAND)} -9 --full --pidfile (guest.pidfile_path) qemu
             }
             .execute()?;
         }

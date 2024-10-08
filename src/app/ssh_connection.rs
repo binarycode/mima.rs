@@ -17,12 +17,7 @@ impl SshConnection {
         }
     }
 
-    pub fn command<T>(&self, command: T) -> Command
-    where
-        T: AsRef<str>,
-    {
-        let command = command.as_ref();
-
+    pub fn command(&self) -> Command {
         command_macros::command! {
             ssh
             -o BatchMode=yes
@@ -31,6 +26,17 @@ impl SshConnection {
             -o StrictHostKeyChecking=no
             -o UserKnownHostsFile=/dev/null
             (ROOT_USER)@(self.destination)
+        }
+    }
+
+    pub fn execute<T>(&self, command: T) -> Command
+    where
+        T: AsRef<str>,
+    {
+        let command = command.as_ref();
+
+        command_macros::command! {
+            {self.command()}
             (command)
         }
     }
